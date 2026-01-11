@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 @TeleOp
 public class ShooterPruebaOpMode extends OpMode {
     private DcMotorEx shooter1;
-    private DcMotorEx shooter2;
+    private DcMotorEx shooter2, intake;
     private final double maxVel = 2600;
     private double velocity = 1600;
     private int shooting = 0;
@@ -20,6 +20,7 @@ public class ShooterPruebaOpMode extends OpMode {
     public void init() {
         shooter1=hardwareMap.get(DcMotorEx.class,"shooter1");
         shooter2=hardwareMap.get(DcMotorEx.class,"shooter2");
+        intake=hardwareMap.get(DcMotorEx.class,"intake");
         shooter1.setDirection(DcMotorSimple.Direction.REVERSE);
         shooter2.setDirection(DcMotorSimple.Direction.REVERSE);
         shooter1.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
@@ -45,6 +46,15 @@ public class ShooterPruebaOpMode extends OpMode {
 
         if(gamepad1.dpad_down && currentTime - lastChangeTime > cooldown){
             velocity = velocity > 0 ? velocity - 50 : 0;
+            lastChangeTime = currentTime;
+        }
+
+        if (gamepad1.circle && currentTime - lastChangeTime > cooldown){
+            if(intake.getPower()>0.1){
+                intake.setPower(0);
+            }else{
+                intake.setPower(-1);
+            }
             lastChangeTime = currentTime;
         }
 
