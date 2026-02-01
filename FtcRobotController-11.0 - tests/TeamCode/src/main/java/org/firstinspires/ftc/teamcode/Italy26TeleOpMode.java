@@ -2,21 +2,19 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.ServoImplEx;
-import com.qualcomm.robotcore.hardware.TouchSensor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
-@TeleOp
+@TeleOp(name = "Italy26 TeleOp", group = "TeleOp")
 
-public class DriveBaseTeleOpMode extends LinearOpMode {
+
+public class Italy26TeleOpMode extends OpMode {
     private DcMotor frontLeft, frontRight, backLeft, backRight, intake, transfer;
     private IMU imu;
     private YawPitchRollAngles orientation;
@@ -28,7 +26,7 @@ public class DriveBaseTeleOpMode extends LinearOpMode {
 
 
     @Override
-    public void runOpMode() {
+    public void init() {
 // Inicializar los motores
         frontLeft = hardwareMap.get(DcMotor.class, "FrontLeft");
         frontRight = hardwareMap.get(DcMotor.class, "FrontRight");
@@ -51,7 +49,6 @@ public class DriveBaseTeleOpMode extends LinearOpMode {
         transfer.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
 
-
 // Inicializar el IMU interno del Control Hub
         imu = hardwareMap.get(IMU.class, "imu");
 // Configurar la orientación del IMU en el robot
@@ -61,44 +58,49 @@ public class DriveBaseTeleOpMode extends LinearOpMode {
         ));
         imu.initialize(parameters);
 
-
-// Esperar el inicio
-        waitForStart();
-
+    }
+    @Override
+    public void start() {
         this.gamepad1.rumble(1);
         this.gamepad2.rumble(1);
+    }
 
-        while (opModeIsActive()) {
 
+    @Override
+    public void loop() {
+//DRIVEBASE
+        drive = -gamepad1.left_stick_y; // Adelante/Atrás
+        strafe = gamepad1.left_stick_x;
+        rotate = -gamepad1.right_stick_x;
+        orientation = imu.getRobotYawPitchRollAngles();
+        double yawAngle = orientation.getYaw(AngleUnit.DEGREES) - yawOffset;
+        double adjustedDrive = drive * Math.cos(Math.toRadians(yawAngle)) - strafe * Math.sin(Math.toRadians(yawAngle));
+        double adjustedStrafe = drive * Math.sin(Math.toRadians(yawAngle)) + strafe * Math.cos(Math.toRadians(yawAngle));
+        double frontLeftPower = (adjustedDrive + adjustedStrafe + rotate);
+        double frontRightPower = (adjustedDrive - adjustedStrafe - rotate);
+        double backLeftPower = (adjustedDrive - adjustedStrafe + rotate);
+        double backRightPower = (adjustedDrive + adjustedStrafe - rotate);
 
-// Leer el ángulo de giro (yaw) del IMU interno
-            drive = -gamepad1.left_stick_y; // Adelante/Atrás
-            strafe = gamepad1.left_stick_x;
-            rotate = -gamepad1.right_stick_x;
-            orientation = imu.getRobotYawPitchRollAngles();
-            double yawAngle = orientation.getYaw(AngleUnit.DEGREES) - yawOffset;
-            double adjustedDrive = drive * Math.cos(Math.toRadians(yawAngle)) - strafe * Math.sin(Math.toRadians(yawAngle));
-            double adjustedStrafe = drive * Math.sin(Math.toRadians(yawAngle)) + strafe * Math.cos(Math.toRadians(yawAngle));
-            double frontLeftPower = (adjustedDrive + adjustedStrafe + rotate);
-            double frontRightPower = (adjustedDrive - adjustedStrafe - rotate);
-            double backLeftPower = (adjustedDrive - adjustedStrafe + rotate);
-            double backRightPower = (adjustedDrive + adjustedStrafe - rotate);
-            //Potencia
-            frontLeft.setPower(frontLeftPower);
-            frontRight.setPower(frontRightPower);
-            backLeft.setPower(backLeftPower);
-            backRight.setPower(backRightPower);
-            if (gamepad1.cross){
-                intake.setPower(-1);
-            } else {
-                intake.setPower(0);
-            }
-            if (gamepad1.circle){
-                transfer.setPower(1);
-            } else {
-                transfer.setPower(0);
-            }
-            telemetry.addData("yaw",yawAngle);
+        //Potencia
+        frontLeft.setPower(frontLeftPower);
+        frontRight.setPower(frontRightPower);
+        backLeft.setPower(backLeftPower);
+        backRight.setPower(backRightPower);
+
+//INTAKE
+        if (gamepad1.cross){
+            intake.setPower(-1);
+        } else {
+            intake.setPower(0);
         }
+
+//TRANSFER
+        if (gamepad1.circle){
+            transfer.setPower(1);
+        } else {
+            transfer.setPower(0);
+        }
+        telemetry.addData("yaw",yawAngle);
+
     }
 }

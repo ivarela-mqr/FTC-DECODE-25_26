@@ -18,7 +18,7 @@ public class AprilTagLimelight extends OpMode {
     @Override
     public void init() {
         limelight = hardwareMap.get(Limelight3A.class,"limelight");
-        limelight.pipelineSwitch(8); // Blue aliance aprilTag
+        limelight.pipelineSwitch(8); // Blue alliance aprilTag
         imu = hardwareMap.get(IMU.class,"imu");
         RevHubOrientationOnRobot revHubOrientationOnRobot = new RevHubOrientationOnRobot(
                 RevHubOrientationOnRobot.LogoFacingDirection.UP,
@@ -41,7 +41,6 @@ public class AprilTagLimelight extends OpMode {
             telemetry.addData("Ty", llResult.getTy());
             telemetry.addData("Ta", llResult.getTa());
             telemetry.addData("distance in cm",getDistanceFromTargeta(llResult.getTa()));
-
         }
     }
     private double getDistanceFromTargeta(double ta){
