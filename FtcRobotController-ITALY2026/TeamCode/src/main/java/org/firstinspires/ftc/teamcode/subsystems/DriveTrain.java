@@ -18,7 +18,7 @@ public class DriveTrain {
     private double strafe = 0;
     private double rotate = 0;
 
-    DriveTrain(HardwareMap hardwareMap){
+    public DriveTrain(HardwareMap hardwareMap){
         frontLeft = hardwareMap.get(DcMotor.class, "FrontLeft");
         frontRight = hardwareMap.get(DcMotor.class, "FrontRight");
         backLeft = hardwareMap.get(DcMotor.class, "BackLeft");
