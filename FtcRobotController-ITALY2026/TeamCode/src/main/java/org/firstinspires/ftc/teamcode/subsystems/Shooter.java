@@ -11,10 +11,9 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class Shooter {
     DcMotorEx shooter0, shooter1;
-    Servo rotorL, rotorR, coverL, coverR;
+    Servo rotorL, rotorR, coverL, coverR, block;
 
     LimeLight limeLight;
-
 
 
     // PID constants rotors
@@ -33,7 +32,7 @@ public class Shooter {
 
     //PIDF shooter
     double highVelocityShooter = 1500;
-    double lowVelocityShooter = 500;
+    double lowVelocityShooter = 900;
 
     double curTargetVelocity = highVelocityShooter;
 
@@ -45,13 +44,14 @@ public class Shooter {
 
 
 
-    public Shooter (HardwareMap hardwareMap, Constants.Alliance alliance){
+    Shooter (HardwareMap hardwareMap, Constants.Alliance alliance){
         shooter0 = hardwareMap.get(DcMotorEx.class,"shooter0");
         shooter1 = hardwareMap.get(DcMotorEx.class,"shooter1");
         rotorL = hardwareMap.get(Servo.class,"rotorL");
         rotorR = hardwareMap.get(Servo.class,"rotorR");
         coverL = hardwareMap.get(Servo.class,"coverL");
         coverR = hardwareMap.get(Servo.class,"coverR");
+        block = hardwareMap.get(Servo.class, "block");
 
         shooter0.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         shooter1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -126,39 +126,19 @@ public class Shooter {
         coverR.setPosition(coverR.getPosition()+(direction*0.05));
     }
 
-    public void switchCurTargetVelocity(){
-        if (curTargetVelocity == highVelocityShooter) {
-            curTargetVelocity = lowVelocityShooter;
-        }else{curTargetVelocity = highVelocityShooter;}
-    }
-
     public void setShootingPower(Telemetry telemetry){
-        shooter0.setVelocity(curTargetVelocity);
-        shooter1.setVelocity(curTargetVelocity);
+
     }
-
-
-
-
-    public void TeleOp(Gamepad gamepad, Telemetry telemetry, double yawAngle, boolean isShooting){
-        //adjust shooter position
+    public void TeleOp(Gamepad gamepad, Telemetry telemetry, double yawAngle){
         double[] tx = limeLight.getGoalAprilTagData(telemetry, yawAngle);
         aimShooterWithLimeLight(telemetry, tx[0]);
         adjustCover(telemetry, tx[1]);
 
-        //correct shooter cover
         if(gamepad.left_bumper){
             correctCover(telemetry, -1);
         }else if(gamepad.right_bumper){
             correctCover(telemetry, 1);
         }
-
-        //shoot motor power
-        if(isShooting){
-            curTargetVelocity = highVelocityShooter;
-        }else {curTargetVelocity = lowVelocityShooter;}
-        setShootingPower(telemetry);
-
         telemetry.addData("cover position: ", coverL.getPosition());
     }
 
