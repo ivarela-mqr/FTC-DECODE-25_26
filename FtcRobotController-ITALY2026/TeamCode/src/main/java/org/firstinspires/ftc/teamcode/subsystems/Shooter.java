@@ -12,10 +12,9 @@ import org.firstinspires.ftc.teamcode.util.Constants;
 
 public class Shooter {
     DcMotorEx shooter0, shooter1;
-    Servo rotorL, rotorR;//, coverL, coverR;
+    Servo rotorL, rotorR, coverL, coverR, block;
 
     LimeLight limeLight;
-
 
 
     // PID constants rotors
@@ -43,22 +42,25 @@ public class Shooter {
     double kD_shooter = 0;
     double kF_shooter = 15.4;
 
-    public Shooter (HardwareMap hardwareMap, Constants.Alliance alliance, Telemetry telemetry){
+
+
+    public Shooter (HardwareMap hardwareMap, Constants.Alliance alliance){
         shooter0 = hardwareMap.get(DcMotorEx.class,"shooter0");
         shooter1 = hardwareMap.get(DcMotorEx.class,"shooter1");
         rotorL = hardwareMap.get(Servo.class,"rotorL");
         rotorR = hardwareMap.get(Servo.class,"rotorR");
-        //coverL = hardwareMap.get(Servo.class,"coverL");
-        //coverR = hardwareMap.get(Servo.class,"coverR");
+        coverL = hardwareMap.get(Servo.class,"coverL");
+        coverR = hardwareMap.get(Servo.class,"coverR");
+        block = hardwareMap.get(Servo.class, "block");
 
-        shooter0.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        shooter1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        shooter0.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        shooter1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         PIDFCoefficients pidfCoefficients_shooter = new PIDFCoefficients(kP_shooter, kI_shooter, kD_shooter, kF_shooter);
 
         shooter0.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, pidfCoefficients_shooter);
         shooter1.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, pidfCoefficients_shooter);
 
-        //coverL.setDirection(Servo.Direction.REVERSE);
+        coverL.setDirection(Servo.Direction.REVERSE);
 
         limeLight = new LimeLight(hardwareMap, alliance);
 
@@ -115,13 +117,13 @@ public class Shooter {
 
     public void adjustCover(Telemetry telemetry, double dist){
         double pos = 0;
-        //coverL.setPosition(pos);
-        //coverR.setPosition(pos);
+        coverL.setPosition(pos);
+        coverR.setPosition(pos);
     }
 
     public void correctCover(Telemetry telemetry, double direction){
-        //coverL.setPosition(coverL.getPosition()+(direction*0.05));
-        //coverR.setPosition(coverR.getPosition()+(direction*0.05));
+        coverL.setPosition(coverL.getPosition()+(direction*0.05));
+        coverR.setPosition(coverR.getPosition()+(direction*0.05));
     }
 
     public void switchCurTargetVelocity(){
