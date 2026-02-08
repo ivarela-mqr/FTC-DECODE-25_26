@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -8,23 +10,29 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.util.Debouncer;
 
 public class Intake {
     DcMotorEx  intake, transfer;
-    Servo block;
-    DistanceSensor distanceSensor1, distanceSensor2;
-    ColorSensor colorSensor;
+    //Servo block;
+    //DistanceSensor distanceSensor1, distanceSensor2;
+    //ColorSensor colorSensor;
     boolean isShooting = false, isIntaking = false;
+
+    Debouncer crossDebouncer = new Debouncer(200);
 
 
     public Intake(HardwareMap hardwareMap){
         intake = hardwareMap.get(DcMotorEx.class,"intake");
+        intake.setDirection(DcMotorSimple.Direction.REVERSE);
         transfer = hardwareMap.get(DcMotorEx.class,"transfer");
-        block = hardwareMap.get(Servo.class, "block");
+        intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        transfer.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        //block = hardwareMap.get(Servo.class, "block");
 
-        distanceSensor1 = hardwareMap.get(DistanceSensor.class,"distanceSensor1");
+        /*distanceSensor1 = hardwareMap.get(DistanceSensor.class,"distanceSensor1");
         distanceSensor2 = hardwareMap.get(DistanceSensor.class,"distanceSensor2");
-        colorSensor.init(hardwareMap);
+        colorSensor.init(hardwareMap);*/
 
     }
 
@@ -33,22 +41,22 @@ public class Intake {
     }
 
     public void intakeArtifact(Telemetry telemetry){
-        isShooting = false;
+        //isShooting = false;
         if(!firstArtifactIn(telemetry)){
-            transfer.setPower(0.5);
+            transfer.setPower(0.75);
         }else{
             transfer.setPower(0);
         }
         if(!secondArtifactIn() || !thirdArtifactIn()){
-            intake.setPower(0.5);
+            intake.setPower(0.75);
         }
     }
     public void shoot1Artifact(){
 
     }
     public void shootArtifacts(){
-        intake.setPower(1);
-        transfer.setPower(1);
+        intake.setPower(0.75);
+        transfer.setPower(0.75);
     }
     public void stopArtifacts(){
         intake.setPower(0);
@@ -66,28 +74,28 @@ public class Intake {
         return num;
     }
     boolean firstArtifactIn(Telemetry telemetry){
-        return colorSensor.getDetectedColor(telemetry)!= ColorSensor.DetectedColors.UNKNOWN;
+        return false;//colorSensor.getDetectedColor(telemetry)!= ColorSensor.DetectedColors.UNKNOWN;
     }
     boolean secondArtifactIn(){
-        return distanceSensor2.getDistance(DistanceUnit.CM)<15;
+        return false;//distanceSensor2.getDistance(DistanceUnit.CM)<15;
     }
     boolean thirdArtifactIn(){
-        return distanceSensor1.getDistance(DistanceUnit.CM)<15;
+        return false; //distanceSensor1.getDistance(DistanceUnit.CM)<15;
     }
 
     public void switchBlock(){
-        if (block.getPosition()>0.8){
+        /*if (block.getPosition()>0.8){
             block.setPosition(0);
-        }else{block.setPosition(1);}
+        }else{block.setPosition(1);}*/
     }
 
 
     public void TeleOp(Gamepad gamepad, Telemetry telemetry, double yawAngle){
         if (isShooting){
-            block.setPosition(1);
+            //block.setPosition(1);
             shootArtifacts();
         }else{
-            block.setPosition(0);
+            //block.setPosition(0);
             stopArtifacts();
         }
 
@@ -97,16 +105,19 @@ public class Intake {
             stopArtifacts();
         }
 
-        if(gamepad.cross){
+        if(gamepad.cross&&crossDebouncer.isReady()){
             isIntaking = !isIntaking;
         }
-        if(numArtifactsIn(telemetry) == 0){
-            isShooting = false;
-        }else if(gamepad.right_trigger>0.1){
+//        if(numArtifactsIn(telemetry) == 0){
+//            //isShooting = false;
+//        }else
+        if(gamepad.right_trigger>0.1){
             isShooting = true;
+        }else{
+            isShooting = false;
         }
-        if(numArtifactsIn(telemetry) == 3) {
-            isIntaking = false;
-        }
+//        if(numArtifactsIn(telemetry) == 3) {
+//            isIntaking = false;
+//        }
     }
 }

@@ -1,6 +1,10 @@
 package org.firstinspires.ftc.teamcode.util;
 
 public class Constants {
+    public enum Alliance {
+        BLUE,
+        RED
+    }
     public static final float HOLLOW_GREEN_R = 0.08f;
     public static final float HOLLOW_GREEN_G = 0.21f;
     public static final float HOLLOW_GREEN_B = 0.19f;

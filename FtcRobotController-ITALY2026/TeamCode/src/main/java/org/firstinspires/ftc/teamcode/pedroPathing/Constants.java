@@ -33,8 +33,8 @@ public class Constants {
     public static PathConstraints pathConstraints = new PathConstraints(0.7, 60, 1, 1);
 
     public static PinpointConstants pinpointConstants = new PinpointConstants()
-            .forwardPodY(2.3125)      // distance from robot center
-            .strafePodX(-6)
+            .forwardPodY(3.61)      // distance from robot center
+            .strafePodX(-6.948)
             .distanceUnit(DistanceUnit.INCH)
             .hardwareMapName("odometry")
             .encoderResolution(
