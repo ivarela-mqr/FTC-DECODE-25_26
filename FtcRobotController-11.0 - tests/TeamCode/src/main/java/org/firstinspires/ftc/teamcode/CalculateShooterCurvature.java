@@ -15,22 +15,24 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
+import org.firstinspires.ftc.teamcode.mechanisms.ColorSensor;
 
 import java.security.Provider;
 @TeleOp
 public class CalculateShooterCurvature extends OpMode {
     private Limelight3A limelight;
     private IMU imu;
-    Servo coverL, coverR;
+    Servo coverL, coverR, block;
     double distance = 0;
-    double F = 0;
-    double[] steps = {0.1, 0.001, 0.0001};
+    double F = 1;
+    double steps = 0.1;
+    int stepsVel = 50;
     DcMotorEx shooter1, shooter2;
     DcMotorEx  intake, transfer;
-    double highVel = 1700;
-    double lowVel = 1000;
+    double highVel = 1600;
     double currVel = highVel;
-    int stepIndex = 0;
+    ColorSensor colorSensor;
+    ColorSensor.DetectedColors detectedColor;
     @Override
     public void init() {
         shooter1=hardwareMap.get(DcMotorEx.class,"shooter1");
@@ -40,7 +42,7 @@ public class CalculateShooterCurvature extends OpMode {
         intake = hardwareMap.get(DcMotorEx.class,"intake");
         transfer = hardwareMap.get(DcMotorEx.class,"transfer");
         intake.setDirection(DcMotorSimple.Direction.REVERSE);
-        PIDFCoefficients coeficients = new PIDFCoefficients(1,0,0,15.4);
+        PIDFCoefficients coeficients = new PIDFCoefficients(1,0,0,15.3);
         shooter1.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,coeficients);
         shooter2.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,coeficients);
         limelight = hardwareMap.get(Limelight3A.class,"limelight");
@@ -52,7 +54,10 @@ public class CalculateShooterCurvature extends OpMode {
         imu.initialize(new IMU.Parameters(revHubOrientationOnRobot));
         coverL = hardwareMap.get(Servo.class,"coverL");
         coverR = hardwareMap.get(Servo.class,"coverR");
+        block = hardwareMap.get(Servo.class,"block");
         coverL.setDirection(Servo.Direction.REVERSE);
+        colorSensor = new ColorSensor();
+        colorSensor.init(hardwareMap);
     }
 
     @Override
@@ -67,26 +72,83 @@ public class CalculateShooterCurvature extends OpMode {
         if (llResult != null && llResult.isValid()){
             distance = getDistanceFromTargeta(llResult.getTa());
         }
+
         if(gamepad1.dpadLeftWasPressed())
-            F += steps[stepIndex];
+            F += steps;
         if(gamepad1.dpadRightWasPressed())
-            F -= steps[stepIndex];
+            F -= steps;
+
+        if(gamepad1.dpadUpWasPressed())
+            currVel += stepsVel;
+        if(gamepad1.dpadDownWasPressed())
+            currVel -= stepsVel;
+
         if(gamepad1.bWasPressed())
-            stepIndex = (stepIndex + 1) % steps.length;
+            block.setPosition(1);
+
+        if(gamepad1.xWasPressed())
+            block.setPosition(0);
+
+        detectedColor = colorSensor.getDetectedColor(telemetry);
+
+        if(detectedColor != ColorSensor.DetectedColors.UNKNOWN)
+            transfer.setPower(0);
+        //F = getPosCover(distance);
         coverL.setPosition(F);
         coverR.setPosition(F);
-        telemetry.addData("Position",coverR.getPosition());
-        telemetry.addData("Distance",distance);
-        telemetry.update();
-        intake.setPower(0.75);
-        transfer.setPower(0.75);
-        if(Math.abs(shooter1.getVelocity()-currVel)>100){
-            shooter1.setPower(1);
-            shooter2.setPower(1);
-        }else {
+
+        if(gamepad1.leftBumperWasPressed()){
+            intake.setPower(1);
+            transfer.setPower(1);
+        }
+        if(gamepad1.leftBumperWasPressed() && detectedColor != ColorSensor.DetectedColors.UNKNOWN)
+            transfer.setPower(1);
+
+        if (gamepad1.rightBumperWasPressed()){
+            intake.setPower(0);
+            transfer.setPower(0);
+        }
+        double vel = getVelocity(distance);
+        if(gamepad1.left_trigger_pressed){
+            if(gamepad1.right_trigger_pressed) {
+                if(block.getPosition()!=0.5)
+                    block.setPosition(0.5);
+                else {
+                    intake.setPower(1);
+                    transfer.setPower(1);
+                }
+            }else{
+                block.setPosition(1);
+                intake.setPower(0);
+                transfer.setPower(0);
+            }
+            /*if(currVel - shooter1.getVelocity() > 100){
+                shooter1.setPower(1);
+                shooter2.setPower(1);
+            }else {
+                shooter1.setVelocity(currVel);
+                shooter2.setVelocity(currVel);
+            }*/
+
             shooter1.setVelocity(currVel);
             shooter2.setVelocity(currVel);
+        }else{
+            shooter1.setPower(0);
+            shooter2.setPower(0);
         }
+        telemetry.addData("Position",coverR.getPosition());
+        telemetry.addData("Distance",distance);
+        telemetry.addData("Velocity", vel);
+        telemetry.addData("Pos", F);
+        telemetry.addData("RealVelocity",shooter1.getVelocity());
+        telemetry.addData("RealVelocity",shooter2.getVelocity());
+        telemetry.update();
+    }
+    private double getPosCover(double distance){
+        return Math.min(0,Math.max(-0.0027027 * distance + 1.082164,1));
+    }
+    private double getVelocity(double distance){
+        return 845.4886 + 37279 * distance - 0.01871125 * Math.pow(distance,2);
     }
     private double getDistanceFromTargeta(double ta){
         return 180.5062* Math.pow(ta,-0.5018798);

@@ -16,7 +16,7 @@ public class Intake {
     DcMotorEx  intake, transfer;
     //Servo block;
     //DistanceSensor distanceSensor1, distanceSensor2;
-    //ColorSensor colorSensor;
+    ColorSensor colorSensor;
     boolean isShooting = false, isIntaking = false;
 
     Debouncer crossDebouncer = new Debouncer(200);
@@ -31,8 +31,8 @@ public class Intake {
         //block = hardwareMap.get(Servo.class, "block");
 
         /*distanceSensor1 = hardwareMap.get(DistanceSensor.class,"distanceSensor1");
-        distanceSensor2 = hardwareMap.get(DistanceSensor.class,"distanceSensor2");
-        colorSensor.init(hardwareMap);*/
+        distanceSensor2 = hardwareMap.get(DistanceSensor.class,"distanceSensor2");*/
+        colorSensor.init(hardwareMap);
 
     }
 
@@ -74,7 +74,7 @@ public class Intake {
         return num;
     }
     boolean firstArtifactIn(Telemetry telemetry){
-        return false;//colorSensor.getDetectedColor(telemetry)!= ColorSensor.DetectedColors.UNKNOWN;
+        return colorSensor.getDetectedColor(telemetry)!= ColorSensor.DetectedColors.UNKNOWN;
     }
     boolean secondArtifactIn(){
         return false;//distanceSensor2.getDistance(DistanceUnit.CM)<15;

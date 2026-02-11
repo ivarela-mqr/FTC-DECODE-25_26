@@ -18,8 +18,8 @@ public class ColorSensor {
     public void init(HardwareMap map){
         colorSensor = map.get(NormalizedColorSensor.class, "colorSensor");
         colorSensor2 = map.get(NormalizedColorSensor.class, "colorSensor2");
-        colorSensor.setGain(8);
-        colorSensor2.setGain(8);
+        colorSensor.setGain(6);
+        colorSensor2.setGain(6);
     }
     public DetectedColors getDetectedColor(Telemetry telemetry){
         //RGB + alpha -> brightness
@@ -33,13 +33,16 @@ public class ColorSensor {
         normGreen2 = colors2.green / colors2.alpha;
         normBlue = colors.blue / colors.alpha;
         normBlue2 = colors2.blue / colors2.alpha;
-        telemetry.addData("red", (normRed + normRed2) /2);
-        telemetry.addData("green", (normGreen + normGreen2)/2);
-        telemetry.addData("blue", (normBlue + normBlue2) / 2);
-        telemetry.addData("brightness",(colors.alpha + colors2.alpha) / 2);
+        /*telemetry.addData("red", normRed);
+        telemetry.addData("red", normRed2);
+        telemetry.addData("green", normGreen);
+        telemetry.addData("green",normGreen2);
+        telemetry.addData("blue", normBlue);
+        telemetry.addData("blue", normBlue2);*/
 
-        if (isGreen(normRed,normRed2,normGreen,normGreen2,normBlue,normBlue2))
+        if (isGreen(normRed,normRed2,normGreen,normGreen2,normBlue,normBlue2)){
             return DetectedColors.GREEN;
+        }
         else if (isPurple(normRed,normRed2,normGreen,normGreen2,normBlue,normBlue2)) {
             return DetectedColors.PURPLE;
         }
@@ -69,8 +72,7 @@ public class ColorSensor {
                         && g2 > Constants.PLAIN_GREEN_G
                         && b2 > Constants.PLAIN_GREEN_B;
 
-        return (sensor1IsHollow && sensor2IsPlain) ||
-                (sensor2IsHollow && sensor1IsPlain);
+        return (sensor1IsPlain || sensor2IsPlain);
     }
     public boolean isPurple(float r1, float r2, float g1, float g2, float b1, float b2){
         boolean sensor1IsHollow =
@@ -93,7 +95,6 @@ public class ColorSensor {
                         g2 > Constants.PLAIN_PURPLE_G &&
                         b2 > Constants.PLAIN_PURPLE_B;
 
-        return (sensor1IsHollow && sensor2IsPlain) ||
-                (sensor2IsHollow && sensor1IsPlain);
+        return  (sensor1IsPlain || sensor2IsPlain);
     }
 }
