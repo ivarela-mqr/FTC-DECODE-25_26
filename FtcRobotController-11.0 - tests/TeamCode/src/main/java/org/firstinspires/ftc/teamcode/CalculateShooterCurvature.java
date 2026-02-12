@@ -16,6 +16,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.mechanisms.ColorSensor;
+import org.firstinspires.ftc.teamcode.mechanisms.DriveTrain;
 
 import java.security.Provider;
 @TeleOp
@@ -33,6 +34,7 @@ public class CalculateShooterCurvature extends OpMode {
     double currVel = highVel;
     ColorSensor colorSensor;
     ColorSensor.DetectedColors detectedColor;
+    DriveTrain driveTrain;
     @Override
     public void init() {
         shooter1=hardwareMap.get(DcMotorEx.class,"shooter1");
@@ -58,6 +60,7 @@ public class CalculateShooterCurvature extends OpMode {
         coverL.setDirection(Servo.Direction.REVERSE);
         colorSensor = new ColorSensor();
         colorSensor.init(hardwareMap);
+        driveTrain = new DriveTrain(hardwareMap);
     }
 
     @Override
@@ -69,6 +72,7 @@ public class CalculateShooterCurvature extends OpMode {
         YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
         limelight.updateRobotOrientation(orientation.getYaw());
         LLResult llResult = limelight.getLatestResult();
+        driveTrain.TeleOp(gamepad1,telemetry, orientation.getYaw());
         if (llResult != null && llResult.isValid()){
             distance = getDistanceFromTargeta(llResult.getTa());
         }
@@ -122,16 +126,13 @@ public class CalculateShooterCurvature extends OpMode {
                 intake.setPower(0);
                 transfer.setPower(0);
             }
-            /*if(currVel - shooter1.getVelocity() > 100){
+            if(vel - shooter1.getVelocity() > 100){
                 shooter1.setPower(1);
                 shooter2.setPower(1);
             }else {
-                shooter1.setVelocity(currVel);
-                shooter2.setVelocity(currVel);
-            }*/
-
-            shooter1.setVelocity(currVel);
-            shooter2.setVelocity(currVel);
+                shooter1.setVelocity(vel);
+                shooter2.setVelocity(vel);
+            }
         }else{
             shooter1.setPower(0);
             shooter2.setPower(0);
@@ -147,8 +148,11 @@ public class CalculateShooterCurvature extends OpMode {
     private double getPosCover(double distance){
         return Math.min(0,Math.max(-0.0027027 * distance + 1.082164,1));
     }
-    private double getVelocity(double distance){
-        return 845.4886 + 37279 * distance - 0.01871125 * Math.pow(distance,2);
+    private double getVelocity(double x){
+        return (int)(157.4115 +
+                16.39278 * x -
+                0.08673005 * Math.pow(x,2) +
+                0.0001515039 * Math.pow(x,3));
     }
     private double getDistanceFromTargeta(double ta){
         return 180.5062* Math.pow(ta,-0.5018798);
