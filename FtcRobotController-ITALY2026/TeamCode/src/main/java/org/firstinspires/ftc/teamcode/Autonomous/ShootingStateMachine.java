@@ -49,15 +49,15 @@ public class ShootingStateMachine {
                 }
                 break;
             case SHOOTING:
-                if(intake.firstArtifactIn() && shooter.getBlockPos() >= 0.5){
+                if(intake.firstArtifactIn() && shooter.getBlockPos() >= 0.5){   //intake.numArtifactsIn(telemetry) >0
                     intake.shootArtifacts();
-                }else if(!intake.firstArtifactIn()){
+                }else if(!intake.firstArtifactIn()){    //intake.numArtifactsIn(telemetry) == 0
                     state = States.INTAKING;
                 }
                 break;
             case INTAKING:
                 shooter.closeBlock();
-                if(intake.firstArtifactIn()){
+                if(intake.firstArtifactIn()){   //intake.numArtifactsIn(telemetry) == 3
                     state = States.INIT;
                 }else {
                     intake.intake();
@@ -73,7 +73,6 @@ public class ShootingStateMachine {
         double dx = pose.getX() - shootingPose.getX();
         double dy = pose.getY() - shootingPose.getY();
         double distance = Math.sqrt(dx * dx + dy * dy);
-
 
         return distance <= posTolerance ;
     }
