@@ -16,7 +16,7 @@ public class Intake {
     DcMotorEx  intake, transfer;
     //Servo block;
     //DistanceSensor distanceSensor1, distanceSensor2;
-    ColorSensor colorSensor;
+    ColorSensor colorSensor = new ColorSensor();
     boolean isShooting = false, isIntaking = false;
 
     Debouncer crossDebouncer = new Debouncer(200);
@@ -42,7 +42,7 @@ public class Intake {
 
     public void intakeArtifact(Telemetry telemetry){
         //isShooting = false;
-        if(!firstArtifactIn(telemetry)){
+        if(!firstArtifactIn()){
             transfer.setPower(0.75);
         }else{
             transfer.setPower(0);
@@ -55,8 +55,8 @@ public class Intake {
 
     }
     public void shootArtifacts(){
-        intake.setPower(0.75);
-        transfer.setPower(0.75);
+        intake.setPower(1);
+        transfer.setPower(1);
     }
     public void stopArtifacts(){
         intake.setPower(0);
@@ -65,7 +65,7 @@ public class Intake {
 
     int numArtifactsIn(Telemetry telemetry){
         int num = 0;
-        if(firstArtifactIn(telemetry))
+        if(firstArtifactIn())
             num+=1;
         if(secondArtifactIn())
             num+=1;
@@ -73,8 +73,8 @@ public class Intake {
             num+=1;
         return num;
     }
-    boolean firstArtifactIn(Telemetry telemetry){
-        return colorSensor.getDetectedColor(telemetry)!= ColorSensor.DetectedColors.UNKNOWN;
+    public boolean firstArtifactIn(){
+        return colorSensor.getDetectedColor() != ColorSensor.DetectedColors.UNKNOWN;
     }
     boolean secondArtifactIn(){
         return false;//distanceSensor2.getDistance(DistanceUnit.CM)<15;
@@ -88,7 +88,17 @@ public class Intake {
             block.setPosition(0);
         }else{block.setPosition(1);}*/
     }
+    public void intake(){
+        if(!firstArtifactIn()) {
+            transfer.setPower(0.75);
+            intake.setPower(1);
+        }
+        else {
+            transfer.setPower(0);
+            intake.setPower(0);
 
+        }
+    }
 
     public void TeleOp(Gamepad gamepad, Telemetry telemetry, double yawAngle){
         if (isShooting){

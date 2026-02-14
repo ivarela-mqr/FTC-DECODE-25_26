@@ -35,7 +35,7 @@ public class Shooter {
     double highVelocityShooter = 1500;
     double lowVelocityShooter = 500;
 
-    double curTargetVelocity = highVelocityShooter;
+    double curTargetVelocity = 1200;
 
     double kP_shooter = 1;
     double kI_shooter = 0;
@@ -115,10 +115,12 @@ public class Shooter {
 
     }
 
-    public void adjustCover(Telemetry telemetry, double dist){
-        double pos = 0;
-        coverL.setPosition(pos);
-        coverR.setPosition(pos);
+    public boolean isReady(){
+        return (curTargetVelocity - shooter0.getVelocity() < 150) && block.getPosition() == 0.5;
+    }
+    public void adjustCover(double dist){
+        coverL.setPosition(dist);
+        coverR.setPosition(dist);
     }
 
     public void correctCover(Telemetry telemetry, double direction){
@@ -140,6 +142,43 @@ public class Shooter {
             shooter1.setVelocity(curTargetVelocity);
         }
         telemetry.addData("Shooter velocity",shooter0.getVelocity());
+    }
+    public void preload(Telemetry telemetry, double yawAngle) {
+        double distance = limeLight.getGoalAprilTagData(telemetry, yawAngle)[1];
+        if(distance != 0)
+            curTargetVelocity = getVelocity(distance);
+        else
+            curTargetVelocity = 1000;
+        if(curTargetVelocity - shooter1.getVelocity() > 100){
+            shooter0.setPower(1);
+            shooter1.setPower(1);
+        }else {
+            shooter0.setVelocity(curTargetVelocity);
+            shooter1.setVelocity(curTargetVelocity);
+        }
+    }
+    public void closeBlock() {
+        block.setPosition(1);
+    }
+    public double getBlockPos() {
+        return block.getPosition();
+    }
+    public void calm(){
+        shooter0.setVelocity(900);
+        shooter1.setVelocity(900);
+    }
+    public void stop() {
+        shooter0.setPower(0);
+        shooter1.setPower(0);
+    }
+    public void openBlock(){
+        block.setPosition(0.5);
+    }
+    private double getVelocity(double x){
+        return (int)(157.4115 +
+                16.39278 * x -
+                0.08673005 * Math.pow(x,2) +
+                0.0001515039 * Math.pow(x,3));
     }
     public void TeleOp(Gamepad gamepad, Telemetry telemetry, double yawAngle, boolean isShooting){
         //adjust shooter position

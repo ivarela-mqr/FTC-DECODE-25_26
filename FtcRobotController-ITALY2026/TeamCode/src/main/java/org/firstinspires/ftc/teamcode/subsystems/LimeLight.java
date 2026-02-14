@@ -27,18 +27,21 @@ public class LimeLight {
     public double[] getGoalAprilTagData(Telemetry telemetry, double yawAngle){
         limelight.updateRobotOrientation(yawAngle);
         LLResult llResult = limelight.getLatestResult();
+        double[] data = new double[2];
         if (llResult != null && llResult.isValid()){
             Pose3D botPose = llResult.getBotpose();
             telemetry.addData("Tx", llResult.getTx());
             telemetry.addData("Ty", llResult.getTy());
             telemetry.addData("Ta", llResult.getTa());
             telemetry.addData("distance in cm",getDistanceFromTargeta(llResult.getTa()));
-            double[] data = new double[2];
+
             data[0] = llResult.getTx();
             data[1] = getDistanceFromTargeta(llResult.getTa());
             return  data;
         }
-        return new double[2];
+        data[0] = 0;
+        data[1] = 0;
+        return data;
     }
 
     private double getDistanceFromTargeta(double ta){
