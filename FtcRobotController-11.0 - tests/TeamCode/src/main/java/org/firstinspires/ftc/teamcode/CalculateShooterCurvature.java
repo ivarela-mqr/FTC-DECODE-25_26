@@ -39,8 +39,7 @@ public class CalculateShooterCurvature extends OpMode {
     public void init() {
         shooter1=hardwareMap.get(DcMotorEx.class,"shooter1");
         shooter2=hardwareMap.get(DcMotorEx.class,"shooter0");
-        shooter1.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-        shooter2.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+
         intake = hardwareMap.get(DcMotorEx.class,"intake");
         transfer = hardwareMap.get(DcMotorEx.class,"transfer");
         intake.setDirection(DcMotorSimple.Direction.REVERSE);

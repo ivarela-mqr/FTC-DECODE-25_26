@@ -49,8 +49,8 @@ public class PruebaPIDShooter extends OpMode {
         if(gamepad1.dpadDownWasPressed())
             P -= steps[stepIndex];
         PIDFCoefficients coeficients = new PIDFCoefficients(P,0,0,F);
-        shooter1.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,coeficients);
-        shooter2.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,coeficients);
+        shooter1.setPIDFCoefficients(DcMotor.RunMode.RUN_WITHOUT_ENCODER,coeficients);
+        shooter2.setPIDFCoefficients(DcMotor.RunMode.RUN_WITHOUT_ENCODER,coeficients);
         shooter1.setVelocity(currVel);
         shooter2.setVelocity(currVel);
         double error = currVel - shooter1.getVelocity();

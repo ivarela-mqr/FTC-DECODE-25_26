@@ -12,15 +12,15 @@ import org.firstinspires.ftc.teamcode.util.Constants;
 
 public class Shooter {
     DcMotorEx shooter0, shooter1;
-    Servo rotorL, rotorR, coverL, coverR, block;
+        Servo rotorL, rotorR, coverL, coverR, block;
 
-    LimeLight limeLight;
+        LimeLight limeLight;
 
 
-    // PID constants rotors
-    double kP_rotor = 0.02;
-    double kI_rotor = 0.0;
-    double kD_rotor = 0.002;
+        // PID constants rotors
+        double kP_rotor = 0.02;
+        double kI_rotor = 0.0;
+        double kD_rotor = 0.002;
 
     // PID state rotors
     double integralSum_rotor = 0;
@@ -53,8 +53,7 @@ public class Shooter {
         coverR = hardwareMap.get(Servo.class,"coverR");
         block = hardwareMap.get(Servo.class, "block");
 
-        shooter0.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        shooter1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
         PIDFCoefficients pidfCoefficients_shooter = new PIDFCoefficients(kP_shooter, kI_shooter, kD_shooter, kF_shooter);
 
         shooter0.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, pidfCoefficients_shooter);
@@ -63,7 +62,6 @@ public class Shooter {
         coverL.setDirection(Servo.Direction.REVERSE);
 
         limeLight = new LimeLight(hardwareMap, alliance);
-
     }
 
     private double pidCalculate(double error) {
