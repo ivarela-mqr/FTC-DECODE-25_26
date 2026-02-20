@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.pedropathing.geometry.Pose;
+import com.pedropathing.util.Timer;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Gamepad;
@@ -9,46 +12,34 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.util.Constants;
+import org.opencv.core.Mat;
+
 
 public class Shooter {
-    DcMotorEx shooter0, shooter1;
-        Servo rotorL, rotorR, coverL, coverR, block;
-
-        LimeLight limeLight;
-
-
-        // PID constants rotors
-        double kP_rotor = 0.02;
-        double kI_rotor = 0.0;
-        double kD_rotor = 0.002;
-
-    // PID state rotors
-    double integralSum_rotor = 0;
-    double lastError_rotor = 0;
-    long lastTime_rotor = 0;
-
-    // Servo state rotors
-    double rotorPos = 0.5;
-
-
-    //PIDF shooter
+   public  DcMotorEx shooter0, shooter1;
+   public CRServo rotorL, rotorR;
+   Servo coverL, coverR, block;
+   LimeLight limeLight;
+   DcMotorEx encoder;
+   final int LIMITE_IZQUIERDA = -10000;
+   final int LIMITE_DERECHA = 15000;
+    final double VELOCIDAD_FACTOR = - 0.05;
+    double offset = 0;
     double highVelocityShooter = 1500;
     double lowVelocityShooter = 500;
-
     double curTargetVelocity = 1200;
-
-    double kP_shooter = 1;
+    double kP_shooter = 1.25;
     double kI_shooter = 0;
     double kD_shooter = 0;
-    double kF_shooter = 15.4;
+    double kF_shooter = 17.5;
+    Timer init;
+    public boolean autoAim = true;
 
-
-
-    public Shooter (HardwareMap hardwareMap, Constants.Alliance alliance){
+    public Shooter (HardwareMap hardwareMap, Constants.Alliance alliance, double targetVel, double targetAngle){
         shooter0 = hardwareMap.get(DcMotorEx.class,"shooter0");
         shooter1 = hardwareMap.get(DcMotorEx.class,"shooter1");
-        rotorL = hardwareMap.get(Servo.class,"rotorL");
-        rotorR = hardwareMap.get(Servo.class,"rotorR");
+        rotorL = hardwareMap.get(CRServo.class,"rotorL");
+        rotorR = hardwareMap.get(CRServo.class,"rotorR");
         coverL = hardwareMap.get(Servo.class,"coverL");
         coverR = hardwareMap.get(Servo.class,"coverR");
         block = hardwareMap.get(Servo.class, "block");
@@ -62,59 +53,54 @@ public class Shooter {
         coverL.setDirection(Servo.Direction.REVERSE);
 
         limeLight = new LimeLight(hardwareMap, alliance);
+        curTargetVelocity = targetVel;
+        coverL.setPosition(targetAngle);
+        coverR.setPosition(targetAngle);
+        encoder = hardwareMap.get(DcMotorEx.class, "intake");
+        encoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        encoder.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        init = new Timer();
     }
+    public void initTimer(){
+        init.resetTimer();
+    }
+    public void aimWithLimelight(double yaw){
+        offset = limeLight.getGoalAprilTagData(yaw)[0];
+        moverServos(offset);
+    }
+    public void moverServos(double offsetX) {
+        int posR = encoder.getCurrentPosition();
 
-    private double pidCalculate(double error) {
-        long currentTime = System.nanoTime();
-        double dt = (currentTime - lastTime_rotor) / 1e9;
+        // Calculamos potencia a partir del offset
+        double potencia = offsetX * VELOCIDAD_FACTOR;
+        if(autoAim) {
+            // Lectura de encoders
 
-        if (lastTime_rotor == 0) {
-            lastTime_rotor = currentTime;
-            return 0;
+            // Verificamos límites: si cualquiera está en el límite, paramos ambos
+            if ((posR <= LIMITE_IZQUIERDA && potencia > 0) ||
+                    (posR >= LIMITE_DERECHA && potencia < 0)) {
+                potencia = 0;
+            }
+
+            // Aplicamos misma potencia a ambos servos
+            rotorL.setPower(potencia);
+            rotorR.setPower(potencia);
         }
-
-        integralSum_rotor += error * dt;
-        double derivative = (error - lastError_rotor) / dt;
-
-        lastError_rotor = error;
-        lastTime_rotor = currentTime;
-
-        return (kP_rotor * error) + (kI_rotor * integralSum_rotor) + (kD_rotor * derivative);
-    }
-    public void resetPID() {
-        integralSum_rotor = 0;
-        lastError_rotor = 0;
-        lastTime_rotor = 0;
+        // Verificamos límites: si cualquiera está en el límite, paramos ambos
+        if ((posR <= LIMITE_IZQUIERDA && potencia > 0) ||
+                (posR >= LIMITE_DERECHA && potencia < 0)) {
+            rotorL.setPower(0);
+            rotorR.setPower(0);
+        }
     }
 
-    public void aimShooterWithLimeLight(Telemetry telemetry,double angle){
-
-
-        // If AprilTag not detected don't move
-        if (Math.abs(angle) < 0.05) return;
-
-        double correction = pidCalculate(angle);
-
-        rotorPos -= correction;
-
-        // Limit servo position
-        rotorPos = Math.max(0.0, Math.min(1.0, rotorPos));
-
-        rotorL.setPosition(rotorPos);
-        rotorR.setPosition(rotorPos);
-
-        telemetry.addLine("AimShooterWithLimeLight:");
-        telemetry.addData("Tx", angle);
-        telemetry.addData("PID Correction", correction);
-        telemetry.addData("Rotor Pos", rotorPos);
-    }
-
-    public void aimShooterWithOdometry(){
-
+    public void setPowerRotor(double power){
+        rotorL.setPower(power * VELOCIDAD_FACTOR);
+        rotorR.setPower(power * VELOCIDAD_FACTOR);
     }
 
     public boolean isReady(){
-        return (curTargetVelocity - shooter0.getVelocity() < 150) && block.getPosition() == 0.5;
+        return Math.abs(curTargetVelocity - Math.max(shooter1.getVelocity(),shooter0.getVelocity())) < 50;
     }
     public void adjustCover(double dist){
         coverL.setPosition(dist);
@@ -132,6 +118,7 @@ public class Shooter {
         }else{curTargetVelocity = highVelocityShooter;}
     }
 
+
     public void setShootingPower(Telemetry telemetry) {
         if (Math.abs(shooter0.getVelocity() - curTargetVelocity) > 100) {
 
@@ -142,12 +129,14 @@ public class Shooter {
         telemetry.addData("Shooter velocity",shooter0.getVelocity());
     }
     public void preload(Telemetry telemetry, double yawAngle) {
-        double distance = limeLight.getGoalAprilTagData(telemetry, yawAngle)[1];
-        if(distance != 0)
+        //double distance = limeLight.getGoalAprilTagData(telemetry, yawAngle)[1];
+        /*if(distance != 0)
             curTargetVelocity = getVelocity(distance);
         else
-            curTargetVelocity = 1000;
-        if(curTargetVelocity - shooter1.getVelocity() > 100){
+            curTargetVelocity = 1000;*/
+        curTargetVelocity = 1200;
+
+        if(curTargetVelocity - Math.max(shooter1.getVelocity(),shooter0.getVelocity()) > 150){
             shooter0.setPower(1);
             shooter1.setPower(1);
         }else {
@@ -156,21 +145,26 @@ public class Shooter {
         }
     }
     public void closeBlock() {
-        block.setPosition(1);
+        block.setPosition(0.7);
     }
     public double getBlockPos() {
         return block.getPosition();
     }
     public void calm(){
-        shooter0.setVelocity(900);
-        shooter1.setVelocity(900);
+        if(Math.abs(curTargetVelocity - Math.max(shooter1.getVelocity(), shooter0.getVelocity())) > 100){
+            shooter0.setPower(1);
+            shooter0.setPower(0);
+        }else {
+            shooter0.setVelocity(curTargetVelocity);
+            shooter1.setVelocity(curTargetVelocity);
+        }
     }
     public void stop() {
         shooter0.setPower(0);
         shooter1.setPower(0);
     }
     public void openBlock(){
-        block.setPosition(0.5);
+        block.setPosition(0);
     }
     private double getVelocity(double x){
         return (int)(157.4115 +
@@ -180,7 +174,7 @@ public class Shooter {
     }
     public void TeleOp(Gamepad gamepad, Telemetry telemetry, double yawAngle, boolean isShooting){
         //adjust shooter position
-        double[] tx = limeLight.getGoalAprilTagData(telemetry, yawAngle);
+        double[] tx = limeLight.getGoalAprilTagData(yawAngle);
         //aimShooterWithLimeLight(telemetry, tx[0]);
         //adjustCover(telemetry, tx[1]);
 

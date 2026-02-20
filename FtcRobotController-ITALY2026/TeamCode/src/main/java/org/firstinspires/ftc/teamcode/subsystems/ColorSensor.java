@@ -1,23 +1,29 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.util.Constants;
 
 public class ColorSensor {
     NormalizedColorSensor colorSensor;
     NormalizedColorSensor colorSensor2;
+    DistanceSensor distanceSensor;
+    DistanceSensor distanceSensor2;
     public enum DetectedColors {
         PURPLE,
         GREEN,
         UNKNOWN
     }
     public void init(HardwareMap map){
-        colorSensor = map.get(NormalizedColorSensor.class, "colorSensor");
+        colorSensor = map.get(NormalizedColorSensor.class, "colorSensor1");
         colorSensor2 = map.get(NormalizedColorSensor.class, "colorSensor2");
+        distanceSensor = map.get(DistanceSensor.class, "colorSensor1");
+        distanceSensor2 = map.get(DistanceSensor.class, "colorSensor2");
         colorSensor.setGain(6);
         colorSensor2.setGain(6);
     }
@@ -27,20 +33,21 @@ public class ColorSensor {
         NormalizedRGBA colors2 = colorSensor2.getNormalizedColors();
         float normRed, normGreen, normBlue;
         float normRed2, normGreen2, normBlue2;
-        normRed = colors.red / colors.alpha;
+        normRed = colors.red / colors.alpha ;
         normRed2 = colors2.red / colors2.alpha;
         normGreen = colors.green / colors.alpha;
         normGreen2 = colors2.green / colors2.alpha;
         normBlue = colors.blue / colors.alpha;
         normBlue2 = colors2.blue / colors2.alpha;
-        /*telemetry.addData("red", normRed);
+        /*telemetry.addData("distance color sensor",distanceSensor.getDistance(DistanceUnit.CM));
+        telemetry.addData("red", normRed);
         telemetry.addData("red", normRed2);
         telemetry.addData("green", normGreen);
         telemetry.addData("green",normGreen2);
         telemetry.addData("blue", normBlue);
         telemetry.addData("blue", normBlue2);*/
 
-        if (isGreen(normRed,normRed2,normGreen,normGreen2,normBlue,normBlue2)){
+        /*if (isGreen(normRed,normRed2,normGreen,normGreen2,normBlue,normBlue2)){
             return DetectedColors.GREEN;
         }
         else if (isPurple(normRed,normRed2,normGreen,normGreen2,normBlue,normBlue2)) {
@@ -48,7 +55,12 @@ public class ColorSensor {
         }
         else {
             return DetectedColors.UNKNOWN;
-        }
+        }*/
+        if(distanceSensor.getDistance(DistanceUnit.CM) < 1.75 ||
+                distanceSensor2.getDistance(DistanceUnit.CM) < 1.75)
+            return DetectedColors.PURPLE;
+        else
+            return DetectedColors.UNKNOWN;
     }
     public boolean isGreen(float r1, float r2, float g1, float g2, float b1, float b2) {
 

@@ -13,7 +13,7 @@ public class LimeLight {
     private Limelight3A limelight;
 
 
-    LimeLight(HardwareMap hardwareMap, Constants.Alliance alliance) {
+    public LimeLight(HardwareMap hardwareMap, Constants.Alliance alliance) {
         limelight = hardwareMap.get(Limelight3A.class,"limelight");
         if (alliance == Constants.Alliance.BLUE)
             limelight.pipelineSwitch(8); // Blue alliance aprilTag
@@ -24,16 +24,16 @@ public class LimeLight {
     }
 
 
-    public double[] getGoalAprilTagData(Telemetry telemetry, double yawAngle){
+    public double[] getGoalAprilTagData(double yawAngle){
         limelight.updateRobotOrientation(yawAngle);
         LLResult llResult = limelight.getLatestResult();
         double[] data = new double[2];
         if (llResult != null && llResult.isValid()){
             Pose3D botPose = llResult.getBotpose();
-            telemetry.addData("Tx", llResult.getTx());
-            telemetry.addData("Ty", llResult.getTy());
-            telemetry.addData("Ta", llResult.getTa());
-            telemetry.addData("distance in cm",getDistanceFromTargeta(llResult.getTa()));
+            //telemetry.addData("Tx", llResult.getTx());
+            //telemetry.addData("Ty", llResult.getTy());
+            //telemetry.addData("Ta", llResult.getTa());
+            //telemetry.addData("distance in cm",getDistanceFromTargeta(llResult.getTa()));
 
             data[0] = llResult.getTx();
             data[1] = getDistanceFromTargeta(llResult.getTa());

@@ -13,9 +13,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.util.Debouncer;
 
 public class Intake {
-    DcMotorEx  intake, transfer;
-    //Servo block;
-    //DistanceSensor distanceSensor1, distanceSensor2;
+    DcMotorEx  transfer;
+    DcMotor intake;
+    DistanceSensor distanceSensor1, distanceSensor2;
     ColorSensor colorSensor = new ColorSensor();
     boolean isShooting = false, isIntaking = false;
 
@@ -23,15 +23,14 @@ public class Intake {
 
 
     public Intake(HardwareMap hardwareMap){
-        intake = hardwareMap.get(DcMotorEx.class,"intake");
+        intake = hardwareMap.get(DcMotor.class,"intake");
         intake.setDirection(DcMotorSimple.Direction.REVERSE);
         transfer = hardwareMap.get(DcMotorEx.class,"transfer");
         intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        transfer.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        //block = hardwareMap.get(Servo.class, "block");
+        transfer.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        /*distanceSensor1 = hardwareMap.get(DistanceSensor.class,"distanceSensor1");
-        distanceSensor2 = hardwareMap.get(DistanceSensor.class,"distanceSensor2");*/
+        distanceSensor1 = hardwareMap.get(DistanceSensor.class,"distanceSensor1");
+        distanceSensor2 = hardwareMap.get(DistanceSensor.class,"distanceSensor2");
         colorSensor.init(hardwareMap);
 
     }
@@ -40,30 +39,34 @@ public class Intake {
         return isShooting;
     }
 
-    public void intakeArtifact(Telemetry telemetry){
+    public void intakeFirstArtifact(){
         //isShooting = false;
-        if(!firstArtifactIn()){
-            transfer.setPower(0.75);
-        }else{
-            transfer.setPower(0);
-        }
-        if(!secondArtifactIn() || !thirdArtifactIn()){
-            intake.setPower(0.75);
-        }
+        transfer.setPower(1);
+        intake.setPower(1);
+    }
+    public void intakeNextArtifacts(){
+        //isShooting = false;
+        transfer.setPower(0);
+        intake.setPower(1);
+    }
+
+    public void unload(){
+        intake.setPower(-0.2);
+        transfer.setPower(-0.5);
     }
     public void shoot1Artifact(){
 
     }
     public void shootArtifacts(){
         intake.setPower(1);
-        transfer.setPower(1);
+        transfer.setVelocity(6000);
     }
     public void stopArtifacts(){
-        intake.setPower(0);
+        intake.setPower(0.25);
         transfer.setPower(0);
     }
 
-    int numArtifactsIn(Telemetry telemetry){
+    public int numArtifactsIn(){
         int num = 0;
         if(firstArtifactIn())
             num+=1;
@@ -76,11 +79,11 @@ public class Intake {
     public boolean firstArtifactIn(){
         return colorSensor.getDetectedColor() != ColorSensor.DetectedColors.UNKNOWN;
     }
-    boolean secondArtifactIn(){
-        return false;//distanceSensor2.getDistance(DistanceUnit.CM)<15;
+    public boolean secondArtifactIn(){
+        return distanceSensor2.getDistance(DistanceUnit.CM)<8;
     }
-    boolean thirdArtifactIn(){
-        return false; //distanceSensor1.getDistance(DistanceUnit.CM)<15;
+    public boolean thirdArtifactIn(){
+        return distanceSensor1.getDistance(DistanceUnit.CM)< 12.5;
     }
 
     public void switchBlock(){
@@ -89,7 +92,7 @@ public class Intake {
         }else{block.setPosition(1);}*/
     }
     public void intake(){
-        if(!firstArtifactIn()) {
+        if(numArtifactsIn() != 3) {
             transfer.setPower(0.75);
             intake.setPower(1);
         }
@@ -98,6 +101,11 @@ public class Intake {
             intake.setPower(0);
 
         }
+    }
+
+    public void intakeArtifact(){
+
+
     }
 
     public void TeleOp(Gamepad gamepad, Telemetry telemetry, double yawAngle){
@@ -110,7 +118,7 @@ public class Intake {
         }
 
         if(isIntaking){
-            intakeArtifact(telemetry);
+            intakeArtifact();
         }else{
             stopArtifacts();
         }

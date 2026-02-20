@@ -17,9 +17,9 @@ import com.pedropathing.paths.PathChain;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.hardware.IMU;
 
-@Autonomous(name = "AutonB_NearPreTotal", group = "Autonomous")
+@Autonomous(name = "Prueba", group = "Autonomous")
 @Configurable
-public class AutonB_NearPreTotal extends OpMode {
+public class Prueba extends OpMode {
     private TelemetryManager panelsTelemetry; // Panels Telemetry instance
     public Follower follower; // Pedro Pathing follower instance
     private PathState pathState; // Current autonomous path state (state machine)
@@ -83,6 +83,7 @@ public class AutonB_NearPreTotal extends OpMode {
         panelsTelemetry.debug("Rotors power", shootingStateMachine.shooter.rotorL.getPower());
         panelsTelemetry.debug("Shooter velocity", shootingStateMachine.shooter.shooter0.getVelocity());
         panelsTelemetry.debug("Shooter velocity", shootingStateMachine.shooter.shooter1.getVelocity());
+        panelsTelemetry.debug("IMU", orientation.getYaw(AngleUnit.DEGREES));
 
         //panelsTelemetry.debug("Can shoot",shootingStateMachine.canShoot(pose));
         //panelsTelemetry.debug("X", follower.getPose().getX());
@@ -105,7 +106,6 @@ public class AutonB_NearPreTotal extends OpMode {
         public PathChain goShotThird;
         public PathChain finalPath;
         public PathChain goOpen1;
-        public PathChain goOpen2;
         public PathChain goSHootOpen;
 
         public Paths(Follower follower) {
@@ -155,26 +155,17 @@ public class AutonB_NearPreTotal extends OpMode {
                     .addPath(
                             new BezierLine(
                                     new Pose(53, 93.000),
-                                    new Pose(53, 60)
+                                    new Pose(12, 58)
                             )
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(90))
+                    .setLinearHeadingInterpolation(Math.toRadians(225), Math.toRadians(170))
                     .build();
 
-            goOpen2 = follower.pathBuilder()
-                    .addPath(
-                            new BezierLine(
-                                    new Pose(53, 60),
-                                    new Pose(14.281, 61.825)
-                            )
-                    )
-                    .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(160))
-                    .build();
 
             goSHootOpen = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(14.281, 61.825),
+                                    new Pose(12, 58),
                                     new Pose(53, 96)
                             )
                     )
@@ -186,7 +177,7 @@ public class AutonB_NearPreTotal extends OpMode {
                     .addPath(
                             new BezierLine(
                                     new Pose(53, 93),
-                                    new Pose(17, 93)
+                                    new Pose(16, 93)
                             )
                     )
                     .setTangentHeadingInterpolation()
@@ -196,7 +187,7 @@ public class AutonB_NearPreTotal extends OpMode {
             goShotFirst = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(17, 93),
+                                    new Pose(16, 93),
                                     new Pose(53, 96)
                             )
                     )
@@ -255,7 +246,7 @@ public class AutonB_NearPreTotal extends OpMode {
         switch (pathState){
             case DRIVE_STARTPOS_SHOOT_POS:
                 shootingStateMachine.shooter.adjustCover(0.3);
-                follower.followPath(paths.goShotLoaded,0.75,true);
+                follower.followPath(paths.goShotLoaded,0.9,true);
                 lastPathState = pathState;
                 pathState = PathState.SHOOT_PRELOAD;
                 shootingStateMachine.shooter.initTimer();
@@ -264,28 +255,41 @@ public class AutonB_NearPreTotal extends OpMode {
                 shootingStateMachine.shooter.autoAim = true;
                 if(!shootingStateMachine.isBusy() && !follower.isBusy()) {
                     if(lastPathState == PathState.TAKE_FIRST) {
-                        follower.followPath(paths.goTakeThird1,0.75,true);
+                        follower.followPath(paths.goTakeThird1,0.9,true);
                         lastPathState = pathState;
                         pathState = PathState.TAKE_THIRD;
                     } else if (lastPathState == PathState.TAKE_SECOND) {
-                        follower.followPath(paths.goTakeFirst,0.75,true);
+                        follower.followPath(paths.goOpen1,0.9,true);
                         lastPathState = pathState;
-                        pathState = PathState.TAKE_FIRST;
+                        pathState = PathState.TAKE_OPEN;
                     } else if (lastPathState == PathState.TAKE_THIRD) {
                         lastPathState = pathState;
                         pathState = PathState.END;
                     } else if(lastPathState == PathState.DRIVE_STARTPOS_SHOOT_POS){
-                        follower.followPath(paths.goTakeSecond1,0.75,true);
+                        follower.followPath(paths.goTakeSecond1,0.9,true);
                         lastPathState = pathState;
                         pathState = PathState.TAKE_SECOND;
+                    } else if(lastPathState == PathState.TAKE_OPEN){
+                        follower.followPath(paths.goTakeFirst,0.9,true);
+                        lastPathState = pathState;
+                        pathState = PathState.TAKE_FIRST;
                     }
                 }
                 break;
             case TAKE_FIRST:
                 if(!follower.isBusy()) {
-                    follower.followPath(paths.goShotFirst,0.75,true);
+                    follower.followPath(paths.goShotFirst,0.9,true);
                     lastPathState = pathState;
                     pathState = PathState.SHOOT_PRELOAD;
+                }
+                break;
+            case TAKE_OPEN:
+                if(!follower.isBusy()&& !shootingStateMachine.intakeStateMachine.isBusy()) {
+
+                    follower.followPath(paths.goSHootOpen,0.7,true);
+                    lastPathState = pathState;
+                    pathState = PathState.SHOOT_PRELOAD;
+
                 }
                 break;
             case TAKE_SECOND:
@@ -293,11 +297,11 @@ public class AutonB_NearPreTotal extends OpMode {
                 shootingStateMachine.shooter.setPowerRotor(10);
                 if(!follower.isBusy()) {
                     if (lastPathState == PathState.SHOOT_PRELOAD){
-                        follower.followPath(paths.goTakeSecond2,0.75,true);
+                        follower.followPath(paths.goTakeSecond2,0.9,true);
                         lastPathState = pathState;
                         pathState = PathState.TAKE_SECOND;
                     } else if (lastPathState == PathState.TAKE_SECOND) {
-                        follower.followPath(paths.goShotSecond,0.75,true);
+                        follower.followPath(paths.goShotSecond,0.9,true);
                         lastPathState = pathState;
                         pathState = PathState.SHOOT_PRELOAD;
                     }
@@ -307,11 +311,11 @@ public class AutonB_NearPreTotal extends OpMode {
             case TAKE_THIRD:
                 if(!follower.isBusy()) {
                     if (lastPathState == PathState.SHOOT_PRELOAD){
-                        follower.followPath(paths.goTakeThird2,0.75,true);
+                        follower.followPath(paths.goTakeThird2,0.9,true);
                         lastPathState = pathState;
                         pathState = PathState.TAKE_THIRD;
                     } else if (lastPathState == PathState.TAKE_THIRD) {
-                        follower.followPath(paths.goShotThird,0.75,true);
+                        follower.followPath(paths.goShotThird,0.9,true);
                         lastPathState = pathState;
                         pathState = PathState.SHOOT_PRELOAD;
                     }

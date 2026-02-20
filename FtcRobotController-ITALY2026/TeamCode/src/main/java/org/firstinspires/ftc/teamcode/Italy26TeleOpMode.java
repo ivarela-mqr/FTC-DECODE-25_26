@@ -25,7 +25,7 @@ public class Italy26TeleOpMode extends OpMode {
     public void init() {
         driveTrain = new DriveTrain(hardwareMap);
         intake = new Intake(hardwareMap);
-        shooter = new Shooter(hardwareMap, Constants.Alliance.BLUE);
+        shooter = new Shooter(hardwareMap, Constants.Alliance.BLUE, 1200, 30);
 
         imu = hardwareMap.get(IMU.class, "imu");
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(

@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.pedroPathing;
 
+import com.pedropathing.control.PIDFCoefficients;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.follower.FollowerConstants;
 import com.pedropathing.ftc.FollowerBuilder;
@@ -15,7 +16,14 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 public class Constants {
 
     public static FollowerConstants followerConstants = new FollowerConstants()
-            .mass(10);
+            .mass(13.5)
+            .forwardZeroPowerAcceleration(-30.1133)
+            .lateralZeroPowerAcceleration(-65.9519)
+            .useSecondaryTranslationalPIDF(false)
+            .useSecondaryHeadingPIDF(false)
+            .useSecondaryDrivePIDF(false)
+            .translationalPIDFCoefficients(new PIDFCoefficients(0.09,0,0.01,0.035))
+            .headingPIDFCoefficients(new PIDFCoefficients(1,0,0.02,0.025));
 
     public static MecanumConstants driveConstants = new MecanumConstants()
             .maxPower(1)
@@ -26,7 +34,9 @@ public class Constants {
             .leftFrontMotorDirection(DcMotorSimple.Direction.REVERSE)
             .leftRearMotorDirection(DcMotorSimple.Direction.REVERSE)
             .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
-            .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD);
+            .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD)
+            .xVelocity(72.26)
+            .yVelocity(57.16);
 
     public static PathConstraints pathConstraints = new PathConstraints(0.7, 60, 1, 1);
 
