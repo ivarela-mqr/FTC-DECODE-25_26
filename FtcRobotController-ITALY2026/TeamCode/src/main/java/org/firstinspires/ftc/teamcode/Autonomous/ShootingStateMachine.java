@@ -2,12 +2,9 @@ package org.firstinspires.ftc.teamcode.Autonomous;
 
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.util.Timer;
-import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.subsystems.Intake;
-import org.firstinspires.ftc.teamcode.subsystems.IntakeStateMachine;
 import org.firstinspires.ftc.teamcode.subsystems.Shooter;
 import org.firstinspires.ftc.teamcode.util.Constants;
 
@@ -21,7 +18,7 @@ public class ShootingStateMachine {
         INTAKING
     }
     public States state;
-    public IntakeStateMachine intakeStateMachine = new IntakeStateMachine();
+    public IntakeAutoStateMachine intakeAutoStateMachine = new IntakeAutoStateMachine();
     public boolean isInShootingPos = false;
     boolean canShoot = false;
     public Timer timer, actualTime;
@@ -89,23 +86,23 @@ public class ShootingStateMachine {
 
         return result;
     }
-    public void init(HardwareMap hardwareMap, Constants.Alliance alliance, Pose shootingPose, Pose targetPose, Telemetry telemetry){
+    public void init(HardwareMap hardwareMap, Constants.Alliance alliance, double currVel){
         //ShotResult result = calculateShot(shootingPose,targetPose);
-        shooter = new Shooter(hardwareMap, alliance,0,0); //result.rpm, result.servoPos);
+        shooter = new Shooter(hardwareMap, alliance,currVel,0); //result.rpm, result.servoPos);
         timer = new Timer();
         actualTime = new Timer();
         switchState(States.INIT);
-        intakeStateMachine.init(hardwareMap);
+        intakeAutoStateMachine.init(hardwareMap);
         //telemetry.addData("Target vel", result.velocity);
         //telemetry.addData("Target rpm", result.rpm);
         //telemetry.addData("Target angle", result.angleDeg);
         //telemetry.addData("Target pos servo", result.servoPos);
     }
 
-    public void update(Pose pose, Telemetry telemetry, double yawAngle, boolean isBussyIntake){
+    public void update(Pose pose, Telemetry telemetry, double yawAngle, boolean isBussyFollower){
         isInShootingPos = canShoot(pose);
         shooter.aimWithLimelight(yawAngle);
-        intakeStateMachine.updateIntakeStateMachine(canShoot);
+        intakeAutoStateMachine.updateIntakeStateMachine(canShoot);
         actualTime.resetTimer();
         switch (state){
             case INIT:
@@ -126,9 +123,9 @@ public class ShootingStateMachine {
                 break;
             case SHOOTING:
                 shooter.openBlock();
-                if(shooter.getBlockPos() <= 0.5)
+                if(shooter.getBlockPos() <= 0.5 && !isBussyFollower)
                     canShoot = true;
-                if(!intakeStateMachine.isShooting()){    //intake.numArtifactsIn(telemetry) == 0
+                if(!intakeAutoStateMachine.isShooting()){    //intake.numArtifactsIn(telemetry) == 0
                     canShoot = false;
                     switchState(States.INTAKING);
                 }
@@ -136,7 +133,7 @@ public class ShootingStateMachine {
             case INTAKING:
                 shooter.closeBlock();
                 shooter.calm();
-                if(!intakeStateMachine.isBusy())
+                if(!intakeAutoStateMachine.isBusy())
                     switchState(States.INIT);
                 break;
             default:
