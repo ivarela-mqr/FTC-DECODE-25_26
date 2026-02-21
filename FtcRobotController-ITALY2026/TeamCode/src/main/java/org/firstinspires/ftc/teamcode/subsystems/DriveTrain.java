@@ -41,11 +41,14 @@ public class DriveTrain {
     public void TeleOp(Gamepad gamepad, Telemetry telemetry, double yawAngle){
         drive = -gamepad.left_stick_y;
         strafe = gamepad.left_stick_x;
-        rotate = -gamepad.right_stick_x;
+        rotate = gamepad.right_stick_x;
 
 
         double adjustedDrive = drive * Math.cos(Math.toRadians(yawAngle)) - strafe * Math.sin(Math.toRadians(yawAngle));
         double adjustedStrafe = drive * Math.sin(Math.toRadians(yawAngle)) + strafe * Math.cos(Math.toRadians(yawAngle));
+
+//        double adjustedDrive = drive;
+//        double adjustedStrafe = strafe;
 
         double frontLeftPower = (adjustedDrive + adjustedStrafe + rotate);
         double frontRightPower = (adjustedDrive - adjustedStrafe - rotate);

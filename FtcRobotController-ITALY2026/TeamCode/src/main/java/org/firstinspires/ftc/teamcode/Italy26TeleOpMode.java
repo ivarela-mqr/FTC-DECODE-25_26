@@ -7,6 +7,8 @@ import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
+import org.firstinspires.ftc.teamcode.subsystems.IntakeStateMachine;
+import org.firstinspires.ftc.teamcode.subsystems.Tilt;
 import org.firstinspires.ftc.teamcode.util.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.DriveTrain;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
@@ -17,16 +19,19 @@ public class Italy26TeleOpMode extends OpMode {
     DriveTrain driveTrain;
     Intake intake;
     Shooter shooter;
+    Tilt tilt;
     IMU imu;
     YawPitchRollAngles orientation;
     double yawOffset = 0;
+    IntakeStateMachine intakeStateMachine = new IntakeStateMachine();
 
     @Override
     public void init() {
         driveTrain = new DriveTrain(hardwareMap);
         intake = new Intake(hardwareMap);
         shooter = new Shooter(hardwareMap, Constants.Alliance.BLUE, 1200, 30); //todo ch. alliance from auton
-
+        tilt = new Tilt(hardwareMap);
+        intakeStateMachine.init(hardwareMap);
         imu = hardwareMap.get(IMU.class, "imu");
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
                 RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
@@ -56,11 +61,10 @@ public class Italy26TeleOpMode extends OpMode {
         }
 
         driveTrain.TeleOp(gamepad1,telemetry,yawAngle);
+        intakeStateMachine.updateIntakeStateMachine((shooter.isReady() && gamepad1.right_trigger > 0.1));
         intake.TeleOp(gamepad1, gamepad2, telemetry, yawAngle);
-        shooter.TeleOp(gamepad1, gamepad2, telemetry, yawAngle, intake.getIsShooting());
-
-
-
+        shooter.TeleOp(gamepad1, gamepad2, telemetry, yawAngle, intakeStateMachine.isFull());
+        tilt.Teleop(gamepad1);
         telemetry.addData("Is shooting", intake.getIsShooting());
         telemetry.update();
     }

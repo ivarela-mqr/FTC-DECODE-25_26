@@ -21,7 +21,6 @@ public class Intake {
 
     Debouncer crossDebouncer = new Debouncer(200);
 
-
     public Intake(HardwareMap hardwareMap) {
         intake = hardwareMap.get(DcMotor.class, "intake");
         intake.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -40,13 +39,11 @@ public class Intake {
     }
 
     public void intakeFirstArtifact() {
-        //isShooting = false;
         transfer.setPower(1);
         intake.setPower(1);
     }
 
     public void intakeNextArtifacts() {
-        //isShooting = false;
         transfer.setPower(0);
         intake.setPower(1);
     }
@@ -66,7 +63,7 @@ public class Intake {
     }
 
     public void stopArtifacts() {
-        intake.setPower(0.25);
+        intake.setPower(0);
         transfer.setPower(0);
     }
 
@@ -95,45 +92,27 @@ public class Intake {
 
 
     public void intake() {
-        if (numArtifactsIn() != 3) {
-            transfer.setPower(0.75);
-            intake.setPower(1);
-        } else {
-            transfer.setPower(0);
-            intake.setPower(0);
-
-        }
+       transfer.setPower(0.75);
+       intake.setPower(1);
     }
 
-    public void intakeArtifact() {
-    }
+
 
     public void TeleOp(Gamepad gamepad1, Gamepad gamepad2, Telemetry telemetry, double yawAngle) {
-        if (isShooting) {
-            shootArtifacts();
-        } else {
-            stopArtifacts();
-        }
 
         if (isIntaking) {
-            intakeArtifact();
+            intake();
         } else {
             stopArtifacts();
         }
 
         if (gamepad1.cross && crossDebouncer.isReady()) {
-            if (gamepad1.cross && crossDebouncer.isReady()) {
-                isIntaking = !isIntaking;
-            }
+            isIntaking = !isIntaking;
         }
 
         if (gamepad1.triangle){
             unload();
         }
-//        if(numArtifactsIn(telemetry) == 0){
-//            //isShooting = false;
-//        }else
-
 
         //shoot
         if (gamepad1.right_trigger > 0.1) {
@@ -151,9 +130,5 @@ public class Intake {
             isShooting = false;
             isIntaking = false;
         }
-//        if(numArtifactsIn(telemetry) == 3) {
-//            isIntaking = false;
-//        }
-
     }
 }

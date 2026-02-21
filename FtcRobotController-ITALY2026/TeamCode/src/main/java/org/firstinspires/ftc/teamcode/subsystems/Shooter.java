@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.util.Constants;
+import org.firstinspires.ftc.teamcode.util.Debouncer;
 import org.opencv.core.Mat;
 
 
@@ -34,7 +35,9 @@ public class Shooter {
     double kF_shooter = 17.5;
     public Timer init;
     public boolean autoAim = true;
-
+    public Debouncer debouncer = new Debouncer(200);
+    public Debouncer velDebouncer = new Debouncer(200);
+    public Debouncer blockDebouncer = new Debouncer(200);
     public Shooter (HardwareMap hardwareMap, Constants.Alliance alliance, double targetVel, double targetAngle){
         shooter0 = hardwareMap.get(DcMotorEx.class,"shooter0");
         shooter1 = hardwareMap.get(DcMotorEx.class,"shooter1");
@@ -95,8 +98,15 @@ public class Shooter {
     }
 
     public void setPowerRotor(double power){
+        int posR = encoder.getCurrentPosition();
+
         rotorL.setPower(power * VELOCIDAD_FACTOR);
         rotorR.setPower(power * VELOCIDAD_FACTOR);
+        if ((posR <= LIMITE_IZQUIERDA && rotorR.getPower() > 0) ||
+                (posR >= LIMITE_DERECHA && rotorL.getPower() < 0)) {
+            rotorL.setPower(0);
+            rotorR.setPower(0);
+        }
     }
 
     public boolean isReady(){
@@ -121,7 +131,8 @@ public class Shooter {
 
     public void setShootingPower(Telemetry telemetry) {
         if (Math.abs(shooter0.getVelocity() - curTargetVelocity) > 100) {
-
+            shooter0.setPower(1);
+            shooter1.setPower(1);
         }else{
             shooter0.setVelocity(curTargetVelocity);
             shooter1.setVelocity(curTargetVelocity);
@@ -129,13 +140,6 @@ public class Shooter {
         telemetry.addData("Shooter velocity",shooter0.getVelocity());
     }
     public void preload(Telemetry telemetry, double yawAngle) {
-        //double distance = limeLight.getGoalAprilTagData(telemetry, yawAngle)[1];
-        /*if(distance != 0)
-            curTargetVelocity = getVelocity(distance);
-        else
-            curTargetVelocity = 1000;*/
-        curTargetVelocity = 1200;
-
         if(curTargetVelocity - Math.max(shooter1.getVelocity(),shooter0.getVelocity()) > 150){
             shooter0.setPower(1);
             shooter1.setPower(1);
@@ -177,7 +181,7 @@ public class Shooter {
                 0.08673005 * Math.pow(x,2) +
                 0.0001515039 * Math.pow(x,3));
     }
-    public void TeleOp(Gamepad gamepad1, Gamepad gamepad2, Telemetry telemetry, double yawAngle, boolean isShooting){
+    public void TeleOp(Gamepad gamepad1, Gamepad gamepad2, Telemetry telemetry, double yawAngle, boolean isFull){
         //aim rotor
         if (gamepad1.start){
             autoAim = true;
@@ -186,29 +190,53 @@ public class Shooter {
 
         //correct shooter rotor
         if (gamepad2.left_trigger > 0.1){
-            setPowerRotor(gamepad2.left_trigger*0.5);
-        } else if (gamepad2.right_trigger > 0.1) {
-            setPowerRotor(-gamepad2.right_trigger*0.5);
+            autoAim = false;
+            setPowerRotor(10);
+        }else if (gamepad2.right_trigger > 0.1) {
+            autoAim = false;
+            setPowerRotor(-10);
+        } else {
+            setPowerRotor(0);
+            autoAim = false;
         }
 
+        if(isFull){
+            preload(telemetry,yawAngle);
+            if(isReady() && gamepad1.right_trigger > 0.1){
+                openBlock();
+            }
+            setShootingPower(telemetry);
+        }else {
+            closeBlock();
+            stop();
+        }
+
+        if(gamepad2.dpad_up && velDebouncer.isReady())
+            curTargetVelocity += 50;
+
+        if(gamepad2.dpad_down && velDebouncer.isReady())
+            curTargetVelocity -= 50;
+
+
         //correct shooter cover
-        if(gamepad2.left_bumper){
-            autoAim = false;
+        if(gamepad2.left_bumper && debouncer.isReady()){
             correctCover(telemetry, -1);
-        }else if(gamepad2.right_bumper){
-            autoAim = false;
+        }
+        if(gamepad2.right_bumper && debouncer.isReady()){
             correctCover(telemetry, 1);
+        }
+
+        if (gamepad2.circle && blockDebouncer.isReady()){
+            switchBlock();
         }
 
 
 
         //shoot motor power
-        if(isShooting){
-            curTargetVelocity = highVelocityShooter;
-        }else {curTargetVelocity = lowVelocityShooter;}
 
-        setShootingPower(telemetry);
-        telemetry.addData("Shooting shooter?",isShooting);
+        telemetry.addData("velocity shooter",shooter0.getVelocity());
+        telemetry.addData("curTargetVelocity",curTargetVelocity);
+        telemetry.addData("cover pos", coverR.getPosition());
 
         //telemetry.addData("cover position: ", coverL.getPosition());
     }

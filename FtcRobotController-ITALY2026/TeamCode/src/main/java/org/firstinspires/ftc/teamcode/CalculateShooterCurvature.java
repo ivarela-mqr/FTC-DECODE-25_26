@@ -30,6 +30,7 @@ public class CalculateShooterCurvature extends OpMode {
     private LimeLight limelight;
     private IMU imu;
     Servo coverL, coverR, block;
+    CRServo climb1, climb2, climb3, climb4;
     private CRServo rotorL,rotorR; // Servo 1 con encoder
     double distance = 0;
     double F = 1;
@@ -105,6 +106,11 @@ public class CalculateShooterCurvature extends OpMode {
 
 // Cambiamos a modo de correr usando encoder
         encoder.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        climb1 = hardwareMap.get(CRServo.class, "climb1");
+        climb2 = hardwareMap.get(CRServo.class, "climb2");
+        climb3 = hardwareMap.get(CRServo.class, "climb3");
+        climb4 = hardwareMap.get(CRServo.class, "climb4");
     }
 
     @Override
@@ -156,8 +162,10 @@ public class CalculateShooterCurvature extends OpMode {
             transfer.setPower(1);*/
 
         if (gamepad1.rightBumperWasPressed()){
-            intake.setPower(0);
-            transfer.setPower(0);
+            climb1.setPower(-1);
+            climb2.setPower(-1);
+            climb3.setPower(1);
+            climb4.setPower(1);
         }
         double vel = getVelocity(distance);
 
@@ -169,7 +177,9 @@ public class CalculateShooterCurvature extends OpMode {
 
         //-10000 Limite derecho
 
-        aimShooterWithLimeLight(telemetry,offset);
+        //aimShooterWithLimeLight(telemetry,offset);
+
+
         telemetry.addData("up",p);
         telemetry.addData("down",F);
         // Escalar potencia para servos si es necesario

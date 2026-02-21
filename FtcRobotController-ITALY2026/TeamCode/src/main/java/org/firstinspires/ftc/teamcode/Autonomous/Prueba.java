@@ -51,9 +51,7 @@ public class Prueba extends OpMode {
 
         pathState = PathState.DRIVE_STARTPOS_SHOOT_POS;
         shootingStateMachine.init(hardwareMap,
-                org.firstinspires.ftc.teamcode.util.Constants.Alliance.BLUE, new Pose(64, 85),
-                new Pose(15,138),
-                telemetry);
+                org.firstinspires.ftc.teamcode.util.Constants.Alliance.BLUE, 1200);
 
         imu = hardwareMap.get(IMU.class, "imu");
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
@@ -78,7 +76,7 @@ public class Prueba extends OpMode {
         panelsTelemetry.debug("Last state",lastPathState);
         panelsTelemetry.debug("Path State", pathState);
         panelsTelemetry.debug("Shooter state",shootingStateMachine.state);
-        panelsTelemetry.debug("Intake state",shootingStateMachine.intakeStateMachine.state);
+        panelsTelemetry.debug("Intake state",shootingStateMachine.intakeAutoStateMachine.state);
         panelsTelemetry.debug("Is aiming auto", shootingStateMachine.shooter.autoAim);
         panelsTelemetry.debug("Rotors power", shootingStateMachine.shooter.rotorL.getPower());
         panelsTelemetry.debug("Shooter velocity", shootingStateMachine.shooter.shooter0.getVelocity());
@@ -284,7 +282,7 @@ public class Prueba extends OpMode {
                 }
                 break;
             case TAKE_OPEN:
-                if(!follower.isBusy()&& !shootingStateMachine.intakeStateMachine.isBusy()) {
+                if(!follower.isBusy()&& !shootingStateMachine.intakeAutoStateMachine.isBusy()) {
 
                     follower.followPath(paths.goSHootOpen,0.7,true);
                     lastPathState = pathState;

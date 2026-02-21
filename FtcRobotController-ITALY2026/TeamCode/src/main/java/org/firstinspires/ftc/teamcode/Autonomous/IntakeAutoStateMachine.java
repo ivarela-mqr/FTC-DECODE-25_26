@@ -1,11 +1,12 @@
-package org.firstinspires.ftc.teamcode.subsystems;
+package org.firstinspires.ftc.teamcode.Autonomous;
 
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.util.IntakeStateMachineStates;
 
-public class IntakeStateMachine {
+public class IntakeAutoStateMachine {
     public Intake intake;
     public IntakeStateMachineStates state;
     public Timer timer = new Timer();
@@ -18,10 +19,6 @@ public class IntakeStateMachine {
     public boolean isBusy() {
         return state != IntakeStateMachineStates.INIT && state != IntakeStateMachineStates.FIRST_ARTIFACT && state != IntakeStateMachineStates.SECOND_ARTIFACT;
     }
-
-    public boolean isFull(){
-        return state == IntakeStateMachineStates.FINAL;
-    }
     public boolean isShooting() {
         return intake.numArtifactsIn() > 0;
     }
@@ -31,29 +28,33 @@ public class IntakeStateMachine {
         switch (state){
             case INIT:
                 intake.intakeFirstArtifact();
-                if(intake.firstArtifactIn()){
+                if(intake.firstArtifactIn()
+                        || Math.abs(currTime.getElapsedTimeSeconds() - timer.getElapsedTimeSeconds()) > 3){
                     switchState(IntakeStateMachineStates.FIRST_ARTIFACT);
                 }
                 break;
             case FIRST_ARTIFACT:
                 intake.intakeNextArtifacts();
-                if(intake.secondArtifactIn()){
+                if(intake.secondArtifactIn()
+                        || Math.abs(currTime.getElapsedTimeSeconds() - timer.getElapsedTimeSeconds()) > 0.5){
                     switchState(IntakeStateMachineStates.SECOND_ARTIFACT);
                 }
                 break;
             case SECOND_ARTIFACT:
                 intake.intakeNextArtifacts();;
-                if(intake.thirdArtifactIn()){
+                if(intake.thirdArtifactIn()
+                        || Math.abs(currTime.getElapsedTimeSeconds() - timer.getElapsedTimeSeconds()) > 0.5){
                     switchState(IntakeStateMachineStates.FINAL);
                 }
                 break;
             case FINAL:
                 intake.stopArtifacts();
-                if(canShoot){switchState(IntakeStateMachineStates.INIT);}
+                if(canShoot){switchState(IntakeStateMachineStates.SHOOTING);}
                 break;
             case SHOOTING:
                 intake.shootArtifacts();
-                if(!canShoot){
+                if(!canShoot
+                        || Math.abs(currTime.getElapsedTimeSeconds() - timer.getElapsedTimeSeconds()) > 5){
                     switchState(IntakeStateMachineStates.INIT);
                 }
                 break;
