@@ -25,7 +25,7 @@ public class Italy26TeleOpMode extends OpMode {
     public void init() {
         driveTrain = new DriveTrain(hardwareMap);
         intake = new Intake(hardwareMap);
-        shooter = new Shooter(hardwareMap, Constants.Alliance.BLUE, 1200, 30);
+        shooter = new Shooter(hardwareMap, Constants.Alliance.BLUE, 1200, 30); //todo ch. alliance from auton
 
         imu = hardwareMap.get(IMU.class, "imu");
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
@@ -48,10 +48,19 @@ public class Italy26TeleOpMode extends OpMode {
         if(gamepad1.options){
             yawOffset = orientation.getYaw();
         }
+        //switch Alliance
+        if (gamepad2.dpad_left){
+            shooter.limeLight.switchAlliance(Constants.Alliance.BLUE);
+        }else if(gamepad2.dpad_right){
+            shooter.limeLight.switchAlliance(Constants.Alliance.RED);
+        }
 
         driveTrain.TeleOp(gamepad1,telemetry,yawAngle);
-        intake.TeleOp(gamepad1, telemetry, yawAngle);
-        shooter.TeleOp(gamepad1, telemetry, yawAngle, intake.getIsShooting());
+        intake.TeleOp(gamepad1, gamepad2, telemetry, yawAngle);
+        shooter.TeleOp(gamepad1, gamepad2, telemetry, yawAngle, intake.getIsShooting());
+
+
+
         telemetry.addData("Is shooting", intake.getIsShooting());
         telemetry.update();
     }

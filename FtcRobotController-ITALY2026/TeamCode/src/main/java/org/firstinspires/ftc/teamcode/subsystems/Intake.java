@@ -13,7 +13,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.util.Debouncer;
 
 public class Intake {
-    DcMotorEx  transfer;
+    DcMotorEx transfer;
     DcMotor intake;
     DistanceSensor distanceSensor1, distanceSensor2;
     ColorSensor colorSensor = new ColorSensor();
@@ -22,120 +22,138 @@ public class Intake {
     Debouncer crossDebouncer = new Debouncer(200);
 
 
-    public Intake(HardwareMap hardwareMap){
-        intake = hardwareMap.get(DcMotor.class,"intake");
+    public Intake(HardwareMap hardwareMap) {
+        intake = hardwareMap.get(DcMotor.class, "intake");
         intake.setDirection(DcMotorSimple.Direction.REVERSE);
-        transfer = hardwareMap.get(DcMotorEx.class,"transfer");
+        transfer = hardwareMap.get(DcMotorEx.class, "transfer");
         intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         transfer.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        distanceSensor1 = hardwareMap.get(DistanceSensor.class,"distanceSensor1");
-        distanceSensor2 = hardwareMap.get(DistanceSensor.class,"distanceSensor2");
+        distanceSensor1 = hardwareMap.get(DistanceSensor.class, "distanceSensor1");
+        distanceSensor2 = hardwareMap.get(DistanceSensor.class, "distanceSensor2");
         colorSensor.init(hardwareMap);
 
     }
 
-    public boolean getIsShooting(){
+    public boolean getIsShooting() {
         return isShooting;
     }
 
-    public void intakeFirstArtifact(){
+    public void intakeFirstArtifact() {
         //isShooting = false;
         transfer.setPower(1);
         intake.setPower(1);
     }
-    public void intakeNextArtifacts(){
+
+    public void intakeNextArtifacts() {
         //isShooting = false;
         transfer.setPower(0);
         intake.setPower(1);
     }
 
-    public void unload(){
+    public void unload() {
         intake.setPower(-0.2);
         transfer.setPower(-0.5);
     }
-    public void shoot1Artifact(){
+
+    public void shoot1Artifact() {
 
     }
-    public void shootArtifacts(){
+
+    public void shootArtifacts() {
         intake.setPower(1);
         transfer.setVelocity(6000);
     }
-    public void stopArtifacts(){
+
+    public void stopArtifacts() {
         intake.setPower(0.25);
         transfer.setPower(0);
     }
 
-    public int numArtifactsIn(){
+    public int numArtifactsIn() {
         int num = 0;
-        if(firstArtifactIn())
-            num+=1;
-        if(secondArtifactIn())
-            num+=1;
-        if(thirdArtifactIn())
-            num+=1;
+        if (firstArtifactIn())
+            num += 1;
+        if (secondArtifactIn())
+            num += 1;
+        if (thirdArtifactIn())
+            num += 1;
         return num;
     }
-    public boolean firstArtifactIn(){
+
+    public boolean firstArtifactIn() {
         return colorSensor.getDetectedColor() != ColorSensor.DetectedColors.UNKNOWN;
     }
-    public boolean secondArtifactIn(){
-        return distanceSensor2.getDistance(DistanceUnit.CM)<8;
-    }
-    public boolean thirdArtifactIn(){
-        return distanceSensor1.getDistance(DistanceUnit.CM)< 12.5;
+
+    public boolean secondArtifactIn() {
+        return distanceSensor2.getDistance(DistanceUnit.CM) < 8;
     }
 
-    public void switchBlock(){
-        /*if (block.getPosition()>0.8){
-            block.setPosition(0);
-        }else{block.setPosition(1);}*/
+    public boolean thirdArtifactIn() {
+        return distanceSensor1.getDistance(DistanceUnit.CM) < 12.5;
     }
-    public void intake(){
-        if(numArtifactsIn() != 3) {
+
+
+    public void intake() {
+        if (numArtifactsIn() != 3) {
             transfer.setPower(0.75);
             intake.setPower(1);
-        }
-        else {
+        } else {
             transfer.setPower(0);
             intake.setPower(0);
 
         }
     }
 
-    public void intakeArtifact(){
-
-
+    public void intakeArtifact() {
     }
 
-    public void TeleOp(Gamepad gamepad, Telemetry telemetry, double yawAngle){
-        if (isShooting){
-            //block.setPosition(1);
+    public void TeleOp(Gamepad gamepad1, Gamepad gamepad2, Telemetry telemetry, double yawAngle) {
+        if (isShooting) {
             shootArtifacts();
-        }else{
-            //block.setPosition(0);
+        } else {
             stopArtifacts();
         }
 
-        if(isIntaking){
+        if (isIntaking) {
             intakeArtifact();
-        }else{
+        } else {
             stopArtifacts();
         }
 
-        if(gamepad.cross&&crossDebouncer.isReady()){
-            isIntaking = !isIntaking;
+        if (gamepad1.cross && crossDebouncer.isReady()) {
+            if (gamepad1.cross && crossDebouncer.isReady()) {
+                isIntaking = !isIntaking;
+            }
+        }
+
+        if (gamepad1.triangle){
+            unload();
         }
 //        if(numArtifactsIn(telemetry) == 0){
 //            //isShooting = false;
 //        }else
-        if(gamepad.right_trigger>0.1){
+
+
+        //shoot
+        if (gamepad1.right_trigger > 0.1) {
             isShooting = true;
-        }else{
+        } else {
             isShooting = false;
+        }
+
+
+        //stoppers
+        if (gamepad2.square) {
+            isShooting = false;
+        }
+        if (gamepad2.triangle) {
+            isShooting = false;
+            isIntaking = false;
         }
 //        if(numArtifactsIn(telemetry) == 3) {
 //            isIntaking = false;
 //        }
+
     }
 }

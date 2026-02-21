@@ -13,6 +13,7 @@ public class LimeLight {
     private Limelight3A limelight;
 
 
+
     public LimeLight(HardwareMap hardwareMap, Constants.Alliance alliance) {
         limelight = hardwareMap.get(Limelight3A.class,"limelight");
         if (alliance == Constants.Alliance.BLUE)
@@ -21,6 +22,13 @@ public class LimeLight {
             limelight.pipelineSwitch(8); // Red alliance aprilTag
 
         limelight.start();
+    }
+
+    public void switchAlliance(Constants.Alliance newAlliance){
+        if (newAlliance == Constants.Alliance.BLUE)
+            limelight.pipelineSwitch(8); // Blue alliance aprilTag
+        else if (newAlliance == Constants.Alliance.RED)
+            limelight.pipelineSwitch(8); // Red alliance aprilTag
     }
 
 
