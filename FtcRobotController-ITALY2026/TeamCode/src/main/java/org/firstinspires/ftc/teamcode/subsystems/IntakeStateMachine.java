@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.pedropathing.util.Timer;
+import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.util.IntakeStateMachineStates;
@@ -13,21 +14,31 @@ public class IntakeStateMachine {
 
     public void init(HardwareMap hardwareMap){
         intake = new Intake(hardwareMap);
-        state = IntakeStateMachineStates.FINAL;
+        state = IntakeStateMachineStates.INIT;
     }
     public boolean isBusy() {
         return state != IntakeStateMachineStates.INIT && state != IntakeStateMachineStates.FIRST_ARTIFACT && state != IntakeStateMachineStates.SECOND_ARTIFACT;
     }
+    public boolean isIntaking() {
+        return state == IntakeStateMachineStates.INIT
+                || state == IntakeStateMachineStates.FIRST_ARTIFACT
+                || state == IntakeStateMachineStates.SECOND_ARTIFACT;
+    }
 
     public boolean isFull(){
-        return state == IntakeStateMachineStates.FINAL;
+        return state == IntakeStateMachineStates.FINAL || state == IntakeStateMachineStates.SHOOTING;
     }
     public boolean isShooting() {
         return intake.numArtifactsIn() > 0;
     }
 
-    public void updateIntakeStateMachine(boolean canShoot){
+    public void updateIntakeStateMachine(boolean canShoot, Gamepad gamepad1, Gamepad gamepad2){
         currTime.resetTimer();
+        intake.TeleOp(gamepad1,gamepad2,isIntaking());
+
+        if(gamepad2.dpadDownWasPressed())
+            switchState(IntakeStateMachineStates.FINAL);
+
         switch (state){
             case INIT:
                 intake.intakeFirstArtifact();
@@ -38,22 +49,25 @@ public class IntakeStateMachine {
             case FIRST_ARTIFACT:
                 intake.intakeNextArtifacts();
                 if(intake.secondArtifactIn()){
+                    intake.transferPosition2ArtifactIn = intake.transfer.getCurrentPosition();
                     switchState(IntakeStateMachineStates.SECOND_ARTIFACT);
                 }
                 break;
             case SECOND_ARTIFACT:
-                intake.intakeNextArtifacts();;
-                if(intake.thirdArtifactIn()){
+                intake.intakeNextArtifacts();
+                intake.setTransferPosition(75);
+                if(intake.thirdArtifactIn()
+                        && Math.abs(timer.getElapsedTimeSeconds() - currTime.getElapsedTimeSeconds()) > 1){
                     switchState(IntakeStateMachineStates.FINAL);
                 }
                 break;
             case FINAL:
                 intake.stopArtifacts();
-                if(canShoot){switchState(IntakeStateMachineStates.INIT);}
+                if(canShoot){switchState(IntakeStateMachineStates.SHOOTING);}
                 break;
             case SHOOTING:
                 intake.shootArtifacts();
-                if(!canShoot){
+                if(intake.numArtifactsIn() == 0){
                     switchState(IntakeStateMachineStates.INIT);
                 }
                 break;

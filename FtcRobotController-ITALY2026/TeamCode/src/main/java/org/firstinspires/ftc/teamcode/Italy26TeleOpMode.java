@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.subsystems.IntakeStateMachine;
 import org.firstinspires.ftc.teamcode.subsystems.Tilt;
@@ -61,11 +62,16 @@ public class Italy26TeleOpMode extends OpMode {
         }
 
         driveTrain.TeleOp(gamepad1,telemetry,yawAngle);
-        intakeStateMachine.updateIntakeStateMachine((shooter.isReady() && gamepad1.right_trigger > 0.1));
-        intake.TeleOp(gamepad1, gamepad2, telemetry, yawAngle);
+        intakeStateMachine.updateIntakeStateMachine((shooter.canShoot() && gamepad1.right_trigger > 0.1),gamepad1,gamepad2);
         shooter.TeleOp(gamepad1, gamepad2, telemetry, yawAngle, intakeStateMachine.isFull());
         tilt.Teleop(gamepad1);
+        telemetry.addData("Sensor1", intakeStateMachine.intake.firstArtifactIn());
+        telemetry.addData("Sensor2", intakeStateMachine.intake.distanceSensor1.getDistance(DistanceUnit.CM));
+        telemetry.addData("Sensor3", intakeStateMachine.intake.distanceSensor2.getDistance(DistanceUnit.CM));
+        telemetry.addData("Intake state", intakeStateMachine.state);
         telemetry.addData("Is shooting", intake.getIsShooting());
+        telemetry.addData("Pos encoder", shooter.encoder.getCurrentPosition());
+
         telemetry.update();
     }
 }

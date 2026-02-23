@@ -23,7 +23,7 @@ public class Shooter {
     public LimeLight limeLight;
     public DcMotorEx encoder;
     final int LIMITE_IZQUIERDA = -10000;
-    final int LIMITE_DERECHA = 15000;
+    final int LIMITE_DERECHA = 10000;
     final double VELOCIDAD_FACTOR = - 0.05;
     double offset = 0;
     double highVelocityShooter = 1500;
@@ -57,8 +57,8 @@ public class Shooter {
 
         limeLight = new LimeLight(hardwareMap, alliance);
         curTargetVelocity = targetVel;
-        coverL.setPosition(targetAngle);
-        coverR.setPosition(targetAngle);
+        //coverL.setPosition(targetAngle);
+        //coverR.setPosition(targetAngle);
         encoder = hardwareMap.get(DcMotorEx.class, "intake");
         encoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         encoder.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -74,22 +74,16 @@ public class Shooter {
     public void moverServos(double offsetX) {
         int posR = encoder.getCurrentPosition();
 
-        // Calculamos potencia a partir del offset
         double potencia = offsetX * VELOCIDAD_FACTOR;
         if(autoAim) {
-            // Lectura de encoders
-
-            // Verificamos límites: si cualquiera está en el límite, paramos ambos
             if ((posR <= LIMITE_IZQUIERDA && potencia > 0) ||
                     (posR >= LIMITE_DERECHA && potencia < 0)) {
                 potencia = 0;
             }
 
-            // Aplicamos misma potencia a ambos servos
             rotorL.setPower(potencia);
             rotorR.setPower(potencia);
         }
-        // Verificamos límites: si cualquiera está en el límite, paramos ambos
         if ((posR <= LIMITE_IZQUIERDA && potencia > 0) ||
                 (posR >= LIMITE_DERECHA && potencia < 0)) {
             rotorL.setPower(0);
@@ -99,18 +93,30 @@ public class Shooter {
 
     public void setPowerRotor(double power){
         int posR = encoder.getCurrentPosition();
-
-        rotorL.setPower(power * VELOCIDAD_FACTOR);
-        rotorR.setPower(power * VELOCIDAD_FACTOR);
-        if ((posR <= LIMITE_IZQUIERDA && rotorR.getPower() > 0) ||
-                (posR >= LIMITE_DERECHA && rotorL.getPower() < 0)) {
+        if ((posR <= LIMITE_IZQUIERDA && rotorR.getPower() < 0) ||
+                (posR >= LIMITE_DERECHA && rotorL.getPower() > 0)) {
             rotorL.setPower(0);
             rotorR.setPower(0);
+        }else{
+            rotorL.setPower(power * VELOCIDAD_FACTOR);
+            rotorR.setPower(power * VELOCIDAD_FACTOR);
+        }
+    }
+    public void resetRotorPosition(){
+        if(encoder.getCurrentPosition()>50){
+            setPowerRotor(-10);
+        }else if(encoder.getCurrentPosition()<-50){
+            setPowerRotor(10);
+        }else{
+            setPowerRotor(0);
         }
     }
 
     public boolean isReady(){
-        return Math.abs(curTargetVelocity - Math.max(shooter1.getVelocity(),shooter0.getVelocity())) < 50;
+        return curTargetVelocity - Math.max(shooter1.getVelocity(),shooter0.getVelocity()) < 50;
+    }
+    public boolean canShoot(){
+        return curTargetVelocity - Math.max(shooter1.getVelocity(),shooter0.getVelocity()) < 50 && block.getPosition() <= 0.2;
     }
     public void adjustCover(double dist){
         coverL.setPosition(dist);
@@ -157,7 +163,7 @@ public class Shooter {
     public void calm(){
         if(Math.abs(curTargetVelocity - Math.max(shooter1.getVelocity(), shooter0.getVelocity())) > 100){
             shooter0.setPower(1);
-            shooter0.setPower(0);
+            shooter1.setPower(1);
         }else {
             shooter0.setVelocity(curTargetVelocity);
             shooter1.setVelocity(curTargetVelocity);
@@ -191,11 +197,11 @@ public class Shooter {
         //correct shooter rotor
         if (gamepad2.left_trigger > 0.1){
             autoAim = false;
-            setPowerRotor(10);
+            setPowerRotor(-10);
         }else if (gamepad2.right_trigger > 0.1) {
             autoAim = false;
-            setPowerRotor(-10);
-        } else {
+            setPowerRotor(10);
+        } else if (!autoAim){
             setPowerRotor(0);
             autoAim = false;
         }

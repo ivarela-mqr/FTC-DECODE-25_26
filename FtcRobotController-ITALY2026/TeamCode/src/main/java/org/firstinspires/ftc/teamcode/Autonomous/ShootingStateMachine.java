@@ -7,10 +7,11 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.subsystems.Shooter;
 import org.firstinspires.ftc.teamcode.util.Constants;
+import org.firstinspires.ftc.teamcode.util.IntakeStateMachineStates;
 
 public class ShootingStateMachine {
     Shooter shooter;
-    Pose shootingPose = new Pose(56, 93);
+    Pose shootingPose;
     public enum States {
         INIT,
         LOADING,
@@ -86,13 +87,14 @@ public class ShootingStateMachine {
 
         return result;
     }
-    public void init(HardwareMap hardwareMap, Constants.Alliance alliance, double currVel){
+    public void init(HardwareMap hardwareMap, Constants.Alliance alliance, double currVel, IntakeStateMachineStates state, Pose shootingPose){
         //ShotResult result = calculateShot(shootingPose,targetPose);
         shooter = new Shooter(hardwareMap, alliance,currVel,0); //result.rpm, result.servoPos);
         timer = new Timer();
         actualTime = new Timer();
         switchState(States.INIT);
-        intakeAutoStateMachine.init(hardwareMap);
+        intakeAutoStateMachine.init(hardwareMap, state);
+        this.shootingPose = shootingPose;
         //telemetry.addData("Target vel", result.velocity);
         //telemetry.addData("Target rpm", result.rpm);
         //telemetry.addData("Target angle", result.angleDeg);
@@ -110,11 +112,12 @@ public class ShootingStateMachine {
                 shooter.calm();
                 if(isInShootingPos) {
                     shooter.preload(telemetry, yawAngle);
-                    state = States.LOADING;
+                    switchState(States.LOADING);
                 }
                 break;
             case LOADING:
-                if(shooter.isReady()) {
+                if(shooter.isReady() && !isBussyFollower
+                    && Math.abs(timer.getElapsedTimeSeconds() - actualTime.getElapsedTimeSeconds())> 1) {
                     switchState(States.SHOOTING);
                 }
                 else{
@@ -141,7 +144,7 @@ public class ShootingStateMachine {
         }
     }
     public boolean canShoot(Pose pose) {
-        double posTolerance = 40;            // tolerancia en pulgadas (más estricta)
+        double posTolerance = 15;            // tolerancia en pulgadas (más estricta)
 
         double dx = pose.getX() - shootingPose.getX();
         double dy = pose.getY() - shootingPose.getY();

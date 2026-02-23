@@ -11,6 +11,7 @@ import com.bylazar.telemetry.PanelsTelemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.util.IntakeStateMachineStates;
 
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.follower.Follower;
@@ -55,7 +56,8 @@ public class AutonB_NearPreTotal extends OpMode {
 
         pathState = PathState.DRIVE_STARTPOS_SHOOT_POS;
         shootingStateMachine.init(hardwareMap,
-                org.firstinspires.ftc.teamcode.util.Constants.Alliance.BLUE,1200);
+                org.firstinspires.ftc.teamcode.util.Constants.Alliance.BLUE,1150, IntakeStateMachineStates.FINAL,
+                new Pose(53,90));
 
         imu = hardwareMap.get(IMU.class, "imu");
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
@@ -73,7 +75,7 @@ public class AutonB_NearPreTotal extends OpMode {
         double yawAngle = orientation.getYaw(AngleUnit.DEGREES);
         follower.update(); // Update Pedro Pathing
         Pose pose = pathState == PathState.SHOOT_PRELOAD ? follower.getPose() : new Pose();
-        shootingStateMachine.update(pose,telemetry,yawAngle, follower.isBusy());
+        shootingStateMachine.update(pose,telemetry,yawAngle, pathState != PathState.SHOOT_PRELOAD);
         autonomousPathUpdate(); // Update autonomous state machine
         ticks ++;
         // Log values to Panels and Driver Station
@@ -86,6 +88,7 @@ public class AutonB_NearPreTotal extends OpMode {
         panelsTelemetry.debug("Shooter velocity", shootingStateMachine.shooter.shooter0.getVelocity());
         panelsTelemetry.debug("Shooter velocity", shootingStateMachine.shooter.shooter1.getVelocity());
         panelsTelemetry.debug("Ticks", ticks);
+        panelsTelemetry.debug("Is bussy", pathState != PathState.SHOOT_PRELOAD);
 
         //panelsTelemetry.debug("Can shoot",shootingStateMachine.canShoot(pose));
         //panelsTelemetry.debug("X", follower.getPose().getX());
@@ -154,7 +157,7 @@ public class AutonB_NearPreTotal extends OpMode {
                     .addPath(
                             new BezierLine(
                                     new Pose(23, 64),
-                                    new Pose(16, 71)
+                                    new Pose(14, 73)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
@@ -162,8 +165,8 @@ public class AutonB_NearPreTotal extends OpMode {
             goShotSecond = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(16, 71),
-                                    new Pose(56, 86)
+                                    new Pose(14, 73),
+                                    new Pose(58, 83)
                             )
                     )
                     .setTangentHeadingInterpolation()
@@ -175,7 +178,7 @@ public class AutonB_NearPreTotal extends OpMode {
             goTakeFirst = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(56, 86),
+                                    new Pose(58, 83),
                                     new Pose(20, 90)
                             )
                     )
@@ -188,7 +191,7 @@ public class AutonB_NearPreTotal extends OpMode {
                     .addPath(
                             new BezierLine(
                                     new Pose(20, 90),
-                                    new Pose(53, 96)
+                                    new Pose(56, 96)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(144))
@@ -197,7 +200,7 @@ public class AutonB_NearPreTotal extends OpMode {
             goTakeThird1 = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(53, 96),
+                                    new Pose(56, 96),
                                     new Pose(42.000, 40)
                             )
                     )
@@ -218,7 +221,7 @@ public class AutonB_NearPreTotal extends OpMode {
                     .addPath(
                             new BezierLine(
                                     new Pose(17, 40.000),
-                                    new Pose(53, 96)
+                                    new Pose(56, 99)
                             )
                     )
                     //.setTangentHeadingInterpolation()
@@ -229,24 +232,21 @@ public class AutonB_NearPreTotal extends OpMode {
             finalPath = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(53, 96),
+                                    new Pose(56, 99),
                                     new Pose(20, 70)
                             )
                     )
-                    .setTangentHeadingInterpolation()
+                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
                     .build();
         }
     }
 
 
     public void autonomousPathUpdate() {
-        // Add your state machine Here
-        // Access paths with paths.pathName
-        // Refer to the Pedro Pathing Docs (Auto Example) for an example state machine
         actualTimer.resetTimer();
         switch (pathState){
             case DRIVE_STARTPOS_SHOOT_POS:
-                shootingStateMachine.shooter.adjustCover(0.32);
+                shootingStateMachine.shooter.adjustCover(0.3);
                 follower.followPath(paths.goShotLoaded,0.5,true);
                 setPathState(PathState.SHOOT_PRELOAD);
                 break;
@@ -270,13 +270,11 @@ public class AutonB_NearPreTotal extends OpMode {
                 break;
             case TAKE_FIRST:
                 if(!follower.isBusy()) {
-                    follower.followPath(paths.goShotFirst,0.75,true);
+                    follower.followPath(paths.goShotFirst,0.5,true);
                     setPathState(PathState.SHOOT_PRELOAD);
                 }
                 break;
             case TAKE_SECOND:
-                //shootingStateMachine.shooter.autoAim = false;
-                //shootingStateMachine.shooter.setPowerRotor(10);
                 if(!follower.isBusy()) {
                     if (lastPathState == PathState.SHOOT_PRELOAD){
                         follower.followPath(paths.goTakeSecond2,0.75,true);
@@ -294,7 +292,7 @@ public class AutonB_NearPreTotal extends OpMode {
                         follower.followPath(paths.goTakeThird2,0.75,true);
                         setPathState(PathState.TAKE_THIRD);
                     } else if (lastPathState == PathState.TAKE_THIRD) {
-                        follower.followPath(paths.goShotThird,0.75,true);
+                        follower.followPath(paths.goShotThird,0.65,true);
                         setPathState(PathState.SHOOT_PRELOAD);
                     }
                 }
@@ -306,13 +304,16 @@ public class AutonB_NearPreTotal extends OpMode {
                         follower.followPath(paths.goOpen2,0.5,true);
                         setPathState(PathState.OPEN_BLOCK);
                     }else if(lastPathState == PathState.OPEN_BLOCK &&
-                            Math.abs(actualTimer.getElapsedTimeSeconds() - stateTimer.getElapsedTimeSeconds()) > 1.5){
+                            Math.abs(actualTimer.getElapsedTimeSeconds() - stateTimer.getElapsedTimeSeconds()) > 3){
                         follower.followPath(paths.goShotSecond,0.75, true);
                         setPathState(PathState.SHOOT_PRELOAD);
                     }
 
                 }
                 break;
+            case END:
+
+                shootingStateMachine.shooter.resetRotorPosition();
             default:
                 break;
         }

@@ -6,20 +6,20 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.util.Debouncer;
 
 public class Intake {
-    DcMotorEx transfer;
+    public DcMotorEx transfer;
     DcMotor intake;
-    DistanceSensor distanceSensor1, distanceSensor2;
+    public DistanceSensor distanceSensor1, distanceSensor2;
     ColorSensor colorSensor = new ColorSensor();
     boolean isShooting = false, isIntaking = false;
 
-    Debouncer crossDebouncer = new Debouncer(200);
+    public double transferPosition2ArtifactIn;
+
+    Debouncer intakeDebouncer = new Debouncer(200);
 
     public Intake(HardwareMap hardwareMap) {
         intake = hardwareMap.get(DcMotor.class, "intake");
@@ -78,6 +78,12 @@ public class Intake {
         return num;
     }
 
+    public void setTransferPosition(double targetRelativePosition){
+        if(Math.abs(transfer.getCurrentPosition()-transferPosition2ArtifactIn) < targetRelativePosition){
+            transfer.setPower(0.1);
+        }
+    }
+
     public boolean firstArtifactIn() {
         return colorSensor.getDetectedColor() != ColorSensor.DetectedColors.UNKNOWN;
     }
@@ -92,21 +98,21 @@ public class Intake {
 
 
     public void intake() {
-       transfer.setPower(0.75);
+       transfer.setPower(1);
        intake.setPower(1);
     }
 
 
 
-    public void TeleOp(Gamepad gamepad1, Gamepad gamepad2, Telemetry telemetry, double yawAngle) {
+    public void TeleOp(Gamepad gamepad1, Gamepad gamepad2, boolean isIntakingMachine) {
 
         if (isIntaking) {
             intake();
-        } else {
+        } else if(!isIntakingMachine){
             stopArtifacts();
         }
 
-        if (gamepad1.cross && crossDebouncer.isReady()) {
+        if (gamepad1.left_bumper && intakeDebouncer.isReady()) {
             isIntaking = !isIntaking;
         }
 
@@ -115,11 +121,7 @@ public class Intake {
         }
 
         //shoot
-        if (gamepad1.right_trigger > 0.1) {
-            isShooting = true;
-        } else {
-            isShooting = false;
-        }
+        isShooting = gamepad1.right_trigger > 0.1;
 
 
         //stoppers
