@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.pedropathing.follower.Follower;
+import com.pedropathing.ftc.localization.localizers.PinpointLocalizer;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -10,10 +12,12 @@ import com.qualcomm.robotcore.hardware.IMU;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
+import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 public class DriveTrain {
     //variables
     private DcMotor frontLeft, frontRight, backLeft, backRight;
+    private Follower follower;
     private double drive = 0;
     private double strafe = 0;
     private double rotate = 0;
@@ -30,6 +34,7 @@ public class DriveTrain {
         backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
         backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+
     }
 
     public void forwardMovement() {}

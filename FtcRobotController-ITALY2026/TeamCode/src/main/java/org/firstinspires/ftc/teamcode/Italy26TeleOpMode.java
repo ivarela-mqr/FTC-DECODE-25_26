@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -25,6 +27,7 @@ public class Italy26TeleOpMode extends OpMode {
     YawPitchRollAngles orientation;
     double yawOffset = 0;
     IntakeStateMachine intakeStateMachine = new IntakeStateMachine();
+    Follower follower;
 
     @Override
     public void init() {
@@ -39,6 +42,7 @@ public class Italy26TeleOpMode extends OpMode {
                 RevHubOrientationOnRobot.UsbFacingDirection.UP
         ));
         imu.initialize(parameters);
+        follower = org.firstinspires.ftc.teamcode.pedroPathing.Constants.createFollower(hardwareMap);
     }
 
     @Override
@@ -49,10 +53,24 @@ public class Italy26TeleOpMode extends OpMode {
 
     @Override
     public void loop() {
-        orientation = imu.getRobotYawPitchRollAngles();
+        /*orientation = imu.getRobotYawPitchRollAngles();
+
         double yawAngle = orientation.getYaw(AngleUnit.DEGREES) - yawOffset;
         if(gamepad1.options){
             yawOffset = orientation.getYaw();
+        }*/
+        double rawYaw = Math.toDegrees(follower.getPose().getHeading());
+        double yawAngle = rawYaw - yawOffset;
+
+        if (gamepad1.options) {
+            yawOffset = rawYaw;
+        }
+        if (gamepad1.options) {
+            follower.setPose(new Pose(
+                    follower.getPose().getX(),
+                    follower.getPose().getY(),
+                    0
+            ));
         }
         //switch Alliance
         if (gamepad2.dpad_left){

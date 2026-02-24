@@ -38,6 +38,7 @@ public class Shooter {
     public Debouncer debouncer = new Debouncer(200);
     public Debouncer velDebouncer = new Debouncer(200);
     public Debouncer blockDebouncer = new Debouncer(200);
+    private double ultimoOffsetValido = 0;
     public Shooter (HardwareMap hardwareMap, Constants.Alliance alliance, double targetVel, double targetAngle){
         shooter0 = hardwareMap.get(DcMotorEx.class,"shooter0");
         shooter1 = hardwareMap.get(DcMotorEx.class,"shooter1");
@@ -57,8 +58,6 @@ public class Shooter {
 
         limeLight = new LimeLight(hardwareMap, alliance);
         curTargetVelocity = targetVel;
-        //coverL.setPosition(targetAngle);
-        //coverR.setPosition(targetAngle);
         encoder = hardwareMap.get(DcMotorEx.class, "intake");
         encoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         encoder.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -69,13 +68,25 @@ public class Shooter {
     }
     public void aimWithLimelight(double yaw){
         offset = limeLight.getGoalAprilTagData(yaw)[0];
-        moverServos(offset);
+        moverServos(offset, offset != 0);
     }
-    public void moverServos(double offsetX) {
+    // Variable de clase
+
+    public void moverServos(Double offsetX, boolean objetivoDetectado) {
         int posR = encoder.getCurrentPosition();
 
+        // Si la cámara detecta el objetivo, actualizamos el último offset válido
+        if (objetivoDetectado) {
+            ultimoOffsetValido = offsetX;
+        } else {
+            // Si no detecta, usamos el último offset válido
+            offsetX = ultimoOffsetValido;
+        }
+
+        // Calculamos la potencia
         double potencia = offsetX * VELOCIDAD_FACTOR;
-        if(autoAim) {
+
+        if (autoAim) {
             if ((posR <= LIMITE_IZQUIERDA && potencia > 0) ||
                     (posR >= LIMITE_DERECHA && potencia < 0)) {
                 potencia = 0;
@@ -84,6 +95,8 @@ public class Shooter {
             rotorL.setPower(potencia);
             rotorR.setPower(potencia);
         }
+
+        // Limites mecánicos (por seguridad)
         if ((posR <= LIMITE_IZQUIERDA && potencia > 0) ||
                 (posR >= LIMITE_DERECHA && potencia < 0)) {
             rotorL.setPower(0);
