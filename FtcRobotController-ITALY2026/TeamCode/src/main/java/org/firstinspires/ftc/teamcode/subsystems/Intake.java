@@ -102,8 +102,6 @@ public class Intake {
        intake.setPower(1);
     }
 
-
-
     public void TeleOp(Gamepad gamepad1, Gamepad gamepad2, boolean isIntakingMachine) {
 
         if (isIntaking) {
@@ -114,23 +112,6 @@ public class Intake {
 
         if (gamepad1.left_bumper && intakeDebouncer.isReady()) {
             isIntaking = !isIntaking;
-        }
-
-        if (gamepad1.triangle){
-            unload();
-        }
-
-        //shoot
-        isShooting = gamepad1.right_trigger > 0.1;
-
-
-        //stoppers
-        if (gamepad2.square) {
-            isShooting = false;
-        }
-        if (gamepad2.triangle) {
-            isShooting = false;
-            isIntaking = false;
         }
     }
 }

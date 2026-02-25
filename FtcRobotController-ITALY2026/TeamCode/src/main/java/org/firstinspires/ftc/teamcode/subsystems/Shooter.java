@@ -39,6 +39,7 @@ public class Shooter {
     public Debouncer velDebouncer = new Debouncer(200);
     public Debouncer blockDebouncer = new Debouncer(200);
     private double ultimoOffsetValido = 0;
+    private boolean teleOp = false;
     public Shooter (HardwareMap hardwareMap, Constants.Alliance alliance, double targetVel, double targetAngle){
         shooter0 = hardwareMap.get(DcMotorEx.class,"shooter0");
         shooter1 = hardwareMap.get(DcMotorEx.class,"shooter1");
@@ -66,24 +67,30 @@ public class Shooter {
     public void initTimer(){
         init.resetTimer();
     }
+
+    public void adjustVelAndCover(double distance){
+        if(distance > 0 && teleOp){
+            curTargetVelocity = 1.685393*distance + 930.3371;
+            double pos = -0.001404494*distance + 0.5247191;
+            adjustCover(pos);
+        }
+    }
     public void aimWithLimelight(double yaw){
-        offset = limeLight.getGoalAprilTagData(yaw)[0];
+        double[] var = limeLight.getGoalAprilTagData(yaw);
+        offset = var[0];
+        adjustVelAndCover(var[1]);
         moverServos(offset, offset != 0);
     }
-    // Variable de clase
 
-    public void moverServos(Double offsetX, boolean objetivoDetectado) {
+    public void moverServos(Double offsetX, boolean objectDetected) {
         int posR = encoder.getCurrentPosition();
 
-        // Si la cámara detecta el objetivo, actualizamos el último offset válido
-        if (objetivoDetectado) {
+        if (objectDetected) {
             ultimoOffsetValido = offsetX;
         } else {
-            // Si no detecta, usamos el último offset válido
             offsetX = ultimoOffsetValido;
         }
 
-        // Calculamos la potencia
         double potencia = offsetX * VELOCIDAD_FACTOR;
 
         if (autoAim) {
@@ -96,7 +103,6 @@ public class Shooter {
             rotorR.setPower(potencia);
         }
 
-        // Limites mecánicos (por seguridad)
         if ((posR <= LIMITE_IZQUIERDA && potencia > 0) ||
                 (posR >= LIMITE_DERECHA && potencia < 0)) {
             rotorL.setPower(0);
@@ -202,6 +208,7 @@ public class Shooter {
     }
     public void TeleOp(Gamepad gamepad1, Gamepad gamepad2, Telemetry telemetry, double yawAngle, boolean isFull){
         //aim rotor
+        teleOp = true;
         if (gamepad1.start){
             autoAim = true;
         }
@@ -249,18 +256,11 @@ public class Shooter {
             switchBlock();
         }
 
-
-
-        //shoot motor power
-
         telemetry.addData("velocity shooter",shooter0.getVelocity());
         telemetry.addData("curTargetVelocity",curTargetVelocity);
         telemetry.addData("cover pos", coverR.getPosition());
 
         //telemetry.addData("cover position: ", coverL.getPosition());
     }
-
-
-
 
 }

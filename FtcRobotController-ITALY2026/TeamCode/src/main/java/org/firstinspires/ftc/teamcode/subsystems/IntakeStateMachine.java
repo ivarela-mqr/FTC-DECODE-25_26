@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.util.IntakeStateMachineStates;
+import org.opencv.core.Mat;
 
 public class IntakeStateMachine {
     public Intake intake;
@@ -38,6 +39,8 @@ public class IntakeStateMachine {
 
         if(gamepad2.dpadDownWasPressed())
             switchState(IntakeStateMachineStates.FINAL);
+        if(gamepad2.triangle)
+            switchState(IntakeStateMachineStates.UNLOAD);
 
         switch (state){
             case INIT:
@@ -55,7 +58,7 @@ public class IntakeStateMachine {
                 break;
             case SECOND_ARTIFACT:
                 intake.intakeNextArtifacts();
-                intake.setTransferPosition(75);
+                intake.setTransferPosition(100);
                 if(intake.thirdArtifactIn()
                         && Math.abs(timer.getElapsedTimeSeconds() - currTime.getElapsedTimeSeconds()) > 1){
                     switchState(IntakeStateMachineStates.FINAL);
@@ -70,6 +73,10 @@ public class IntakeStateMachine {
                 if(intake.numArtifactsIn() == 0){
                     switchState(IntakeStateMachineStates.INIT);
                 }
+            case UNLOAD:
+                if(Math.abs(timer.getElapsedTimeSeconds() - currTime.getElapsedTimeSeconds()) > 0.5)
+                    switchState(IntakeStateMachineStates.INIT);
+                intake.unload();
                 break;
         }
     }

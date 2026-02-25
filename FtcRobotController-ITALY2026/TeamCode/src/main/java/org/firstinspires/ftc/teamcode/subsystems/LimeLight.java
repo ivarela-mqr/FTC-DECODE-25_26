@@ -9,11 +9,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.util.Constants;
 
 public class LimeLight {
-
     private Limelight3A limelight;
-
-
-
     public LimeLight(HardwareMap hardwareMap, Constants.Alliance alliance) {
         limelight = hardwareMap.get(Limelight3A.class,"limelight");
         if (alliance == Constants.Alliance.BLUE)
