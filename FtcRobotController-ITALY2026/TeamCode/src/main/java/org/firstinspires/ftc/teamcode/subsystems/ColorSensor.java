@@ -56,8 +56,8 @@ public class ColorSensor {
         else {
             return DetectedColors.UNKNOWN;
         }*/
-        if(distanceSensor.getDistance(DistanceUnit.CM) < 1.75 ||
-                distanceSensor2.getDistance(DistanceUnit.CM) < 1.75)
+        if(distanceSensor.getDistance(DistanceUnit.CM) < 3 ||
+                distanceSensor2.getDistance(DistanceUnit.CM) < 3)
             return DetectedColors.PURPLE;
         else
             return DetectedColors.UNKNOWN;

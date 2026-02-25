@@ -43,6 +43,7 @@ public class Italy26TeleOpMode extends OpMode {
         ));
         imu.initialize(parameters);
         follower = org.firstinspires.ftc.teamcode.pedroPathing.Constants.createFollower(hardwareMap);
+        follower.startTeleOpDrive(true);
         follower.setStartingPose(new Pose(72,72,0));
     }
 
@@ -54,12 +55,12 @@ public class Italy26TeleOpMode extends OpMode {
 
     @Override
     public void loop() {
-        /*orientation = imu.getRobotYawPitchRollAngles();
+        orientation = imu.getRobotYawPitchRollAngles();
 
-        double yawAngle = orientation.getYaw(AngleUnit.DEGREES) - yawOffset;
+        double yawAngleShooter = orientation.getYaw(AngleUnit.DEGREES) - yawOffset;
         if(gamepad1.options){
-            yawOffset = orientation.getYaw();
-        }*/
+            //yawOffset = orientation.getYaw();
+        }
         double rawYaw = Math.toDegrees(follower.getHeading());
         double yawAngle = rawYaw - yawOffset;
 
@@ -82,8 +83,9 @@ public class Italy26TeleOpMode extends OpMode {
         }
 
         driveTrain.TeleOp(gamepad1,telemetry,yawAngle);
-        intakeStateMachine.updateIntakeStateMachine((shooter.canShoot() && gamepad1.right_trigger > 0.1),gamepad1,gamepad2);
-        shooter.TeleOp(gamepad1, gamepad2, telemetry, yawAngle, intakeStateMachine.isFull());
+        intakeStateMachine.updateIntakeStateMachine((shooter.canShoot() && gamepad1.right_trigger > 0.1)
+                ,gamepad1,gamepad2);
+        shooter.TeleOp(gamepad1, gamepad2, telemetry, yawAngleShooter, intakeStateMachine.isFull());
         tilt.Teleop(gamepad1);
         telemetry.addData("Sensor1", intakeStateMachine.intake.firstArtifactIn());
         telemetry.addData("Sensor2", intakeStateMachine.intake.distanceSensor1.getDistance(DistanceUnit.CM));
@@ -91,7 +93,8 @@ public class Italy26TeleOpMode extends OpMode {
         telemetry.addData("Intake state", intakeStateMachine.state);
         telemetry.addData("Is shooting", intake.getIsShooting());
         telemetry.addData("Pos encoder", shooter.encoder.getCurrentPosition());
-        telemetry.addData("Heading", follower.getHeading());
+        telemetry.addData("Heading odometry", follower.getHeading());
+        telemetry.addData("Yaw imu", yawAngleShooter);
 
         telemetry.update();
     }

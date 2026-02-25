@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.bylazar.configurables.annotations.Configurable;
+import com.bylazar.telemetry.PanelsTelemetry;
+import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -15,7 +18,7 @@ import org.firstinspires.ftc.teamcode.util.Constants;
 import org.firstinspires.ftc.teamcode.util.Debouncer;
 import org.opencv.core.Mat;
 
-
+@Configurable
 public class Shooter {
     public  DcMotorEx shooter0, shooter1;
     public CRServo rotorL, rotorR;
@@ -66,17 +69,20 @@ public class Shooter {
     }
     public void initTimer(){
         init.resetTimer();
-    } public void adjustVelAndCover(double distance){
+    }
+    public void adjustVelAndCover(double distance){
         if(distance > 0 && teleOp){
             curTargetVelocity = 1.685393*distance + 930.3371;
             double pos = -0.001404494*distance + 0.5247191;
             adjustCover(pos);
         }
     }
-    public void aimWithLimelight(double yaw){
+    public void aimWithLimelight(double yaw, Telemetry telemetry){
         double[] var = limeLight.getGoalAprilTagData(yaw);
         offset = var[0];
         adjustVelAndCover(var[1]);
+        telemetry.addData("Offset",var[0]);
+        telemetry.addData("Distance",var[1]);
         moverServos(offset, offset != 0);
     }
     // Variable de clase
@@ -114,8 +120,8 @@ public class Shooter {
 
     public void setPowerRotor(double power){
         int posR = encoder.getCurrentPosition();
-        if ((posR <= LIMITE_IZQUIERDA && rotorR.getPower() < 0) ||
-                (posR >= LIMITE_DERECHA && rotorL.getPower() > 0)) {
+        if ((posR <= LIMITE_IZQUIERDA && rotorR.getPower() > 0) ||
+                (posR >= LIMITE_DERECHA && rotorL.getPower() < 0)) {
             rotorL.setPower(0);
             rotorR.setPower(0);
         }else{
@@ -213,8 +219,12 @@ public class Shooter {
         if (gamepad1.start){
             autoAim = true;
         }
-        teleOp = true;
-        aimWithLimelight(yawAngle);
+        teleOp = false;
+        PIDFCoefficients pidfCoefficients_shooter = new PIDFCoefficients(kP_shooter, kI_shooter, kD_shooter, kF_shooter);
+
+        shooter0.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, pidfCoefficients_shooter);
+        shooter1.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, pidfCoefficients_shooter);
+        aimWithLimelight(yawAngle,telemetry);
 
         //correct shooter rotor
         if (gamepad2.left_trigger > 0.1){

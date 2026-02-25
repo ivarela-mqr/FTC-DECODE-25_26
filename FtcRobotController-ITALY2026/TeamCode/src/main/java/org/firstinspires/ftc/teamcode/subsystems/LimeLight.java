@@ -15,7 +15,7 @@ public class LimeLight {
         if (alliance == Constants.Alliance.BLUE)
             limelight.pipelineSwitch(8); // Blue alliance aprilTag
         else if (alliance == Constants.Alliance.RED)
-            limelight.pipelineSwitch(8); // Red alliance aprilTag
+            limelight.pipelineSwitch(9); // Red alliance aprilTag
 
         limelight.start();
     }
@@ -24,7 +24,7 @@ public class LimeLight {
         if (newAlliance == Constants.Alliance.BLUE)
             limelight.pipelineSwitch(8); // Blue alliance aprilTag
         else if (newAlliance == Constants.Alliance.RED)
-            limelight.pipelineSwitch(8); // Red alliance aprilTag
+            limelight.pipelineSwitch(9); // Red alliance aprilTag
     }
 
 

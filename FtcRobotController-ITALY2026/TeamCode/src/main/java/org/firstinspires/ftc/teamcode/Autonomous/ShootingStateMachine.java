@@ -103,7 +103,7 @@ public class ShootingStateMachine {
 
     public void update(Pose pose, Telemetry telemetry, double yawAngle, boolean isBussyFollower){
         isInShootingPos = canShoot(pose);
-        shooter.aimWithLimelight(yawAngle);
+        shooter.aimWithLimelight(yawAngle, telemetry);
         intakeAutoStateMachine.updateIntakeStateMachine(canShoot);
         actualTime.resetTimer();
         switch (state){
