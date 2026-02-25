@@ -66,9 +66,17 @@ public class Shooter {
     }
     public void initTimer(){
         init.resetTimer();
+    } public void adjustVelAndCover(double distance){
+        if(distance > 0 && teleOp){
+            curTargetVelocity = 1.685393*distance + 930.3371;
+            double pos = -0.001404494*distance + 0.5247191;
+            adjustCover(pos);
+        }
     }
     public void aimWithLimelight(double yaw){
-        offset = limeLight.getGoalAprilTagData(yaw)[0];
+        double[] var = limeLight.getGoalAprilTagData(yaw);
+        offset = var[0];
+        adjustVelAndCover(var[1]);
         moverServos(offset, offset != 0);
     }
     // Variable de clase
@@ -205,6 +213,7 @@ public class Shooter {
         if (gamepad1.start){
             autoAim = true;
         }
+        teleOp = true;
         aimWithLimelight(yawAngle);
 
         //correct shooter rotor
