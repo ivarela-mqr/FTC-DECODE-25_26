@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
-import com.pedropathing.geometry.Pose;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -13,7 +12,6 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.util.Constants;
 import org.firstinspires.ftc.teamcode.util.Debouncer;
-import org.opencv.core.Mat;
 
 
 public class Shooter {
@@ -38,7 +36,7 @@ public class Shooter {
     public Debouncer debouncer = new Debouncer(200);
     public Debouncer velDebouncer = new Debouncer(200);
     public Debouncer blockDebouncer = new Debouncer(200);
-    private double ultimoOffsetValido = 0;
+    private double lastValidOffset = 0;
     public Shooter (HardwareMap hardwareMap, Constants.Alliance alliance, double targetVel, double targetAngle){
         shooter0 = hardwareMap.get(DcMotorEx.class,"shooter0");
         shooter1 = hardwareMap.get(DcMotorEx.class,"shooter1");
@@ -77,10 +75,10 @@ public class Shooter {
 
         // Si la cámara detecta el objetivo, actualizamos el último offset válido
         if (objetivoDetectado) {
-            ultimoOffsetValido = offsetX;
+            lastValidOffset = offsetX;
         } else {
             // Si no detecta, usamos el último offset válido
-            offsetX = ultimoOffsetValido;
+            offsetX = lastValidOffset;
         }
 
         // Calculamos la potencia
