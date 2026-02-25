@@ -4,6 +4,7 @@ import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
@@ -44,14 +45,14 @@ public class AutonB_0GateFarPartial extends OpMode {
         panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
 
         follower = Constants.createFollower(hardwareMap);
-        follower.setStartingPose(new Pose(56, 7, Math.toRadians(90)));
+        follower.setStartingPose(new Pose(53, 7, Math.toRadians(90)));
 
         paths = new Paths(follower); // Build paths
 
 
         pathState = PathState.DRIVE_STARTPOS_SHOOT_POS;
         shootingStateMachine.init(hardwareMap,
-                org.firstinspires.ftc.teamcode.util.Constants.Alliance.BLUE,1400, IntakeStateMachineStates.FINAL,
+                org.firstinspires.ftc.teamcode.util.Constants.Alliance.BLUE,1450, IntakeStateMachineStates.FINAL,
                 new Pose(63,16));
 
         imu = hardwareMap.get(IMU.class, "imu");
@@ -108,7 +109,7 @@ public class AutonB_0GateFarPartial extends OpMode {
             goShotLoaded = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(56, 7),
+                                    new Pose(53, 7),
                                     new Pose(63, 16)
                             )
                     )
@@ -129,7 +130,7 @@ public class AutonB_0GateFarPartial extends OpMode {
                     .addPath(
                             new BezierLine(
                                     new Pose(42, 40),
-                                    new Pose(16, 40)
+                                    new Pose(12, 40)
                             )
                     )
                     .setTangentHeadingInterpolation()
@@ -137,8 +138,8 @@ public class AutonB_0GateFarPartial extends OpMode {
             goShotThird = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(16, 40),
-                                    new Pose(63, 16)
+                                    new Pose(12, 40),
+                                    new Pose(60, 8)
                             )
                     )
                     .setGlobalDeceleration()
@@ -149,7 +150,7 @@ public class AutonB_0GateFarPartial extends OpMode {
             goTakeBase1 = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(63, 16),
+                                    new Pose(60, 8),
                                     new Pose(0, 35)
                             )
                     )
@@ -169,7 +170,7 @@ public class AutonB_0GateFarPartial extends OpMode {
 
             goShotBase = follower.pathBuilder()
                     .addPath(
-                            new BezierLine(
+                            new BezierCurve(
                                     new Pose(0, 10),
                                     new Pose(63, 16)
                             )
