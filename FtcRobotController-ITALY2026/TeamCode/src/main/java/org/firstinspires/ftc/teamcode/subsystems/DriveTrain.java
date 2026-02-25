@@ -44,27 +44,25 @@ public class DriveTrain {
     public void rotatingMovement(){}
 
     public void TeleOp(Gamepad gamepad, Telemetry telemetry, double yawAngle){
-        drive = -gamepad.left_stick_y;
-        strafe = gamepad.left_stick_x;
-        rotate = gamepad.right_stick_x;
+        drive  = -gamepad.left_stick_y;
+        strafe =  gamepad.left_stick_x;
+        rotate =  gamepad.right_stick_x;
+
+        double headingRad = Math.toRadians(yawAngle);
+
+        double rotX = drive * Math.cos(headingRad) - strafe * Math.sin(headingRad);
+        double rotY = drive * Math.sin(headingRad) + strafe * Math.cos(headingRad);
+
+        double frontLeftPower  = rotX + rotY + rotate;
+        double frontRightPower = rotX - rotY - rotate;
+        double backLeftPower   = rotX - rotY + rotate;
+        double backRightPower  = rotX + rotY - rotate;
 
 
-        double adjustedDrive = drive * Math.cos(Math.toRadians(yawAngle)) - strafe * Math.sin(Math.toRadians(yawAngle));
-        double adjustedStrafe = drive * Math.sin(Math.toRadians(yawAngle)) + strafe * Math.cos(Math.toRadians(yawAngle));
-
-//        double adjustedDrive = drive;
-//        double adjustedStrafe = strafe;
-
-        double frontLeftPower = (adjustedDrive + adjustedStrafe + rotate);
-        double frontRightPower = (adjustedDrive - adjustedStrafe - rotate);
-        double backLeftPower = (adjustedDrive - adjustedStrafe + rotate);
-        double backRightPower = (adjustedDrive + adjustedStrafe - rotate);
-
-        //Power
         frontLeft.setPower(frontLeftPower);
         frontRight.setPower(frontRightPower);
-        backLeft.setPower(backLeftPower);
-        backRight.setPower(backRightPower);
+        backLeft.setPower(backLeftPower );
+        backRight.setPower(backRightPower );
 
         telemetry.addData("yaw",yawAngle);
     }

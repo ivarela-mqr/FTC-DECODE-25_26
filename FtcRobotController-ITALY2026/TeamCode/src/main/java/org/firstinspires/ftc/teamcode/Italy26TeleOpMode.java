@@ -43,6 +43,7 @@ public class Italy26TeleOpMode extends OpMode {
         ));
         imu.initialize(parameters);
         follower = org.firstinspires.ftc.teamcode.pedroPathing.Constants.createFollower(hardwareMap);
+        follower.setStartingPose(new Pose(72,72,0));
     }
 
     @Override
@@ -59,7 +60,7 @@ public class Italy26TeleOpMode extends OpMode {
         if(gamepad1.options){
             yawOffset = orientation.getYaw();
         }*/
-        double rawYaw = Math.toDegrees(follower.getPose().getHeading());
+        double rawYaw = Math.toDegrees(follower.getHeading());
         double yawAngle = rawYaw - yawOffset;
 
         if (gamepad1.options) {
@@ -72,6 +73,7 @@ public class Italy26TeleOpMode extends OpMode {
                     0
             ));
         }
+        follower.update();
         //switch Alliance
         if (gamepad2.dpad_left){
             shooter.limeLight.switchAlliance(Constants.Alliance.BLUE);
@@ -89,6 +91,7 @@ public class Italy26TeleOpMode extends OpMode {
         telemetry.addData("Intake state", intakeStateMachine.state);
         telemetry.addData("Is shooting", intake.getIsShooting());
         telemetry.addData("Pos encoder", shooter.encoder.getCurrentPosition());
+        telemetry.addData("Heading", follower.getHeading());
 
         telemetry.update();
     }
