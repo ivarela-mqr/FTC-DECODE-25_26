@@ -34,14 +34,7 @@ public class DriveTrain {
         backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
         backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
-
     }
-
-    public void forwardMovement() {}
-
-    public void strafingMovement(){}
-
-    public void rotatingMovement(){}
 
     public void TeleOp(Gamepad gamepad, Telemetry telemetry, double yawAngle){
         drive  = -gamepad.left_stick_y;
@@ -58,7 +51,6 @@ public class DriveTrain {
         double backLeftPower   = rotX - rotY + rotate;
         double backRightPower  = rotX + rotY - rotate;
 
-
         frontLeft.setPower(frontLeftPower);
         frontRight.setPower(frontRightPower);
         backLeft.setPower(backLeftPower );
@@ -66,5 +58,4 @@ public class DriveTrain {
 
         telemetry.addData("yaw",yawAngle);
     }
-
 }

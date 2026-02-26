@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
-import com.pedropathing.geometry.Pose;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -13,7 +12,6 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.util.Constants;
 import org.firstinspires.ftc.teamcode.util.Debouncer;
-import org.opencv.core.Mat;
 
 
 public class Shooter {
@@ -22,9 +20,9 @@ public class Shooter {
     public Servo coverL, coverR, block;
     public LimeLight limeLight;
     public DcMotorEx encoder;
-    final int LIMITE_IZQUIERDA = -10000;
-    final int LIMITE_DERECHA = 10000;
-    final double VELOCIDAD_FACTOR = - 0.05;
+    final int LEFT_LIMIT = -10000;
+    final int RIGHT_LIMIT = 10000;
+    final double VELOCITY_FACTOR = - 0.05;
     double offset = 0;
     double highVelocityShooter = 1500;
     double lowVelocityShooter = 500;
@@ -66,7 +64,9 @@ public class Shooter {
     }
     public void initTimer(){
         init.resetTimer();
-    } public void adjustVelAndCover(double distance){
+    }
+
+    public void adjustVelAndCover(double distance){
         if(distance > 0 && teleOp){
             curTargetVelocity = 1.685393*distance + 930.3371;
             double pos = -0.001404494*distance + 0.5247191;
@@ -77,36 +77,36 @@ public class Shooter {
         double[] var = limeLight.getGoalAprilTagData(yaw);
         offset = var[0];
         adjustVelAndCover(var[1]);
-        moverServos(offset, offset != 0);
+        moveServos(offset, offset != 0);
     }
-    // Variable de clase
+    // Class variable
 
-    public void moverServos(Double offsetX, boolean objectDetected) {
+    public void moveServos(Double offsetX, boolean objectDetected) {
         int posR = encoder.getCurrentPosition();
 
         if (objectDetected) {
             lastValidOffset = offsetX;
         } else {
-            // Si no detecta, usamos el último offset válido
+            // Use last valid offset
             offsetX = lastValidOffset;
         }
 
-        // Calculamos la potencia
-        double potencia = offsetX * VELOCIDAD_FACTOR;
+        // calculate power
+        double power = offsetX * VELOCITY_FACTOR;
 
         if (autoAim) {
-            if ((posR <= LIMITE_IZQUIERDA && potencia > 0) ||
-                    (posR >= LIMITE_DERECHA && potencia < 0)) {
-                potencia = 0;
+            if ((posR <= LEFT_LIMIT && power > 0) ||
+                    (posR >= RIGHT_LIMIT && power < 0)) {
+                power = 0;
             }
 
-            rotorL.setPower(potencia);
-            rotorR.setPower(potencia);
+            rotorL.setPower(power);
+            rotorR.setPower(power);
         }
 
         // Limites mecánicos (por seguridad)
-        if ((posR <= LIMITE_IZQUIERDA && potencia > 0) ||
-                (posR >= LIMITE_DERECHA && potencia < 0)) {
+        if ((posR <= LEFT_LIMIT && power > 0) ||
+                (posR >= RIGHT_LIMIT && power < 0)) {
             rotorL.setPower(0);
             rotorR.setPower(0);
         }
@@ -114,13 +114,13 @@ public class Shooter {
 
     public void setPowerRotor(double power){
         int posR = encoder.getCurrentPosition();
-        if ((posR <= LIMITE_IZQUIERDA && rotorR.getPower() < 0) ||
-                (posR >= LIMITE_DERECHA && rotorL.getPower() > 0)) {
+        if ((posR <= LEFT_LIMIT && rotorR.getPower() < 0) ||
+                (posR >= RIGHT_LIMIT && rotorL.getPower() > 0)) {
             rotorL.setPower(0);
             rotorR.setPower(0);
         }else{
-            rotorL.setPower(power * VELOCIDAD_FACTOR);
-            rotorR.setPower(power * VELOCIDAD_FACTOR);
+            rotorL.setPower(power * VELOCITY_FACTOR);
+            rotorR.setPower(power * VELOCITY_FACTOR);
         }
     }
     public void resetRotorPosition(){
@@ -259,17 +259,8 @@ public class Shooter {
         }
 
 
-
-        //shoot motor power
-
         telemetry.addData("velocity shooter",shooter0.getVelocity());
         telemetry.addData("curTargetVelocity",curTargetVelocity);
         telemetry.addData("cover pos", coverR.getPosition());
-
-        //telemetry.addData("cover position: ", coverL.getPosition());
     }
-
-
-
-
 }

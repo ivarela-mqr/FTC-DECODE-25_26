@@ -78,8 +78,8 @@ public class Intake {
         return num;
     }
 
-    public void setTransferPosition(double targetRelativePosition){
-        if(Math.abs(transfer.getCurrentPosition()-transferPosition2ArtifactIn) < targetRelativePosition){
+    public void setTransferPosition(double targetRelativePosition) {
+        if (Math.abs(transfer.getCurrentPosition() - transferPosition2ArtifactIn) < targetRelativePosition) {
             transfer.setPower(0.1);
         }
     }
@@ -98,15 +98,15 @@ public class Intake {
 
 
     public void intake() {
-       transfer.setPower(1);
-       intake.setPower(1);
+        transfer.setPower(1);
+        intake.setPower(1);
     }
 
     public void TeleOp(Gamepad gamepad1, Gamepad gamepad2, boolean isIntakingMachine) {
 
         if (isIntaking) {
             intake();
-        } else if(!isIntakingMachine){
+        } else if (!isIntakingMachine) {
             stopArtifacts();
         }
 
