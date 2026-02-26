@@ -9,5 +9,6 @@ public enum PathState{
     TAKE_THIRD,
     TAKE_OPEN,
     OPEN_BLOCK,
+    TAKE_BASE,
     END
 }

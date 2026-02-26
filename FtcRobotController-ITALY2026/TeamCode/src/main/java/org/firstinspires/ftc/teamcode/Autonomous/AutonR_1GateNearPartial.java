@@ -28,15 +28,6 @@ public class AutonR_1GateNearPartial extends OpMode {
     private Paths paths; // Paths defined in the Paths class
     IMU imu;
     YawPitchRollAngles orientation;
-    public enum PathState{
-        DRIVE_STARTPOS_SHOOT_POS,
-        SHOOT_PRELOAD,
-        TAKE_FIRST,
-        TAKE_SECOND,
-        TAKE_OPEN,
-        OPEN_BLOCK,
-        END
-    }
     ShootingStateMachine shootingStateMachine = new ShootingStateMachine();
     boolean shootsTriggered = false;
     int ticks = 0;

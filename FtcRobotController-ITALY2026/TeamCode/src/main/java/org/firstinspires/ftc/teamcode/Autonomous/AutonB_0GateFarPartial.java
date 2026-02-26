@@ -29,13 +29,6 @@ public class AutonB_0GateFarPartial extends OpMode {
     private Paths paths; // Paths defined in the Paths class
     IMU imu;
     YawPitchRollAngles orientation;
-    public enum PathState{
-        DRIVE_STARTPOS_SHOOT_POS,
-        SHOOT_PRELOAD,
-        TAKE_THIRD,
-        TAKE_BASE,
-        END
-    }
     ShootingStateMachine shootingStateMachine = new ShootingStateMachine();
     int ticks = 0;
     Timer stateTimer = new Timer();
