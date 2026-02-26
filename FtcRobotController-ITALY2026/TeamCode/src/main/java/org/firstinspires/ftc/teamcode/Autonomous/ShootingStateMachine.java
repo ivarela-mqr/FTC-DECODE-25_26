@@ -88,17 +88,12 @@ public class ShootingStateMachine {
         return result;
     }
     public void init(HardwareMap hardwareMap, Constants.Alliance alliance, double currVel, IntakeStateMachineStates state, Pose shootingPose){
-        //ShotResult result = calculateShot(shootingPose,targetPose);
-        shooter = new Shooter(hardwareMap, alliance,currVel,0); //result.rpm, result.servoPos);
+        shooter = new Shooter(hardwareMap, alliance,currVel,0);
         timer = new Timer();
         actualTime = new Timer();
         switchState(States.INIT);
         intakeAutoStateMachine.init(hardwareMap, state);
         this.shootingPose = shootingPose;
-        //telemetry.addData("Target vel", result.velocity);
-        //telemetry.addData("Target rpm", result.rpm);
-        //telemetry.addData("Target angle", result.angleDeg);
-        //telemetry.addData("Target pos servo", result.servoPos);
     }
 
     public void update(Pose pose, Telemetry telemetry, double yawAngle, boolean isBussyFollower){
@@ -128,7 +123,7 @@ public class ShootingStateMachine {
                 shooter.openBlock();
                 if(shooter.getBlockPos() <= 0.5 && !isBussyFollower)
                     canShoot = true;
-                if(!intakeAutoStateMachine.isShooting()){    //intake.numArtifactsIn(telemetry) == 0
+                if(!intakeAutoStateMachine.isShooting()){
                     canShoot = false;
                     switchState(States.INTAKING);
                 }
@@ -144,7 +139,7 @@ public class ShootingStateMachine {
         }
     }
     public boolean canShoot(Pose pose) {
-        double posTolerance = 15;            // tolerancia en pulgadas (más estricta)
+        double posTolerance = 15;
 
         double dx = pose.getX() - shootingPose.getX();
         double dy = pose.getY() - shootingPose.getY();

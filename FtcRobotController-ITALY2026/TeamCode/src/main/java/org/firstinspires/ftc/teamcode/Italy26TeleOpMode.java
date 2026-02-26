@@ -51,6 +51,7 @@ public class Italy26TeleOpMode extends OpMode {
     public void start(){
         gamepad1.rumble(20);
         gamepad2.rumble(20);
+        tilt.resetTimer();
     }
 
     @Override
@@ -83,15 +84,13 @@ public class Italy26TeleOpMode extends OpMode {
         }
 
         driveTrain.TeleOp(gamepad1,telemetry,yawAngle);
-        intakeStateMachine.updateIntakeStateMachine((shooter.canShoot() && gamepad1.right_trigger > 0.1)
-                ,gamepad1,gamepad2);
+        intakeStateMachine.updateIntakeStateMachine((shooter.canShoot() && gamepad1.right_trigger > 0.1),gamepad2);
         shooter.TeleOp(gamepad1, gamepad2, telemetry, yawAngleShooter, intakeStateMachine.isFull());
         tilt.Teleop(gamepad1);
         telemetry.addData("Sensor1", intakeStateMachine.intake.firstArtifactIn());
         telemetry.addData("Sensor2", intakeStateMachine.intake.distanceSensor1.getDistance(DistanceUnit.CM));
         telemetry.addData("Sensor3", intakeStateMachine.intake.distanceSensor2.getDistance(DistanceUnit.CM));
         telemetry.addData("Intake state", intakeStateMachine.state);
-        telemetry.addData("Is shooting", intake.getIsShooting());
         telemetry.addData("Pos encoder", shooter.encoder.getCurrentPosition());
         telemetry.addData("Heading odometry", follower.getHeading());
         telemetry.addData("Yaw imu", yawAngleShooter);

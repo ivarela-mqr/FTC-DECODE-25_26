@@ -5,7 +5,6 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.util.IntakeStateMachineStates;
-import org.opencv.core.Mat;
 
 public class IntakeStateMachine {
     public Intake intake;
@@ -17,26 +16,12 @@ public class IntakeStateMachine {
         intake = new Intake(hardwareMap);
         state = IntakeStateMachineStates.INIT;
     }
-    public boolean isBusy() {
-        return state != IntakeStateMachineStates.INIT && state != IntakeStateMachineStates.FIRST_ARTIFACT && state != IntakeStateMachineStates.SECOND_ARTIFACT;
-    }
-    public boolean isIntaking() {
-        return state == IntakeStateMachineStates.INIT
-                || state == IntakeStateMachineStates.FIRST_ARTIFACT
-                || state == IntakeStateMachineStates.SECOND_ARTIFACT;
-    }
-
     public boolean isFull(){
         return state == IntakeStateMachineStates.FINAL || state == IntakeStateMachineStates.SHOOTING;
     }
-    public boolean isShooting() {
-        return intake.numArtifactsIn() > 0;
-    }
 
-    public void updateIntakeStateMachine(boolean canShoot, Gamepad gamepad1, Gamepad gamepad2){
+    public void updateIntakeStateMachine(boolean canShoot, Gamepad gamepad2){
         currTime.resetTimer();
-        intake.TeleOp(gamepad1,gamepad2,isIntaking());
-
         if(gamepad2.dpadDownWasPressed())
             switchState(IntakeStateMachineStates.FINAL);
 

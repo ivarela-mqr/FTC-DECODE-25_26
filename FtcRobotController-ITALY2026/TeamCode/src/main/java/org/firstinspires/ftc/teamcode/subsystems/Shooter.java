@@ -1,9 +1,5 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
-import com.bylazar.configurables.annotations.Configurable;
-import com.bylazar.telemetry.PanelsTelemetry;
-import com.bylazar.telemetry.TelemetryManager;
-import com.pedropathing.geometry.Pose;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -17,7 +13,6 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.util.Constants;
 import org.firstinspires.ftc.teamcode.util.Debouncer;
 
-@Configurable
 public class Shooter {
     public  DcMotorEx shooter0, shooter1;
     public CRServo rotorL, rotorR;
@@ -28,13 +23,11 @@ public class Shooter {
     final int RIGHT_LIMIT = 10000;
     final double VELOCITY_FACTOR = - 0.05;
     double offset = 0;
-    double highVelocityShooter = 1500;
-    double lowVelocityShooter = 500;
     double curTargetVelocity = 1200;
     double kP_shooter = 1.15;
-    double kI_shooter = 0;
-    double kD_shooter = 0;
-    double kF_shooter = 17.5;
+    double kI_shooter = 0.0005;
+    double kD_shooter = 1.35;
+    double kF_shooter = 16;
     public Timer init;
     public boolean autoAim = true;
     public Debouncer debouncer = new Debouncer(200);
@@ -82,19 +75,15 @@ public class Shooter {
         adjustVelAndCover(var[1]);
         moveServos(offset, offset != 0);
     }
-    // Class variable
-
     public void moveServos(Double offsetX, boolean objectDetected) {
         int posR = encoder.getCurrentPosition();
 
         if (objectDetected) {
             lastValidOffset = offsetX;
         } else {
-            // Use last valid offset
             offsetX = lastValidOffset;
         }
 
-        // calculate power
         double power = offsetX * VELOCITY_FACTOR;
 
         if (autoAim) {
@@ -107,7 +96,6 @@ public class Shooter {
             rotorR.setPower(power);
         }
 
-        // Limites mecánicos (por seguridad)
         if ((posR <= LEFT_LIMIT && power > 0) ||
                 (posR >= RIGHT_LIMIT && power < 0)) {
             rotorL.setPower(0);
@@ -151,13 +139,6 @@ public class Shooter {
         coverL.setPosition(coverL.getPosition()+(direction*0.05));
         coverR.setPosition(coverR.getPosition()+(direction*0.05));
     }
-
-    public void switchCurTargetVelocity(){
-        if (curTargetVelocity == highVelocityShooter) {
-            curTargetVelocity = lowVelocityShooter;
-        }else{curTargetVelocity = highVelocityShooter;}
-    }
-
 
     public void setShootingPower(Telemetry telemetry) {
         if (Math.abs(shooter0.getVelocity() - curTargetVelocity) > 100) {
@@ -205,22 +186,12 @@ public class Shooter {
             block.setPosition(0);
         }else{block.setPosition(1);}
     }
-    private double getVelocity(double x){
-        return (int)(157.4115 +
-                16.39278 * x -
-                0.08673005 * Math.pow(x,2) +
-                0.0001515039 * Math.pow(x,3));
-    }
     public void TeleOp(Gamepad gamepad1, Gamepad gamepad2, Telemetry telemetry, double yawAngle, boolean isFull){
         //aim rotor
-        if (gamepad1.start){
+        if (gamepad2.share){
             autoAim = true;
         }
-        teleOp = false;
-        PIDFCoefficients pidfCoefficients_shooter = new PIDFCoefficients(kP_shooter, kI_shooter, kD_shooter, kF_shooter);
-
-        shooter0.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, pidfCoefficients_shooter);
-        shooter1.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, pidfCoefficients_shooter);
+        teleOp = true;
         aimWithLimelight(yawAngle,telemetry);
 
         //correct shooter rotor
@@ -242,7 +213,7 @@ public class Shooter {
             }
             setShootingPower(telemetry);
         }else {
-            closeBlock();
+            calm();
             stop();
         }
 
