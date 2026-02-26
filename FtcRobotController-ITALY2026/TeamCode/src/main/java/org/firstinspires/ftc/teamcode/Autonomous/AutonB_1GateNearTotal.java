@@ -19,7 +19,7 @@ import com.pedropathing.paths.PathChain;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.hardware.IMU;
 
-@Autonomous(name = "AutonB_1GateNearTotal", group = "Autonomous")
+@Autonomous(name = "BLUE_1GateNearTotal", group = "Autonomous")
 @Configurable
 public class AutonB_1GateNearTotal extends OpMode {
     private TelemetryManager panelsTelemetry; // Panels Telemetry instance

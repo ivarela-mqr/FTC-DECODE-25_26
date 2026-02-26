@@ -18,7 +18,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.util.IntakeStateMachineStates;
 
-@Autonomous(name = "AutonR_1GateNearTotal", group = "Autonomous")
+@Autonomous(name = "RED_1GateNearTotal", group = "Autonomous")
 @Configurable
 public class AutonR_1GateNearTotal extends OpMode {
     private TelemetryManager panelsTelemetry; // Panels Telemetry instance
