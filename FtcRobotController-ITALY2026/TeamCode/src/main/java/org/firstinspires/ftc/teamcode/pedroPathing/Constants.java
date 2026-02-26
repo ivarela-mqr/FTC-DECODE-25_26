@@ -36,7 +36,8 @@ public class Constants {
             .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
             .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD)
             .xVelocity(72.26)
-            .yVelocity(57.16);
+            .yVelocity(57.16)
+            .useBrakeModeInTeleOp(true);
 
     public static PathConstraints pathConstraints = new PathConstraints(0.7, 60, 1, 1);
 

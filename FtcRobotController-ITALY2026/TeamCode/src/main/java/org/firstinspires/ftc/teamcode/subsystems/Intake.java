@@ -15,7 +15,7 @@ public class Intake {
     DcMotor intake;
     public DistanceSensor distanceSensor1, distanceSensor2;
     ColorSensor colorSensor = new ColorSensor();
-    boolean isShooting = false, isIntaking = false;
+    boolean isShooting = false, isIntaking = true;
 
     public double transferPosition2ArtifactIn;
 
@@ -59,7 +59,7 @@ public class Intake {
 
     public void shootArtifacts() {
         intake.setPower(1);
-        transfer.setVelocity(6000);
+        transfer.setPower(1);
     }
 
     public void stopArtifacts() {
@@ -104,11 +104,11 @@ public class Intake {
 
     public void TeleOp(Gamepad gamepad1, Gamepad gamepad2, boolean isIntakingMachine) {
 
-        if (isIntaking) {
+        /*if (isIntaking) {
             intake();
         } else if (!isIntakingMachine) {
             stopArtifacts();
-        }
+        }*/
 
         if (gamepad1.left_bumper && intakeDebouncer.isReady()) {
             isIntaking = !isIntaking;

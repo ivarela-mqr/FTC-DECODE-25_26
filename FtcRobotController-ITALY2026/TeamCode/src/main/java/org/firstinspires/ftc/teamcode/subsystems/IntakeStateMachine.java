@@ -39,6 +39,7 @@ public class IntakeStateMachine {
 
         if(gamepad2.dpadDownWasPressed())
             switchState(IntakeStateMachineStates.FINAL);
+
         if(gamepad2.triangle)
             switchState(IntakeStateMachineStates.UNLOAD);
 
@@ -54,11 +55,11 @@ public class IntakeStateMachine {
                 if(intake.secondArtifactIn()){
                     intake.transferPosition2ArtifactIn = intake.transfer.getCurrentPosition();
                     switchState(IntakeStateMachineStates.SECOND_ARTIFACT);
+                    intake.setTransferPosition(50);
                 }
                 break;
             case SECOND_ARTIFACT:
                 intake.intakeNextArtifacts();
-                intake.setTransferPosition(100);
                 if(intake.thirdArtifactIn()
                         && Math.abs(timer.getElapsedTimeSeconds() - currTime.getElapsedTimeSeconds()) > 1){
                     switchState(IntakeStateMachineStates.FINAL);
@@ -66,13 +67,16 @@ public class IntakeStateMachine {
                 break;
             case FINAL:
                 intake.stopArtifacts();
-                if(canShoot){switchState(IntakeStateMachineStates.SHOOTING);}
+                if(canShoot){
+                    switchState(IntakeStateMachineStates.SHOOTING);
+                }
                 break;
             case SHOOTING:
                 intake.shootArtifacts();
-                if(intake.numArtifactsIn() == 0){
+                if(Math.abs(timer.getElapsedTimeSeconds() - currTime.getElapsedTimeSeconds())> 1){
                     switchState(IntakeStateMachineStates.INIT);
                 }
+                break;
             case UNLOAD:
                 if(Math.abs(timer.getElapsedTimeSeconds() - currTime.getElapsedTimeSeconds()) > 0.5)
                     switchState(IntakeStateMachineStates.INIT);

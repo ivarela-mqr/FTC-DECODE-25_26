@@ -1,5 +1,11 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.bylazar.configurables.annotations.Configurable;
+import com.bylazar.panels.Panels;
+import com.bylazar.telemetry.PanelsTelemetry;
+import com.bylazar.telemetry.TelemetryManager;
+import com.pedropathing.telemetry.SelectScope;
+import com.pedropathing.telemetry.SelectableOpMode;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
@@ -25,7 +31,11 @@ import org.firstinspires.ftc.teamcode.subsystems.LimeLight;
 import org.firstinspires.ftc.teamcode.util.Constants;
 
 import java.security.Provider;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+
 @TeleOp
+@Configurable
 public class CalculateShooterCurvature extends OpMode {
     private LimeLight limelight;
     private IMU imu;
@@ -66,6 +76,8 @@ public class CalculateShooterCurvature extends OpMode {
     // Factor de movimiento
     final double VELOCIDAD_FACTOR = - 0.05;
     double offset = 0;
+    private PanelsTelemetry panelsTelemetry; // Panels Telemetry instance
+
     @Override
     public void init() {
         shooter1=hardwareMap.get(DcMotorEx.class,"shooter1");
@@ -118,6 +130,8 @@ public class CalculateShooterCurvature extends OpMode {
         YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
         offset = limelight.getGoalAprilTagData(orientation.getYaw())[0];
         driveTrain.TeleOp(gamepad1,telemetry, orientation.getYaw());
+
+
         if(gamepad1.dpadLeftWasPressed())
             F += steps[index];
         if(gamepad1.dpadRightWasPressed())
@@ -135,9 +149,9 @@ public class CalculateShooterCurvature extends OpMode {
             block.setPosition(0);
 
         detectedColor = colorSensor.getDetectedColor();
-        //telemetry.addData("ColorDetected",detectedColor);
-        //telemetry.addData("Sensor 1", distanceSensor1.getDistance(DistanceUnit.CM));
-        //telemetry.addData("Sensor 2", distanceSensor2.getDistance(DistanceUnit.CM));
+        telemetry.addData("ColorDetected",detectedColor);
+        telemetry.addData("Sensor 1", distanceSensor1.getDistance(DistanceUnit.CM));
+        telemetry.addData("Sensor 2", distanceSensor2.getDistance(DistanceUnit.CM));
         /*if(detectedColor != ColorSensor.DetectedColors.UNKNOWN)
             transfer.setPower(0);*/
         //F = getPosCover(distance);
@@ -180,18 +194,18 @@ public class CalculateShooterCurvature extends OpMode {
         //aimShooterWithLimeLight(telemetry,offset);
 
 
-        telemetry.addData("up",p);
-        telemetry.addData("down",F);
+        //telemetry.addData("up",p);
+        //telemetry.addData("down",F);
         // Escalar potencia para servos si es necesario
 
         int position = encoder.getCurrentPosition();
-        telemetry.addData("OFFSET", steps[index]);
-        telemetry.addData("Encoder Position", position);
+        //telemetry.addData("OFFSET", steps[index]);
+        //telemetry.addData("Encoder Position", position);
 
-        telemetry.addData("Position",coverR.getPosition());
-        telemetry.addData("Distance",distance);
-        telemetry.addData("Velocity", vel);
-        telemetry.addData("Pos", block.getPosition());
+        //telemetry.addData("Position",coverR.getPosition());
+        //telemetry.addData("Distance",distance);
+        //telemetry.addData("Velocity", vel);
+        //telemetry.addData("Pos", block.getPosition());
         telemetry.addData("RealVelocity",shooter1.getVelocity());
         telemetry.addData("RealVelocity",shooter2.getVelocity());
         telemetry.update();
@@ -235,8 +249,8 @@ public class CalculateShooterCurvature extends OpMode {
         rotorR.setPower(potencia);
 
         // Telemetría para debug
-        telemetry.addData("Pos R", posR);
-        telemetry.addData("Potencia", potencia);
+        //telemetry.addData("Pos R", posR);
+        //telemetry.addData("Potencia", potencia);
     }
 
     private double pidCalculate(double error) {

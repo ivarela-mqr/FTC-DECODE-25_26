@@ -1,5 +1,9 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.bylazar.configurables.annotations.Configurable;
+import com.bylazar.telemetry.PanelsTelemetry;
+import com.bylazar.telemetry.TelemetryManager;
+import com.pedropathing.geometry.Pose;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -13,7 +17,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.util.Constants;
 import org.firstinspires.ftc.teamcode.util.Debouncer;
 
-
+@Configurable
 public class Shooter {
     public  DcMotorEx shooter0, shooter1;
     public CRServo rotorL, rotorR;
@@ -65,7 +69,6 @@ public class Shooter {
     public void initTimer(){
         init.resetTimer();
     }
-
     public void adjustVelAndCover(double distance){
         if(distance > 0 && teleOp){
             curTargetVelocity = 1.685393*distance + 930.3371;
@@ -73,7 +76,7 @@ public class Shooter {
             adjustCover(pos);
         }
     }
-    public void aimWithLimelight(double yaw){
+    public void aimWithLimelight(double yaw, Telemetry telemetry){
         double[] var = limeLight.getGoalAprilTagData(yaw);
         offset = var[0];
         adjustVelAndCover(var[1]);
@@ -114,8 +117,8 @@ public class Shooter {
 
     public void setPowerRotor(double power){
         int posR = encoder.getCurrentPosition();
-        if ((posR <= LEFT_LIMIT && rotorR.getPower() < 0) ||
-                (posR >= RIGHT_LIMIT && rotorL.getPower() > 0)) {
+        if ((posR <= LEFT_LIMIT && rotorR.getPower() > 0) ||
+                (posR >= RIGHT_LIMIT && rotorL.getPower() < 0)) {
             rotorL.setPower(0);
             rotorR.setPower(0);
         }else{
@@ -213,8 +216,12 @@ public class Shooter {
         if (gamepad1.start){
             autoAim = true;
         }
-        teleOp = true;
-        aimWithLimelight(yawAngle);
+        teleOp = false;
+        PIDFCoefficients pidfCoefficients_shooter = new PIDFCoefficients(kP_shooter, kI_shooter, kD_shooter, kF_shooter);
+
+        shooter0.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, pidfCoefficients_shooter);
+        shooter1.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, pidfCoefficients_shooter);
+        aimWithLimelight(yawAngle,telemetry);
 
         //correct shooter rotor
         if (gamepad2.left_trigger > 0.1){
