@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
+import com.pedropathing.util.Timer;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -28,9 +29,14 @@ public class Italy26TeleOpMode extends OpMode {
     double yawOffset = 0;
     IntakeStateMachine intakeStateMachine = new IntakeStateMachine();
     Follower follower;
+    Timer actualTimer,initTimer;
 
     @Override
     public void init() {
+        actualTimer = new Timer();
+        initTimer = new Timer();
+        actualTimer.resetTimer();
+        initTimer.resetTimer();
         driveTrain = new DriveTrain(hardwareMap);
         intake = new Intake(hardwareMap);
         shooter = new Shooter(hardwareMap, Constants.Alliance.BLUE, 1200, 30); //todo ch. alliance from auton
@@ -52,10 +58,12 @@ public class Italy26TeleOpMode extends OpMode {
         gamepad1.rumble(20);
         gamepad2.rumble(20);
         tilt.resetTimer();
+        initTimer.resetTimer();
     }
 
     @Override
     public void loop() {
+        actualTimer.resetTimer();
         orientation = imu.getRobotYawPitchRollAngles();
 
         double yawAngleShooter = orientation.getYaw(AngleUnit.DEGREES) - yawOffset;
@@ -64,6 +72,11 @@ public class Italy26TeleOpMode extends OpMode {
         }
         double rawYaw = Math.toDegrees(follower.getHeading());
         double yawAngle = rawYaw - yawOffset;
+
+        if(Math.abs(actualTimer.getElapsedTimeSeconds() - initTimer.getElapsedTimeSeconds()) > 90){
+            gamepad1.rumble(500);
+            gamepad2.rumble(500);
+        }
 
         if (gamepad1.options) {
             yawOffset = rawYaw;
@@ -84,7 +97,8 @@ public class Italy26TeleOpMode extends OpMode {
         }
 
         driveTrain.TeleOp(gamepad1,telemetry,yawAngle);
-        intakeStateMachine.updateIntakeStateMachine((shooter.canShoot() && gamepad1.right_trigger > 0.1),gamepad2);
+        intakeStateMachine.updateIntakeStateMachine((shooter.canShoot() && gamepad1.right_trigger > 0.1)
+                , gamepad1,gamepad2);
         shooter.TeleOp(gamepad1, gamepad2, telemetry, yawAngleShooter, intakeStateMachine.isFull());
         tilt.Teleop(gamepad1);
         telemetry.addData("Sensor1", intakeStateMachine.intake.firstArtifactIn());

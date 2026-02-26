@@ -19,8 +19,10 @@ public class Shooter {
     public Servo coverL, coverR, block;
     public LimeLight limeLight;
     public DcMotorEx encoder;
-    final int LEFT_LIMIT = -10000;
-    final int RIGHT_LIMIT = 10000;
+    int LEFT_LIMIT = -10000;
+    final int LEFT_TELEOP_LIMIT = -2500;
+    int RIGHT_LIMIT = 10000;
+    final int RIGHT_TELEOP_LIMIT = 2500;
     final double VELOCITY_FACTOR = - 0.05;
     double offset = 0;
     double curTargetVelocity = 1200;
@@ -65,7 +67,7 @@ public class Shooter {
     public void adjustVelAndCover(double distance){
         if(distance > 0 && teleOp){
             curTargetVelocity = 1.685393*distance + 930.3371;
-            double pos = -0.001404494*distance + 0.5247191;
+            double pos =  -0.000921659*distance + 0.4115207;
             adjustCover(pos);
         }
     }
@@ -116,9 +118,9 @@ public class Shooter {
     }
     public void resetRotorPosition(){
         if(encoder.getCurrentPosition()>50){
-            setPowerRotor(-10);
+            setPowerRotor(-20);
         }else if(encoder.getCurrentPosition()<-50){
-            setPowerRotor(10);
+            setPowerRotor(20);
         }else{
             setPowerRotor(0);
         }
@@ -138,17 +140,6 @@ public class Shooter {
     public void correctCover(Telemetry telemetry, double direction){
         coverL.setPosition(coverL.getPosition()+(direction*0.05));
         coverR.setPosition(coverR.getPosition()+(direction*0.05));
-    }
-
-    public void setShootingPower(Telemetry telemetry) {
-        if (Math.abs(shooter0.getVelocity() - curTargetVelocity) > 100) {
-            shooter0.setPower(1);
-            shooter1.setPower(1);
-        }else{
-            shooter0.setVelocity(curTargetVelocity);
-            shooter1.setVelocity(curTargetVelocity);
-        }
-        telemetry.addData("Shooter velocity",shooter0.getVelocity());
     }
     public void preload(Telemetry telemetry, double yawAngle) {
         if(curTargetVelocity - Math.max(shooter1.getVelocity(),shooter0.getVelocity()) > 150){
@@ -192,6 +183,8 @@ public class Shooter {
             autoAim = true;
         }
         teleOp = true;
+        RIGHT_LIMIT = RIGHT_TELEOP_LIMIT;
+        LEFT_LIMIT = LEFT_TELEOP_LIMIT;
         aimWithLimelight(yawAngle,telemetry);
 
         //correct shooter rotor
@@ -211,10 +204,9 @@ public class Shooter {
             if(isReady() && gamepad1.right_trigger > 0.1){
                 openBlock();
             }
-            setShootingPower(telemetry);
         }else {
             calm();
-            stop();
+            closeBlock();
         }
 
         if(gamepad2.dpad_up && velDebouncer.isReady())

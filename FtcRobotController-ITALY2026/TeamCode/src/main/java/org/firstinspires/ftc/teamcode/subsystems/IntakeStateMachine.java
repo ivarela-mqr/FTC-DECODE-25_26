@@ -20,9 +20,9 @@ public class IntakeStateMachine {
         return state == IntakeStateMachineStates.FINAL || state == IntakeStateMachineStates.SHOOTING;
     }
 
-    public void updateIntakeStateMachine(boolean canShoot, Gamepad gamepad2){
+    public void updateIntakeStateMachine(boolean canShoot, Gamepad gamepad1, Gamepad gamepad2){
         currTime.resetTimer();
-        if(gamepad2.dpadDownWasPressed())
+        if(gamepad2.dpadDownWasPressed() || gamepad1.left_trigger > 0.1)
             switchState(IntakeStateMachineStates.FINAL);
 
         if(gamepad2.triangle)
@@ -48,6 +48,8 @@ public class IntakeStateMachine {
                 if(intake.thirdArtifactIn()
                         && Math.abs(timer.getElapsedTimeSeconds() - currTime.getElapsedTimeSeconds()) > 1){
                     switchState(IntakeStateMachineStates.FINAL);
+                    gamepad1.rumble(1000);
+                    gamepad2.rumble(1000);
                 }
                 break;
             case FINAL:
