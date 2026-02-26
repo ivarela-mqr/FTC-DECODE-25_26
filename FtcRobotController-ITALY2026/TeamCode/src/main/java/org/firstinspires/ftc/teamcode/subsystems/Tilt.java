@@ -15,10 +15,13 @@ public class Tilt {
         climb3 = hardwareMap.get(CRServo.class, "climb3");
         climb4 = hardwareMap.get(CRServo.class, "climb4");
     }
-
+    public void resetTimer(){
+        timer.resetTimer();
+    }
     public void Teleop(Gamepad gamepad){
         actualTimer.resetTimer();
-        if(gamepad.dpadUpWasPressed()){
+        if(gamepad.dpadUpWasPressed()
+                && Math.abs(timer.getElapsedTimeSeconds() - actualTimer.getElapsedTimeSeconds()) > 90){
             timer.resetTimer();
             climb1.setPower(-1);
             climb2.setPower(-1);

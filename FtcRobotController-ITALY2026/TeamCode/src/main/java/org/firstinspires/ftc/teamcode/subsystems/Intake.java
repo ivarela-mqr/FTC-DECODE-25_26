@@ -4,11 +4,9 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
-import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.util.Debouncer;
 
 public class Intake {
     public DcMotorEx transfer;
@@ -18,8 +16,6 @@ public class Intake {
     boolean isShooting = false, isIntaking = true;
 
     public double transferPosition2ArtifactIn;
-
-    Debouncer intakeDebouncer = new Debouncer(200);
 
     public Intake(HardwareMap hardwareMap) {
         intake = hardwareMap.get(DcMotor.class, "intake");
@@ -51,10 +47,6 @@ public class Intake {
     public void unload() {
         intake.setPower(-0.2);
         transfer.setPower(-0.5);
-    }
-
-    public void shoot1Artifact() {
-
     }
 
     public void shootArtifacts() {
@@ -96,22 +88,8 @@ public class Intake {
         return distanceSensor1.getDistance(DistanceUnit.CM) < 12.5;
     }
 
-
     public void intake() {
         transfer.setPower(1);
         intake.setPower(1);
-    }
-
-    public void TeleOp(Gamepad gamepad1, Gamepad gamepad2, boolean isIntakingMachine) {
-
-        /*if (isIntaking) {
-            intake();
-        } else if (!isIntakingMachine) {
-            stopArtifacts();
-        }*/
-
-        if (gamepad1.left_bumper && intakeDebouncer.isReady()) {
-            isIntaking = !isIntaking;
-        }
     }
 }
