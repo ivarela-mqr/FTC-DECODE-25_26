@@ -26,7 +26,7 @@ public class Shooter {
     final double VELOCITY_FACTOR = - 0.05;
     double offset = 0;
     double curTargetVelocity = 1200;
-    double kP_shooter = 1.15;
+    double kP_shooter = 1.5;
     double kI_shooter = 0.0005;
     double kD_shooter = 1.35;
     double kF_shooter = 16;
@@ -127,7 +127,7 @@ public class Shooter {
     }
 
     public boolean isReady(){
-        return curTargetVelocity - Math.max(shooter1.getVelocity(),shooter0.getVelocity()) < 50;
+        return curTargetVelocity - Math.max(shooter1.getVelocity(),shooter0.getVelocity()) < 50 && offset < 3;
     }
     public boolean canShoot(){
         return curTargetVelocity - Math.max(shooter1.getVelocity(),shooter0.getVelocity()) < 50 && block.getPosition() <= 0.2;
@@ -142,7 +142,7 @@ public class Shooter {
         coverR.setPosition(coverR.getPosition()+(direction*0.05));
     }
     public void preload(Telemetry telemetry, double yawAngle) {
-        if(curTargetVelocity - Math.max(shooter1.getVelocity(),shooter0.getVelocity()) > 150){
+        if(curTargetVelocity - Math.max(shooter1.getVelocity(),shooter0.getVelocity()) > 100){
             shooter0.setPower(1);
             shooter1.setPower(1);
         }else {

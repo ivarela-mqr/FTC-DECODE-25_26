@@ -45,7 +45,7 @@ public class AutonR_2GateNearPartial extends OpMode {
 
         pathState = PathState.DRIVE_STARTPOS_SHOOT_POS;
         shootingStateMachine.init(hardwareMap,
-                org.firstinspires.ftc.teamcode.util.Constants.Alliance.BLUE,1150, IntakeStateMachineStates.FINAL,
+                org.firstinspires.ftc.teamcode.util.Constants.Alliance.BLUE,1200, IntakeStateMachineStates.FINAL,
                 new Pose(91,90));
 
         imu = hardwareMap.get(IMU.class, "imu");
@@ -152,19 +152,19 @@ public class AutonR_2GateNearPartial extends OpMode {
                     .addPath(
                             new BezierLine(
                                     new Pose(130, 73),
-                                    new Pose(86, 83)
+                                    new Pose(86, 86)
                             )
                     )
                     .setTangentHeadingInterpolation()
                     .setGlobalDeceleration()
                     //.setReversed()
-                    .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(36))
+                    .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                     .build();
 
             goTakeFirst = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(86, 83),
+                                    new Pose(86, 86),
                                     new Pose(124, 90)
                             )
                     )
