@@ -8,144 +8,156 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.util.Constants;
 import org.firstinspires.ftc.teamcode.util.Debouncer;
 
 public class Shooter {
-    public  DcMotorEx shooter0, shooter1;
+    public  DcMotorEx shooter0, shooter1, encoder;
     public CRServo rotorL, rotorR;
     public Servo coverL, coverR, block;
     public LimeLight limeLight;
-    public DcMotorEx encoder;
     int LEFT_LIMIT = -10000;
-    final int LEFT_TELEOP_LIMIT = -2500;
     int RIGHT_LIMIT = 10000;
-    final int RIGHT_TELEOP_LIMIT = 2500;
-    final double VELOCITY_FACTOR = - 0.05;
-    double offset = 0;
-    double curTargetVelocity = 1200;
-    double kP_shooter = 1.5;
-    double kI_shooter = 0.0005;
-    double kD_shooter = 1.35;
-    double kF_shooter = 16;
-    public Timer init;
-    public boolean autoAim = true;
+    final double VELOCITY_FACTOR = 0.05;
+    public double offset = 0;
+    double curTargetVelocity;
+    public Timer init = new Timer();
+    public boolean autoAim = true, teleOp = false;
     public Debouncer debouncer = new Debouncer(200);
     public Debouncer velDebouncer = new Debouncer(200);
     public Debouncer blockDebouncer = new Debouncer(200);
+    PIDFCoefficients coefficients = new PIDFCoefficients(22, 0, 1.7, 15);
     private double lastValidOffset = 0;
-    private boolean teleOp = false;
-    public Shooter (HardwareMap hardwareMap, Constants.Alliance alliance, double targetVel, double targetAngle){
+    public boolean stop = false;
+    private ElapsedTime timer = new ElapsedTime();
+    public double kP = 0.35;
+    public double kD = 0.05;
+    double lastError = 0;
+    double lastTime = 0;
+    double filtredError = 0;
+    public double alpha = 0;
+    boolean hold = true;
+    public Shooter (HardwareMap hardwareMap, Constants.Alliance alliance, double targetVel){
         shooter0 = hardwareMap.get(DcMotorEx.class,"shooter0");
         shooter1 = hardwareMap.get(DcMotorEx.class,"shooter1");
+        encoder = hardwareMap.get(DcMotorEx.class, "intake");
         rotorL = hardwareMap.get(CRServo.class,"rotorL");
         rotorR = hardwareMap.get(CRServo.class,"rotorR");
         coverL = hardwareMap.get(Servo.class,"coverL");
         coverR = hardwareMap.get(Servo.class,"coverR");
         block = hardwareMap.get(Servo.class, "block");
-
-
-        PIDFCoefficients pidfCoefficients_shooter = new PIDFCoefficients(kP_shooter, kI_shooter, kD_shooter, kF_shooter);
-
-        shooter0.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, pidfCoefficients_shooter);
-        shooter1.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, pidfCoefficients_shooter);
-
-        coverL.setDirection(Servo.Direction.REVERSE);
-
-        limeLight = new LimeLight(hardwareMap, alliance);
-        curTargetVelocity = targetVel;
-        encoder = hardwareMap.get(DcMotorEx.class, "intake");
+        shooter0.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, coefficients);
+        shooter1.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, coefficients);
         encoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         encoder.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        init = new Timer();
+        coverL.setDirection(Servo.Direction.REVERSE);
+        limeLight = new LimeLight(hardwareMap, alliance);
+        curTargetVelocity = targetVel;
+        timer.reset();
     }
-    public void initTimer(){
+    public void resetTimer(){
         init.resetTimer();
     }
     public void adjustVelAndCover(double distance){
-        if(distance > 0 && teleOp){
-            curTargetVelocity = 1.685393*distance + 930.3371;
-            double pos =  -0.000921659*distance + 0.4115207;
+        if(distance > 0 && teleOp && autoAim){
+            curTargetVelocity = 744.8561 + 4.052032*distance - 0.005816 * Math.pow(distance,2);
+            double pos = 1.212238 - 0.01040305*distance + 0.00002366859 * Math.pow(distance,2);
             adjustCover(pos);
         }
     }
-    public void aimWithLimelight(double yaw, Telemetry telemetry){
+    public void aimWithLimelight(double yaw){
         double[] var = limeLight.getGoalAprilTagData(yaw);
         offset = var[0];
         adjustVelAndCover(var[1]);
         moveServos(offset, offset != 0);
     }
-    public void moveServos(Double offsetX, boolean objectDetected) {
-        int posR = encoder.getCurrentPosition();
+    public double pid(double offset){
+        double currentTime = timer.seconds();
+        double dt = currentTime - lastTime;
+        lastTime = currentTime;
+        filtredError = alpha * filtredError + (1 - alpha) * offset;
 
-        if (objectDetected) {
+        double derivative = 0;
+        if (dt > 0) {
+            derivative = (filtredError - lastError) / dt;
+        }
+
+        double output = (kP * filtredError)
+                + (kD * derivative);
+
+        lastError = filtredError;
+
+        // Deadband
+        if (!hold && Math.abs(filtredError) < 3){
+            output = 0;
+            hold = true;
+        }else if(hold && Math.abs(filtredError) > 5){
+            hold = false;
+        }
+
+        // Limitar potencia
+        output = Math.max(-1, Math.min(1, output * VELOCITY_FACTOR));
+        return -output;
+    }
+    public void moveServos(double offsetX, boolean objectDetected) {
+        if (objectDetected)
             lastValidOffset = offsetX;
-        } else {
+        else
             offsetX = lastValidOffset;
-        }
-
-        double power = offsetX * VELOCITY_FACTOR;
-
+        double power = pid(offsetX);
+        int posR = encoder.getCurrentPosition();
         if (autoAim) {
-            if ((posR <= LEFT_LIMIT && power > 0) ||
-                    (posR >= RIGHT_LIMIT && power < 0)) {
-                power = 0;
-            }
-
-            rotorL.setPower(power);
-            rotorR.setPower(power);
+            setPowerRotor(power);
         }
-
         if ((posR <= LEFT_LIMIT && power > 0) ||
                 (posR >= RIGHT_LIMIT && power < 0)) {
             rotorL.setPower(0);
             rotorR.setPower(0);
         }
     }
-
     public void setPowerRotor(double power){
         int posR = encoder.getCurrentPosition();
-        if ((posR <= LEFT_LIMIT && rotorR.getPower() > 0) ||
-                (posR >= RIGHT_LIMIT && rotorL.getPower() < 0)) {
+        if ((posR <= LEFT_LIMIT && power > 0) ||
+                (posR >= RIGHT_LIMIT && power < 0)) {
             rotorL.setPower(0);
             rotorR.setPower(0);
         }else{
-            rotorL.setPower(power * VELOCITY_FACTOR);
-            rotorR.setPower(power * VELOCITY_FACTOR);
+            rotorL.setPower(power);
+            rotorR.setPower(power);
         }
     }
     public void resetRotorPosition(){
-        if(encoder.getCurrentPosition()>50){
-            setPowerRotor(-20);
-        }else if(encoder.getCurrentPosition()<-50){
-            setPowerRotor(20);
-        }else{
+        if(encoder.getCurrentPosition()>25)
+            setPowerRotor(-5 * VELOCITY_FACTOR);
+        else if(encoder.getCurrentPosition()<-25)
+            setPowerRotor(5 * VELOCITY_FACTOR);
+        else
             setPowerRotor(0);
-        }
     }
-
     public boolean isReady(){
-        return curTargetVelocity - Math.max(shooter1.getVelocity(),shooter0.getVelocity()) < 50 && offset < 3;
+        return velocityOffset() < 50
+                && offset < 5;
     }
-    public boolean canShoot(){
-        return curTargetVelocity - Math.max(shooter1.getVelocity(),shooter0.getVelocity()) < 50 && block.getPosition() <= 0.2;
+    public boolean canShoot(Gamepad gamepad){
+        return (velocityOffset() < 50
+                && block.getPosition() < 0.1) || gamepad.left_trigger > 0.1;
     }
     public void adjustCover(double dist){
         coverL.setPosition(dist);
         coverR.setPosition(dist);
     }
-
-    public void correctCover(Telemetry telemetry, double direction){
+    public void correctCover(double direction){
         coverL.setPosition(coverL.getPosition()+(direction*0.05));
         coverR.setPosition(coverR.getPosition()+(direction*0.05));
     }
-    public void preload(Telemetry telemetry, double yawAngle) {
-        if(curTargetVelocity - Math.max(shooter1.getVelocity(),shooter0.getVelocity()) > 100){
+    public void preload() {
+        if (velocityOffset() > 100) {
             shooter0.setPower(1);
             shooter1.setPower(1);
-        }else {
+        } else {
             shooter0.setVelocity(curTargetVelocity);
             shooter1.setVelocity(curTargetVelocity);
         }
@@ -157,7 +169,7 @@ public class Shooter {
         return block.getPosition();
     }
     public void calm(){
-        if(Math.abs(curTargetVelocity - Math.max(shooter1.getVelocity(), shooter0.getVelocity())) > 100){
+        if(velocityOffset() > 100){
             shooter0.setPower(1);
             shooter1.setPower(1);
         }else {
@@ -177,17 +189,35 @@ public class Shooter {
             block.setPosition(0);
         }else{block.setPosition(1);}
     }
-    public void TeleOp(Gamepad gamepad1, Gamepad gamepad2, Telemetry telemetry, double yawAngle, boolean isFull){
-        //aim rotor
-        if (gamepad2.share){
-            autoAim = true;
-        }
+    public void startTeleop(){
         teleOp = true;
-        RIGHT_LIMIT = RIGHT_TELEOP_LIMIT;
-        LEFT_LIMIT = LEFT_TELEOP_LIMIT;
-        aimWithLimelight(yawAngle,telemetry);
+        RIGHT_LIMIT = Constants.RIGHT_TELEOP_LIMIT;
+        LEFT_LIMIT = Constants.LEFT_TELEOP_LIMIT;
+    }
+    public double velocityOffset(){
+        return curTargetVelocity - Math.max(shooter1.getVelocity(), shooter0.getVelocity());
+    }
+    public void TeleOp(Gamepad gamepad1, Gamepad gamepad2, Telemetry telemetry,
+                       double yawAngle, boolean isFull){
+        aimWithLimelight(yawAngle);
+        if(gamepad1.dpadUpWasPressed())
+            stop = true;
+        if(!stop)
+            preload();
+        else
+            stop();
+        if(isFull && (isReady() || gamepad1.left_trigger > 0.1) && gamepad1.right_trigger > 0.1)
+            openBlock();
+        else if(gamepad1.right_trigger < 0.9 || gamepad1.left_trigger < 0.9)
+            closeBlock();
 
-        //correct shooter rotor
+        if (gamepad2.share)
+            autoAim = true;
+        if (gamepad2.dpad_left)
+            limeLight.switchAlliance(Constants.Alliance.BLUE);
+        else if(gamepad2.dpad_right)
+            limeLight.switchAlliance(Constants.Alliance.RED);
+
         if (gamepad2.left_trigger > 0.1){
             autoAim = false;
             setPowerRotor(-10);
@@ -199,35 +229,16 @@ public class Shooter {
             autoAim = false;
         }
 
-        if(isFull){
-            preload(telemetry,yawAngle);
-            if(isReady() && gamepad1.right_trigger > 0.1){
-                openBlock();
-            }
-        }else {
-            calm();
-            closeBlock();
-        }
-
         if(gamepad2.dpad_up && velDebouncer.isReady())
             curTargetVelocity += 50;
-
         if(gamepad2.dpad_down && velDebouncer.isReady())
             curTargetVelocity -= 50;
-
-
-        //correct shooter cover
-        if(gamepad2.left_bumper && debouncer.isReady()){
-            correctCover(telemetry, -1);
-        }
-        if(gamepad2.right_bumper && debouncer.isReady()){
-            correctCover(telemetry, 1);
-        }
-
-        if (gamepad2.circle && blockDebouncer.isReady()){
+        if(gamepad2.left_bumper && debouncer.isReady())
+            correctCover(-1);
+        if(gamepad2.right_bumper && debouncer.isReady())
+            correctCover(1);
+        if (gamepad2.circle && blockDebouncer.isReady())
             switchBlock();
-        }
-
 
         telemetry.addData("velocity shooter",shooter0.getVelocity());
         telemetry.addData("curTargetVelocity",curTargetVelocity);

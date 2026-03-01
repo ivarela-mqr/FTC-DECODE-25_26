@@ -87,8 +87,9 @@ public class ShootingStateMachine {
 
         return result;
     }
-    public void init(HardwareMap hardwareMap, Constants.Alliance alliance, double currVel, IntakeStateMachineStates state, Pose shootingPose){
-        shooter = new Shooter(hardwareMap, alliance,currVel,0);
+    public void init(HardwareMap hardwareMap, Constants.Alliance alliance,
+                     double currVel, IntakeStateMachineStates state, Pose shootingPose){
+        shooter = new Shooter(hardwareMap, alliance,currVel);
         timer = new Timer();
         actualTime = new Timer();
         switchState(States.INIT);
@@ -98,7 +99,7 @@ public class ShootingStateMachine {
 
     public void update(Pose pose, Telemetry telemetry, double yawAngle, boolean isBussyFollower){
         isInShootingPos = canShoot(pose);
-        shooter.aimWithLimelight(yawAngle, telemetry);
+        shooter.aimWithLimelight(yawAngle);
         intakeAutoStateMachine.updateIntakeStateMachine(canShoot);
         actualTime.resetTimer();
         switch (state){
@@ -106,7 +107,7 @@ public class ShootingStateMachine {
                 shooter.closeBlock();
                 shooter.calm();
                 if(isInShootingPos) {
-                    shooter.preload(telemetry, yawAngle);
+                    shooter.preload();
                     switchState(States.LOADING);
                 }
                 break;
@@ -114,10 +115,8 @@ public class ShootingStateMachine {
                 if(shooter.isReady() && !isBussyFollower
                     && Math.abs(timer.getElapsedTimeSeconds() - actualTime.getElapsedTimeSeconds())> 1) {
                     switchState(States.SHOOTING);
-                }
-                else{
-                    shooter.preload(telemetry,yawAngle);
-                }
+                } else
+                    shooter.preload();
                 break;
             case SHOOTING:
                 shooter.openBlock();
@@ -140,12 +139,10 @@ public class ShootingStateMachine {
     }
     public boolean canShoot(Pose pose) {
         double posTolerance = 15;
-
         double dx = pose.getX() - shootingPose.getX();
         double dy = pose.getY() - shootingPose.getY();
         double distance = Math.sqrt(dx * dx + dy * dy);
-
-        return distance <= posTolerance ;
+        return distance <= posTolerance;
     }
     public boolean canShoot(){
         return canShoot;

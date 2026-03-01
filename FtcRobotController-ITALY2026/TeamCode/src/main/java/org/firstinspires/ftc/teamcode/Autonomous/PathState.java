@@ -7,7 +7,6 @@ public enum PathState{
     TAKE_FIRST,
     TAKE_SECOND,
     TAKE_THIRD,
-    TAKE_OPEN,
     OPEN_BLOCK,
     TAKE_BASE,
     END

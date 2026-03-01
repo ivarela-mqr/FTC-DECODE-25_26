@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import static org.firstinspires.ftc.teamcode.pedroPathing.Constants.createFollower;
+
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.util.Timer;
@@ -15,40 +17,36 @@ import org.firstinspires.ftc.teamcode.subsystems.IntakeStateMachine;
 import org.firstinspires.ftc.teamcode.subsystems.Tilt;
 import org.firstinspires.ftc.teamcode.util.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.DriveTrain;
-import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.Shooter;
 
 @TeleOp
 public class Italy26TeleOpMode extends OpMode {
     DriveTrain driveTrain;
-    Intake intake;
     Shooter shooter;
+    IntakeStateMachine intakeStateMachine;
     Tilt tilt;
     IMU imu;
     YawPitchRollAngles orientation;
     double yawOffset = 0;
-    IntakeStateMachine intakeStateMachine = new IntakeStateMachine();
+    double yawOffsetShooter = 0;
     Follower follower;
     Timer actualTimer,initTimer;
-
+    boolean rumble = false;
     @Override
     public void init() {
         actualTimer = new Timer();
         initTimer = new Timer();
-        actualTimer.resetTimer();
-        initTimer.resetTimer();
         driveTrain = new DriveTrain(hardwareMap);
-        intake = new Intake(hardwareMap);
-        shooter = new Shooter(hardwareMap, Constants.Alliance.BLUE, 1200, 30); //todo ch. alliance from auton
+        shooter = new Shooter(hardwareMap, Constants.Alliance.BLUE, 1200);
         tilt = new Tilt(hardwareMap);
-        intakeStateMachine.init(hardwareMap);
+        intakeStateMachine = new IntakeStateMachine(hardwareMap);
         imu = hardwareMap.get(IMU.class, "imu");
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
                 RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
                 RevHubOrientationOnRobot.UsbFacingDirection.UP
         ));
         imu.initialize(parameters);
-        follower = org.firstinspires.ftc.teamcode.pedroPathing.Constants.createFollower(hardwareMap);
+        follower = createFollower(hardwareMap);
         follower.startTeleOpDrive(true);
         follower.setStartingPose(new Pose(72,72,0));
     }
@@ -59,56 +57,54 @@ public class Italy26TeleOpMode extends OpMode {
         gamepad2.rumble(20);
         tilt.resetTimer();
         initTimer.resetTimer();
+        actualTimer.resetTimer();
+        shooter.startTeleop();
     }
 
     @Override
     public void loop() {
-        actualTimer.resetTimer();
         orientation = imu.getRobotYawPitchRollAngles();
-
-        double yawAngleShooter = orientation.getYaw(AngleUnit.DEGREES) - yawOffset;
-        if(gamepad1.options){
-            //yawOffset = orientation.getYaw();
-        }
+        double yawAngleShooter = orientation.getYaw(AngleUnit.DEGREES)
+                                    - yawOffsetShooter;
         double rawYaw = Math.toDegrees(follower.getHeading());
         double yawAngle = rawYaw - yawOffset;
-
-        if(Math.abs(actualTimer.getElapsedTimeSeconds() - initTimer.getElapsedTimeSeconds()) > 90){
-            gamepad1.rumble(500);
-            gamepad2.rumble(500);
-        }
-
         if (gamepad1.options) {
             yawOffset = rawYaw;
-        }
-        if (gamepad1.options) {
             follower.setPose(new Pose(
                     follower.getPose().getX(),
                     follower.getPose().getY(),
                     0
             ));
+            yawOffsetShooter = orientation.getYaw();
         }
         follower.update();
-        //switch Alliance
-        if (gamepad2.dpad_left){
-            shooter.limeLight.switchAlliance(Constants.Alliance.BLUE);
-        }else if(gamepad2.dpad_right){
-            shooter.limeLight.switchAlliance(Constants.Alliance.RED);
-        }
 
         driveTrain.TeleOp(gamepad1,telemetry,yawAngle);
-        intakeStateMachine.updateIntakeStateMachine((shooter.canShoot() && gamepad1.right_trigger > 0.1)
-                , gamepad1,gamepad2);
-        shooter.TeleOp(gamepad1, gamepad2, telemetry, yawAngleShooter, intakeStateMachine.isFull());
+        intakeStateMachine.TeleOp((shooter.canShoot(gamepad1) && gamepad1.right_trigger > 0.1),
+                                    gamepad1, gamepad2);
+        shooter.TeleOp(gamepad1, gamepad2, telemetry, yawAngleShooter,
+                                    intakeStateMachine.isFull());
         tilt.Teleop(gamepad1);
+
+        actualTimer.resetTimer();
+        if(!rumble && timeElapsed() > 105){
+            rumble = true;
+            gamepad1.rumble(2000);
+            gamepad2.rumble(2000);
+        }
+
         telemetry.addData("Sensor1", intakeStateMachine.intake.firstArtifactIn());
         telemetry.addData("Sensor2", intakeStateMachine.intake.distanceSensor1.getDistance(DistanceUnit.CM));
         telemetry.addData("Sensor3", intakeStateMachine.intake.distanceSensor2.getDistance(DistanceUnit.CM));
         telemetry.addData("Intake state", intakeStateMachine.state);
         telemetry.addData("Pos encoder", shooter.encoder.getCurrentPosition());
         telemetry.addData("Heading odometry", follower.getHeading());
+        telemetry.addData("SHooter", gamepad1.right_trigger);
         telemetry.addData("Yaw imu", yawAngleShooter);
 
         telemetry.update();
+    }
+    public int timeElapsed(){
+        return (int)Math.abs(actualTimer.getElapsedTimeSeconds() - initTimer.getElapsedTimeSeconds());
     }
 }

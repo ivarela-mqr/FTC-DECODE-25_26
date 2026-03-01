@@ -6,5 +6,6 @@ public enum IntakeStateMachineStates {
     SECOND_ARTIFACT,
     FINAL,
     SHOOTING,
-    UNLOAD
+    UNLOAD,
+    END
 }

@@ -15,13 +15,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 public class DriveTrain {
-    //variables
-    private DcMotor frontLeft, frontRight, backLeft, backRight;
-    private Follower follower;
-    private double drive = 0;
-    private double strafe = 0;
-    private double rotate = 0;
-
+    private final DcMotor frontLeft, frontRight, backLeft, backRight;
     public DriveTrain(HardwareMap hardwareMap){
         frontLeft = hardwareMap.get(DcMotor.class, "FrontLeft");
         frontRight = hardwareMap.get(DcMotor.class, "FrontRight");
@@ -37,9 +31,9 @@ public class DriveTrain {
     }
 
     public void TeleOp(Gamepad gamepad, Telemetry telemetry, double yawAngle){
-        drive  = -gamepad.left_stick_y;
-        strafe =  gamepad.left_stick_x;
-        rotate =  gamepad.right_stick_x;
+        double drive = -gamepad.left_stick_y;
+        double strafe = gamepad.left_stick_x;
+        double rotate = gamepad.right_stick_x;
 
         double headingRad = Math.toRadians(yawAngle);
 

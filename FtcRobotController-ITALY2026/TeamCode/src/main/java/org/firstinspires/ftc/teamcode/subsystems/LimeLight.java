@@ -9,7 +9,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.util.Constants;
 
 public class LimeLight {
-    private Limelight3A limelight;
+    private final Limelight3A limelight;
     public LimeLight(HardwareMap hardwareMap, Constants.Alliance alliance) {
         limelight = hardwareMap.get(Limelight3A.class,"limelight");
         if (alliance == Constants.Alliance.BLUE)
@@ -26,14 +26,12 @@ public class LimeLight {
         else if (newAlliance == Constants.Alliance.RED)
             limelight.pipelineSwitch(9); // Red alliance aprilTag
     }
-
-
     public double[] getGoalAprilTagData(double yawAngle){
         limelight.updateRobotOrientation(yawAngle);
         LLResult llResult = limelight.getLatestResult();
         double[] data = new double[2];
         if (llResult != null && llResult.isValid()){
-            Pose3D botPose = llResult.getBotpose();
+            //Pose3D botPose = llResult.getBotpose();
             //telemetry.addData("Tx", llResult.getTx());
             //telemetry.addData("Ty", llResult.getTy());
             //telemetry.addData("Ta", llResult.getTa());
@@ -47,7 +45,6 @@ public class LimeLight {
         data[1] = 0;
         return data;
     }
-
     private double getDistanceFromTargeta(double ta){
         return 180.5062* Math.pow(ta,-0.5018798);
     }

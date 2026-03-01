@@ -46,7 +46,7 @@ public class AutonB_1GateNearTotal extends OpMode {
 
         pathState = PathState.DRIVE_STARTPOS_SHOOT_POS;
         shootingStateMachine.init(hardwareMap,
-                org.firstinspires.ftc.teamcode.util.Constants.Alliance.BLUE,1200, IntakeStateMachineStates.FINAL,
+                org.firstinspires.ftc.teamcode.util.Constants.Alliance.BLUE,1150, IntakeStateMachineStates.FINAL,
                 new Pose(53,90));
 
         imu = hardwareMap.get(IMU.class, "imu");
@@ -119,7 +119,7 @@ public class AutonB_1GateNearTotal extends OpMode {
                     .addPath(
                             new BezierLine(
                                     new Pose(53, 96),
-                                    new Pose(53, 64)
+                                    new Pose(53, 65)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(144), Math.toRadians(180))
@@ -128,8 +128,8 @@ public class AutonB_1GateNearTotal extends OpMode {
             goTakeSecond2 = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(53, 64),
-                                    new Pose(15, 64)
+                                    new Pose(53, 65),
+                                    new Pose(15, 65)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
@@ -137,8 +137,8 @@ public class AutonB_1GateNearTotal extends OpMode {
             goOpen1 = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(15, 64),
-                                    new Pose(23, 64)
+                                    new Pose(15, 65),
+                                    new Pose(23, 65)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
@@ -146,7 +146,7 @@ public class AutonB_1GateNearTotal extends OpMode {
             goOpen2 = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(23, 64),
+                                    new Pose(23, 65),
                                     new Pose(14, 73)
                             )
                     )
@@ -216,7 +216,7 @@ public class AutonB_1GateNearTotal extends OpMode {
                     )
                     //.setTangentHeadingInterpolation()
                     .setGlobalDeceleration()
-                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
+                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(144))
                     //.setReversed()
                     .build();
             finalPath = follower.pathBuilder()
@@ -226,7 +226,7 @@ public class AutonB_1GateNearTotal extends OpMode {
                                     new Pose(20, 70)
                             )
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
+                    .setLinearHeadingInterpolation(Math.toRadians(144), Math.toRadians(180))
                     .build();
         }
     }
@@ -241,7 +241,6 @@ public class AutonB_1GateNearTotal extends OpMode {
                 setPathState(PathState.SHOOT_PRELOAD);
                 break;
             case SHOOT_PRELOAD:
-                shootingStateMachine.shooter.autoAim = true;
                 if(!shootingStateMachine.isBusy() && !follower.isBusy()) {
                     if(lastPathState == PathState.TAKE_FIRST) {
                         follower.followPath(paths.goTakeThird1,0.75,true);
@@ -275,7 +274,6 @@ public class AutonB_1GateNearTotal extends OpMode {
                     }
                 }
                 break;
-
             case TAKE_THIRD:
                 if(!follower.isBusy()) {
                     if (lastPathState == PathState.SHOOT_PRELOAD){
@@ -287,22 +285,20 @@ public class AutonB_1GateNearTotal extends OpMode {
                     }
                 }
                 break;
-
             case OPEN_BLOCK:
                 if(!follower.isBusy()){
                     if(lastPathState == PathState.TAKE_SECOND) {
                         follower.followPath(paths.goOpen2,0.5,true);
                         setPathState(PathState.OPEN_BLOCK);
                     }else if(lastPathState == PathState.OPEN_BLOCK &&
-                            Math.abs(actualTimer.getElapsedTimeSeconds() - stateTimer.getElapsedTimeSeconds()) > 3){
+                            Math.abs(actualTimer.getElapsedTimeSeconds() - stateTimer.getElapsedTimeSeconds()) > 2){
                         follower.followPath(paths.goShotSecond,0.75, true);
                         setPathState(PathState.SHOOT_PRELOAD);
                     }
-
                 }
                 break;
             case END:
-
+                shootingStateMachine.shooter.autoAim = false;
                 shootingStateMachine.shooter.resetRotorPosition();
             default:
                 break;

@@ -44,12 +44,17 @@ public class CalculateShooterCurvature extends OpMode {
     public void init() {
         shooter1=hardwareMap.get(DcMotorEx.class,"shooter1");
         shooter2=hardwareMap.get(DcMotorEx.class,"shooter0");
+        intake = hardwareMap.get(DcMotorEx.class,"intake");
+        transfer = hardwareMap.get(DcMotorEx.class,"transfer");
 
-        p = 0;
+        coverL = hardwareMap.get(Servo.class,"coverL");
+        coverR = hardwareMap.get(Servo.class,"coverR");
+        intake.setDirection(DcMotorSimple.Direction.REVERSE);
+        p = 22;
         i = 0;
-        d = 0;
-        f = 0;
-        PIDFCoefficients coeficients = new PIDFCoefficients(1,0,0,15.3);
+        d = 1.7;
+        f = 15;
+        PIDFCoefficients coeficients = new PIDFCoefficients(p,i,d,f);
         shooter1.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,coeficients);
         shooter2.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,coeficients);
         limelight = hardwareMap.get(Limelight3A.class,"limelight");
@@ -59,6 +64,8 @@ public class CalculateShooterCurvature extends OpMode {
                 RevHubOrientationOnRobot.LogoFacingDirection.UP,
                 RevHubOrientationOnRobot.UsbFacingDirection.FORWARD);
         imu.initialize(new IMU.Parameters(revHubOrientationOnRobot));
+        coverL.setPosition(0.1);
+        coverR.setPosition(0.1);
 
     }
 
@@ -92,6 +99,13 @@ public class CalculateShooterCurvature extends OpMode {
             shooter2.setPower(0);
         }
 
+        if(gamepad1.left_trigger > 0.1) {
+            intake.setPower(1);
+            transfer.setPower(1);
+        }else{
+            intake.setPower(0);
+            transfer.setPower(0);
+        }
         telemetry.addData("Velocity", currVel);
         telemetry.addData("RealVelocity",shooter1.getVelocity());
         telemetry.addData("RealVelocity",shooter2.getVelocity());

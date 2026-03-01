@@ -4,7 +4,6 @@ import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
-import org.firstinspires.ftc.teamcode.subsystems.IntakeStateMachine;
 import org.firstinspires.ftc.teamcode.util.IntakeStateMachineStates;
 
 public class IntakeAutoStateMachine {
@@ -18,7 +17,9 @@ public class IntakeAutoStateMachine {
         this.state = state;
     }
     public boolean isBusy() {
-        return state != IntakeStateMachineStates.INIT && state != IntakeStateMachineStates.FIRST_ARTIFACT && state != IntakeStateMachineStates.SECOND_ARTIFACT;
+        return state != IntakeStateMachineStates.INIT
+                && state != IntakeStateMachineStates.FIRST_ARTIFACT
+                && state != IntakeStateMachineStates.SECOND_ARTIFACT;
     }
     public boolean isShooting() {
         return intake.numArtifactsIn() > 0;
@@ -47,7 +48,7 @@ public class IntakeAutoStateMachine {
                 intake.setTransferPosition(75);
 
                 if(intake.thirdArtifactIn()
-                        || Math.abs(currTime.getElapsedTimeSeconds() - timer.getElapsedTimeSeconds()) > 1){
+                        || Math.abs(currTime.getElapsedTimeSeconds() - timer.getElapsedTimeSeconds()) > 2){
                     switchState(IntakeStateMachineStates.FINAL);
                 }
                 break;
@@ -61,6 +62,8 @@ public class IntakeAutoStateMachine {
                         || Math.abs(currTime.getElapsedTimeSeconds() - timer.getElapsedTimeSeconds()) > 5){
                     switchState(IntakeStateMachineStates.INIT);
                 }
+                break;
+            default:
                 break;
         }
     }

@@ -12,22 +12,26 @@ public class IntakeStateMachine {
     public Timer timer = new Timer();
     public Timer currTime = new Timer();
 
-    public void init(HardwareMap hardwareMap){
+    public IntakeStateMachine(HardwareMap hardwareMap){
         intake = new Intake(hardwareMap);
         state = IntakeStateMachineStates.INIT;
     }
     public boolean isFull(){
-        return state == IntakeStateMachineStates.FINAL || state == IntakeStateMachineStates.SHOOTING;
+        return state == IntakeStateMachineStates.FINAL
+                || state == IntakeStateMachineStates.SHOOTING
+                || state == IntakeStateMachineStates.INIT;
     }
-
-    public void updateIntakeStateMachine(boolean canShoot, Gamepad gamepad1, Gamepad gamepad2){
+    public void TeleOp(boolean canShoot, Gamepad gamepad1, Gamepad gamepad2){
         currTime.resetTimer();
-        if(gamepad2.dpadDownWasPressed() || gamepad1.left_trigger > 0.1)
+
+        if(gamepad2.circle)
             switchState(IntakeStateMachineStates.FINAL);
 
         if(gamepad2.triangle)
             switchState(IntakeStateMachineStates.UNLOAD);
 
+        if(gamepad2.dpadUpWasPressed())
+            switchState(IntakeStateMachineStates.END);
         switch (state){
             case INIT:
                 intake.intakeFirstArtifact();
@@ -60,7 +64,7 @@ public class IntakeStateMachine {
                 break;
             case SHOOTING:
                 intake.shootArtifacts();
-                if(Math.abs(timer.getElapsedTimeSeconds() - currTime.getElapsedTimeSeconds())> 1){
+                if(gamepad1.left_trigger == 0){
                     switchState(IntakeStateMachineStates.INIT);
                 }
                 break;
@@ -69,9 +73,12 @@ public class IntakeStateMachine {
                     switchState(IntakeStateMachineStates.INIT);
                 intake.unload();
                 break;
+            case END:
+                intake.stopArtifacts();
+            default:
+                break;
         }
     }
-
     public void switchState(IntakeStateMachineStates state){
         this.state = state;
         timer.resetTimer();

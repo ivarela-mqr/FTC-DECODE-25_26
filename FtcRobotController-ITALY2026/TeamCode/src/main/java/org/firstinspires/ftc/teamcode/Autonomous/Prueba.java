@@ -249,7 +249,7 @@ public class Prueba extends OpMode {
                 follower.followPath(paths.goShotLoaded,0.9,true);
                 lastPathState = pathState;
                 pathState = PathState.SHOOT_PRELOAD;
-                shootingStateMachine.shooter.initTimer();
+                shootingStateMachine.shooter.resetTimer();
                 break;
             case SHOOT_PRELOAD:
                 shootingStateMachine.shooter.autoAim = true;
