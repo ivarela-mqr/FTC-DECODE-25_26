@@ -47,7 +47,7 @@ public class AutonR_1GateNearTotal extends OpMode {
         pathState = PathState.DRIVE_STARTPOS_SHOOT_POS;
         shootingStateMachine.init(hardwareMap,
                 org.firstinspires.ftc.teamcode.util.Constants.Alliance.RED,
-                1150, IntakeStateMachineStates.FINAL, new Pose(91,90));
+                1200, IntakeStateMachineStates.FINAL, new Pose(91,90));
 
         imu = hardwareMap.get(IMU.class, "imu");
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(

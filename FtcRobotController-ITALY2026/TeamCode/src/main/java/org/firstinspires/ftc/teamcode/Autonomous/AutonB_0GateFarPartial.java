@@ -38,15 +38,15 @@ public class AutonB_0GateFarPartial extends OpMode {
         panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
 
         follower = Constants.createFollower(hardwareMap);
-        follower.setStartingPose(new Pose(53, 7, Math.toRadians(90)));
+        follower.setStartingPose(new Pose(45, 7, Math.toRadians(90)));
 
         paths = new Paths(follower); // Build paths
 
 
         pathState = PathState.DRIVE_STARTPOS_SHOOT_POS;
         shootingStateMachine.init(hardwareMap,
-                org.firstinspires.ftc.teamcode.util.Constants.Alliance.BLUE,1450, IntakeStateMachineStates.FINAL,
-                new Pose(63,16));
+                org.firstinspires.ftc.teamcode.util.Constants.Alliance.BLUE,1400, IntakeStateMachineStates.FINAL,
+                new Pose(63,10));
 
         imu = hardwareMap.get(IMU.class, "imu");
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
@@ -72,16 +72,11 @@ public class AutonB_0GateFarPartial extends OpMode {
         panelsTelemetry.debug("Path State", pathState);
         panelsTelemetry.debug("Shooter state",shootingStateMachine.state);
         panelsTelemetry.debug("Intake state",shootingStateMachine.intakeAutoStateMachine.state);
-        panelsTelemetry.debug("Is aiming auto", shootingStateMachine.shooter.autoAim);
-        panelsTelemetry.debug("Rotors power", shootingStateMachine.shooter.rotorL.getPower());
         panelsTelemetry.debug("Shooter velocity", shootingStateMachine.shooter.shooter0.getVelocity());
-        panelsTelemetry.debug("Shooter velocity", shootingStateMachine.shooter.shooter1.getVelocity());
-        panelsTelemetry.debug("Ticks", ticks);
-        panelsTelemetry.debug("Is bussy", pathState != PathState.SHOOT_PRELOAD);
 
         //panelsTelemetry.debug("Can shoot",shootingStateMachine.canShoot(pose));
-        //panelsTelemetry.debug("X", follower.getPose().getX());
-        //panelsTelemetry.debug("Y", follower.getPose().getY());
+        panelsTelemetry.debug("X", follower.getPose().getX());
+        panelsTelemetry.debug("Y", follower.getPose().getY());
         //panelsTelemetry.debug("Heading", follower.getPose().getHeading());
 
         panelsTelemetry.update(telemetry);
@@ -102,8 +97,8 @@ public class AutonB_0GateFarPartial extends OpMode {
             goShotLoaded = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(53, 7),
-                                    new Pose(63, 16)
+                                    new Pose(45, 7),
+                                    new Pose(60, 16)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(90))
@@ -112,7 +107,7 @@ public class AutonB_0GateFarPartial extends OpMode {
             goTakeThird1 = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(63, 16),
+                                    new Pose(60, 16),
                                     new Pose(42, 40)
                             )
                     )
@@ -123,7 +118,7 @@ public class AutonB_0GateFarPartial extends OpMode {
                     .addPath(
                             new BezierLine(
                                     new Pose(42, 40),
-                                    new Pose(12, 40)
+                                    new Pose(10, 40)
                             )
                     )
                     .setTangentHeadingInterpolation()
@@ -131,7 +126,7 @@ public class AutonB_0GateFarPartial extends OpMode {
             goShotThird = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(12, 40),
+                                    new Pose(10, 40),
                                     new Pose(60, 8)
                             )
                     )
@@ -141,46 +136,61 @@ public class AutonB_0GateFarPartial extends OpMode {
                     .build();
 
             goTakeBase1 = follower.pathBuilder()
+
+                    // 🔹 Primer tramo (con interpolación de heading)
                     .addPath(
                             new BezierLine(
                                     new Pose(60, 8),
-                                    new Pose(0, 35)
+                                    new Pose(30, 22)   // punto intermedio
                             )
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(270))
+                    .setLinearHeadingInterpolation(
+                            Math.toRadians(90),
+                            Math.toRadians(245)
+                    )
+
+                    // 🔹 Segundo tramo (sin interpolación)
+                    .addPath(
+                            new BezierLine(
+                                    new Pose(30, 22),
+                                    new Pose(3.5, 37)
+                            )
+                    )
+                    .setConstantHeadingInterpolation(Math.toRadians(245))
+
                     .setGlobalDeceleration()
                     .build();
 
             goTakeBase2 = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(0, 35),
-                                    new Pose(0, 10)
+                                    new Pose(3.5, 37),
+                                    new Pose(1, 9)
                             )
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(270), Math.toRadians(270))
+                    .setLinearHeadingInterpolation(Math.toRadians(245), Math.toRadians(260))
                     .build();
 
             goShotBase = follower.pathBuilder()
                     .addPath(
                             new BezierCurve(
-                                    new Pose(0, 10),
+                                    new Pose(1, 9),
                                     new Pose(63, 16)
                             )
                     )
                     //.setTangentHeadingInterpolation()
                     .setGlobalDeceleration()
-                    .setLinearHeadingInterpolation(Math.toRadians(270), Math.toRadians(90))
+                    .setLinearHeadingInterpolation(Math.toRadians(260), Math.toRadians(90))
                     .build();
 
             finalPath = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
                                     new Pose(63, 16),
-                                    new Pose(63, 38)
+                                    new Pose(40, 40)
                             )
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(90))
+                    .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(180))
                     .build();
         }
     }
@@ -190,12 +200,12 @@ public class AutonB_0GateFarPartial extends OpMode {
         actualTimer.resetTimer();
         switch (pathState){
             case DRIVE_STARTPOS_SHOOT_POS:
-                shootingStateMachine.shooter.adjustCover(0.05);
+                shootingStateMachine.shooter.adjustCover(0.4);
+                shootingStateMachine.shooter.correctOffset = - 5;
                 follower.followPath(paths.goShotLoaded,0.5,true);
                 setPathState(PathState.SHOOT_PRELOAD);
                 break;
             case SHOOT_PRELOAD:
-                shootingStateMachine.shooter.autoAim = true;
                 if(!shootingStateMachine.isBusy() && !follower.isBusy()) {
                     if (lastPathState == PathState.TAKE_THIRD) {
                         follower.followPath(paths.goTakeBase1, 0.75, true);
@@ -211,12 +221,10 @@ public class AutonB_0GateFarPartial extends OpMode {
                 }
                 break;
 
-
-
             case TAKE_THIRD:
                 if(!follower.isBusy()) {
                     if (lastPathState == PathState.SHOOT_PRELOAD){
-                        follower.followPath(paths.goTakeThird2,0.75,true);
+                        follower.followPath(paths.goTakeThird2,0.5,true);
                         setPathState(PathState.TAKE_THIRD);
                     } else if (lastPathState == PathState.TAKE_THIRD) {
                         follower.followPath(paths.goShotThird,0.65,true);
@@ -230,7 +238,8 @@ public class AutonB_0GateFarPartial extends OpMode {
                     if(lastPathState == PathState.SHOOT_PRELOAD) {
                         follower.followPath(paths.goTakeBase2,0.5,true);
                         setPathState(PathState.TAKE_BASE);
-                    }else if(lastPathState == PathState.TAKE_BASE){
+                    }else if(lastPathState == PathState.TAKE_BASE &&
+                            Math.abs(actualTimer.getElapsedTimeSeconds() - stateTimer.getElapsedTimeSeconds()) > 3){
                         follower.followPath(paths.goShotBase,0.75, true);
                         setPathState(PathState.SHOOT_PRELOAD);
                     }

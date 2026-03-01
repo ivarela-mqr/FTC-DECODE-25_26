@@ -17,9 +17,7 @@ public class IntakeAutoStateMachine {
         this.state = state;
     }
     public boolean isBusy() {
-        return state != IntakeStateMachineStates.INIT
-                && state != IntakeStateMachineStates.FIRST_ARTIFACT
-                && state != IntakeStateMachineStates.SECOND_ARTIFACT;
+        return state != IntakeStateMachineStates.INIT && state != IntakeStateMachineStates.FIRST_ARTIFACT && state != IntakeStateMachineStates.SECOND_ARTIFACT;
     }
     public boolean isShooting() {
         return intake.numArtifactsIn() > 0;
@@ -38,7 +36,7 @@ public class IntakeAutoStateMachine {
             case FIRST_ARTIFACT:
                 intake.intakeNextArtifacts();
                 if(intake.secondArtifactIn()
-                        || Math.abs(currTime.getElapsedTimeSeconds() - timer.getElapsedTimeSeconds()) > 1){
+                        || Math.abs(currTime.getElapsedTimeSeconds() - timer.getElapsedTimeSeconds()) > 1.5){
                     switchState(IntakeStateMachineStates.SECOND_ARTIFACT);
                     intake.transferPosition2ArtifactIn = intake.transfer.getCurrentPosition();
                 }
@@ -48,7 +46,7 @@ public class IntakeAutoStateMachine {
                 intake.setTransferPosition(75);
 
                 if(intake.thirdArtifactIn()
-                        || Math.abs(currTime.getElapsedTimeSeconds() - timer.getElapsedTimeSeconds()) > 2){
+                        || Math.abs(currTime.getElapsedTimeSeconds() - timer.getElapsedTimeSeconds()) > 1){
                     switchState(IntakeStateMachineStates.FINAL);
                 }
                 break;
@@ -62,8 +60,6 @@ public class IntakeAutoStateMachine {
                         || Math.abs(currTime.getElapsedTimeSeconds() - timer.getElapsedTimeSeconds()) > 5){
                     switchState(IntakeStateMachineStates.INIT);
                 }
-                break;
-            default:
                 break;
         }
     }

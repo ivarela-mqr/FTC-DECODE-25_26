@@ -113,7 +113,7 @@ public class ShootingStateMachine {
                 break;
             case LOADING:
                 if(shooter.isReady() && !isBussyFollower
-                    && Math.abs(timer.getElapsedTimeSeconds() - actualTime.getElapsedTimeSeconds())> 1) {
+                    && Math.abs(timer.getElapsedTimeSeconds() - actualTime.getElapsedTimeSeconds())> 0.5) {
                     switchState(States.SHOOTING);
                 } else
                     shooter.preload();

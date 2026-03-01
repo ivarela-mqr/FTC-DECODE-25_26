@@ -46,7 +46,7 @@ public class AutonB_1GateNearTotal extends OpMode {
 
         pathState = PathState.DRIVE_STARTPOS_SHOOT_POS;
         shootingStateMachine.init(hardwareMap,
-                org.firstinspires.ftc.teamcode.util.Constants.Alliance.BLUE,1150, IntakeStateMachineStates.FINAL,
+                org.firstinspires.ftc.teamcode.util.Constants.Alliance.BLUE,1200, IntakeStateMachineStates.FINAL,
                 new Pose(53,90));
 
         imu = hardwareMap.get(IMU.class, "imu");

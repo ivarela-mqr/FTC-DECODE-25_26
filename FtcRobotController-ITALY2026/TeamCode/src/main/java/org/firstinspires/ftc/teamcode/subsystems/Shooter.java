@@ -21,8 +21,8 @@ public class Shooter {
     public LimeLight limeLight;
     int LEFT_LIMIT = -10000;
     int RIGHT_LIMIT = 10000;
-    final double VELOCITY_FACTOR = 0.05;
-    public double offset = 0;
+    final double VELOCITY_FACTOR = 0.1;
+    public double offset = 0, correctOffset = 0;
     double curTargetVelocity;
     public Timer init = new Timer();
     public boolean autoAim = true, teleOp = false;
@@ -32,13 +32,11 @@ public class Shooter {
     PIDFCoefficients coefficients = new PIDFCoefficients(22, 0, 1.7, 15);
     private double lastValidOffset = 0;
     public boolean stop = false;
-    private ElapsedTime timer = new ElapsedTime();
+    private final ElapsedTime timer = new ElapsedTime();
     public double kP = 0.35;
     public double kD = 0.05;
     double lastError = 0;
     double lastTime = 0;
-    double filtredError = 0;
-    public double alpha = 0;
     boolean hold = true;
     public Shooter (HardwareMap hardwareMap, Constants.Alliance alliance, double targetVel){
         shooter0 = hardwareMap.get(DcMotorEx.class,"shooter0");
@@ -78,6 +76,7 @@ public class Shooter {
         double currentTime = timer.seconds();
         double dt = currentTime - lastTime;
         lastTime = currentTime;
+        offset += correctOffset;
         double derivative = 0;
         if (dt > 0) {
             derivative = (offset - lastError) / dt;
@@ -123,9 +122,9 @@ public class Shooter {
     }
     public void resetRotorPosition(){
         if(encoder.getCurrentPosition()>25)
-            setPowerRotor(-5 * VELOCITY_FACTOR);
-        else if(encoder.getCurrentPosition()<-25)
             setPowerRotor(5 * VELOCITY_FACTOR);
+        else if(encoder.getCurrentPosition()<-25)
+            setPowerRotor(-5 * VELOCITY_FACTOR);
         else
             setPowerRotor(0);
     }
