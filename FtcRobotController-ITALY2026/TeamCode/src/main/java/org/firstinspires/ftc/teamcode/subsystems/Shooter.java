@@ -78,27 +78,19 @@ public class Shooter {
         double currentTime = timer.seconds();
         double dt = currentTime - lastTime;
         lastTime = currentTime;
-        filtredError = alpha * filtredError + (1 - alpha) * offset;
-
         double derivative = 0;
         if (dt > 0) {
-            derivative = (filtredError - lastError) / dt;
+            derivative = (offset - lastError) / dt;
         }
-
-        double output = (kP * filtredError)
+        double output = (kP * offset)
                 + (kD * derivative);
-
-        lastError = filtredError;
-
-        // Deadband
-        if (!hold && Math.abs(filtredError) < 3){
+        lastError = offset;
+        if (!hold && Math.abs(offset) < 3){
             output = 0;
             hold = true;
-        }else if(hold && Math.abs(filtredError) > 5){
+        }else if(hold && Math.abs(offset) > 5){
             hold = false;
         }
-
-        // Limitar potencia
         output = Math.max(-1, Math.min(1, output * VELOCITY_FACTOR));
         return -output;
     }
