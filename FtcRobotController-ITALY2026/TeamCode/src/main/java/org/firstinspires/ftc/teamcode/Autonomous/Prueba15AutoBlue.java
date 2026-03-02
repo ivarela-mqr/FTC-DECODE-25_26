@@ -169,14 +169,14 @@ public class Prueba15AutoBlue extends OpMode {
                     .setLinearHeadingInterpolation(Math.toRadians(148),Math.toRadians(180))
                     .addPath(new BezierLine(
                             new Pose(17,63),
-                            new Pose(11.5,63)
+                            new Pose(10,64)
                     ))
                     .setConstantHeadingInterpolation(Math.toRadians(180))
                     .build();
             goSHootOpen = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(11.5, 63),
+                                    new Pose(10, 64),
                                     new Pose(58, 86)
                             )
                     )
@@ -258,13 +258,13 @@ public class Prueba15AutoBlue extends OpMode {
         switch (pathState){
             case DRIVE_STARTPOS_SHOOT_POS:
                 shootingStateMachine.shooter.adjustCover(0.3);
-                follower.followPath(paths.goShotLoaded,1,true);
+                follower.followPath(paths.goShotLoaded,0.75,true);
                 setPathState(PathState.SHOOT_PRELOAD);
                 break;
             case SHOOT_PRELOAD:
                 if(!shootingStateMachine.isBusy() && !follower.isBusy()) {
                     if(lastPathState == PathState.TAKE_FIRST) {
-                        follower.followPath(paths.finalPath,0.75,true);
+                        follower.followPath(paths.finalPath,1,true);
                         setPathState(PathState.END);
                     } else if (lastPathState == PathState.TAKE_SECOND) {
                         follower.followPath(paths.goOpen2,0.75,true);
@@ -273,10 +273,10 @@ public class Prueba15AutoBlue extends OpMode {
                         follower.followPath(paths.goOpen2,0.75,true);
                         setPathState(PathState.OPEN_BLOCK);
                     } else if (lastPathState == PathState.OPEN_BLOCK) {
-                        follower.followPath(paths.goTakeFirst,0.85,true);
+                        follower.followPath(paths.goTakeFirst,1,true);
                         setPathState(PathState.TAKE_FIRST);
                     } else if(lastPathState == PathState.DRIVE_STARTPOS_SHOOT_POS){
-                        follower.followPath(paths.goTakeSecond1,0.85,true);
+                        follower.followPath(paths.goTakeSecond1,1,true);
                         setPathState(PathState.TAKE_SECOND);
                     }
                 }
@@ -290,21 +290,10 @@ public class Prueba15AutoBlue extends OpMode {
             case TAKE_SECOND:
                 if(!follower.isBusy()) {
                     if (lastPathState == PathState.SHOOT_PRELOAD){
-                        follower.followPath(paths.goTakeSecond2,0.85,true);
+                        follower.followPath(paths.goTakeSecond2,1,true);
                         setPathState(PathState.TAKE_SECOND);
                     } else if (lastPathState == PathState.TAKE_SECOND) {
                         follower.followPath(paths.goShotSecond,1,true);
-                        setPathState(PathState.SHOOT_PRELOAD);
-                    }
-                }
-                break;
-            case TAKE_THIRD:
-                if(!follower.isBusy()) {
-                    if (lastPathState == PathState.SHOOT_PRELOAD){
-                        follower.followPath(paths.goTakeThird2,0.75,true);
-                        setPathState(PathState.TAKE_THIRD);
-                    } else if (lastPathState == PathState.TAKE_THIRD) {
-                        follower.followPath(paths.goShotThird,0.65,true);
                         setPathState(PathState.SHOOT_PRELOAD);
                     }
                 }
@@ -316,7 +305,8 @@ public class Prueba15AutoBlue extends OpMode {
                         follower.followPath(paths.goOpen1,0.5,true);
                         setPathState(PathState.OPEN_BLOCK);
                         numOpen ++;
-                    } else if(lastPathState == PathState.OPEN_BLOCK) {
+                    } else if(lastPathState == PathState.OPEN_BLOCK
+                    && Math.abs(actualTimer.getElapsedTimeSeconds() - stateTimer.getElapsedTimeSeconds()) > 1) {
                         follower.followPath(paths.goSHootOpen,1,true);
                         setPathState(PathState.SHOOT_PRELOAD);
                     }
