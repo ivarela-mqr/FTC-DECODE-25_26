@@ -24,7 +24,7 @@ public class Tilt {
             climb3.setPower(1);
             climb4.setPower(1);
         }
-        if(timeElapsed() > 2.5){
+        if(timeElapsed() > 1){
             climb1.setPower(0);
             climb2.setPower(0);
             climb3.setPower(0);
@@ -50,6 +50,7 @@ public class Tilt {
         climb3.setPower(0);
         climb4.setPower(0);
     }
+
 }
 
 

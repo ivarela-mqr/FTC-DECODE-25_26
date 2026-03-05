@@ -66,7 +66,7 @@ public class Intake {
         }
     }
     public boolean firstArtifactIn() {
-        return distanceSensor2.getDistance(DistanceUnit.CM) < 2.8;
+        return distanceSensor2.getDistance(DistanceUnit.CM) < 3.5;
     }
     public boolean secondArtifactIn() {
         return colorSensor.getDetectedColor() != ColorSensor.DetectedColors.UNKNOWN;

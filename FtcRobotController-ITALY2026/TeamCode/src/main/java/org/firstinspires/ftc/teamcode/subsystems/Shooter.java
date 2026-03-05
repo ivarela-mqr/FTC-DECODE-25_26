@@ -28,7 +28,7 @@ public class Shooter {
     public boolean autoAim = true, teleOp = false;
     public Debouncer debouncer = new Debouncer(200);
     public Debouncer velDebouncer = new Debouncer(200);
-    public Debouncer blockDebouncer = new Debouncer(200);
+    public Debouncer blockDebouncer = new Debouncer(500);
     PIDFCoefficients coefficients = new PIDFCoefficients(22, 0, 1.7, 15);
     private double lastValidOffset = 0;
     public boolean stop = false;
@@ -62,7 +62,7 @@ public class Shooter {
     public void adjustVelAndCover(double distance){
         if(distance > 0 && teleOp && autoAim){
             curTargetVelocity = 744.8561 + 4.052032*distance - 0.005816 * Math.pow(distance,2);
-            double pos = 1.212238 - 0.01040305*distance + 0.00002366859 * Math.pow(distance,2);
+            double pos = 1.312238 - 0.01040305*distance + 0.00002366859 * Math.pow(distance,2);
             adjustCover(pos);
         }
     }
@@ -154,7 +154,7 @@ public class Shooter {
         }
     }
     public void closeBlock() {
-        block.setPosition(0.7);
+        block.setPosition(1);
     }
     public double getBlockPos() {
         return block.getPosition();
@@ -176,7 +176,7 @@ public class Shooter {
         block.setPosition(0);
     }
     public void switchBlock(){
-        if (block.getPosition()>0.5){
+        if (block.getPosition()>0.8){
             block.setPosition(0);
         }else{block.setPosition(1);}
     }
@@ -192,9 +192,9 @@ public class Shooter {
                        double yawAngle, boolean isFull){
         aimWithLimelight(yawAngle);
         preload();
-        if(isFull && (isReady() || gamepad1.left_trigger > 0.1) && gamepad1.right_trigger > 0.1)
+        if(((isFull && isReady()) || gamepad1.left_trigger > 0.1) && gamepad1.right_trigger > 0.1)
             openBlock();
-        else if(gamepad1.right_trigger < 0.9 || gamepad1.left_trigger < 0.9)
+        else if(gamepad1.right_trigger < 0.5 && gamepad1.left_trigger < 0.5)
             closeBlock();
 
         if (gamepad2.share)
@@ -206,10 +206,10 @@ public class Shooter {
 
         if (gamepad2.left_trigger > 0.1){
             autoAim = false;
-            setPowerRotor(-10);
+            setPowerRotor(10);
         }else if (gamepad2.right_trigger > 0.1) {
             autoAim = false;
-            setPowerRotor(10);
+            setPowerRotor(-10);
         } else if (!autoAim){
             setPowerRotor(0);
             autoAim = false;
@@ -223,8 +223,8 @@ public class Shooter {
             correctCover(-1);
         if(gamepad2.right_bumper && debouncer.isReady())
             correctCover(1);
-        if (gamepad2.circle && blockDebouncer.isReady())
-            switchBlock();
+//        if (gamepad2.circle && blockDebouncer.isReady())
+//            switchBlock();
 
         telemetry.addData("velocity shooter",shooter0.getVelocity());
         telemetry.addData("curTargetVelocity",curTargetVelocity);

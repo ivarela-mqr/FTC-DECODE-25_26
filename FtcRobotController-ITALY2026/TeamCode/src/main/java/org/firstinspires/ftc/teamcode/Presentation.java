@@ -65,7 +65,7 @@ public class Presentation extends OpMode {
         if(gamepad1.dpadDownWasPressed()){
             timer.resetTimer();
             tilt.up();
-        }else if(timeElapsed() > 2.5)
+        }else if(timeElapsed() > 1)
             tilt.stop();
 
     }

@@ -30,6 +30,9 @@ public class IntakeStateMachine {
         if(gamepad2.triangle)
             switchState(IntakeStateMachineStates.UNLOAD);
 
+        if(gamepad2.square)
+            switchState((IntakeStateMachineStates.INIT));
+
         switch (state){
 
             case INIT:
@@ -63,7 +66,7 @@ public class IntakeStateMachine {
                 break;
             case SHOOTING:
                 intake.shootArtifacts();
-                if(gamepad1.left_trigger == 0){
+                if(gamepad1.left_trigger < 0.9){
                     switchState(IntakeStateMachineStates.INIT);
                 }
                 break;
