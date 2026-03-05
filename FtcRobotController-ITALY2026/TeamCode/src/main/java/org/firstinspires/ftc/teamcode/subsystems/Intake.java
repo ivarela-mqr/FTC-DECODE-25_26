@@ -12,7 +12,7 @@ public class Intake {
     public DcMotorEx transfer;
     DcMotor intake;
     public DistanceSensor distanceSensor1, distanceSensor2;
-    ColorSensor colorSensor = new ColorSensor();
+    public ColorSensor colorSensor = new ColorSensor();
     public double transferPosition2ArtifactIn;
 
     public Intake(HardwareMap hardwareMap) {
@@ -66,10 +66,10 @@ public class Intake {
         }
     }
     public boolean firstArtifactIn() {
-        return colorSensor.getDetectedColor() != ColorSensor.DetectedColors.UNKNOWN;
+        return distanceSensor2.getDistance(DistanceUnit.CM) < 2.8;
     }
     public boolean secondArtifactIn() {
-        return distanceSensor2.getDistance(DistanceUnit.CM) < 8;
+        return colorSensor.getDetectedColor() != ColorSensor.DetectedColors.UNKNOWN;
     }
     public boolean thirdArtifactIn() {
         return distanceSensor1.getDistance(DistanceUnit.CM) < 12.5;

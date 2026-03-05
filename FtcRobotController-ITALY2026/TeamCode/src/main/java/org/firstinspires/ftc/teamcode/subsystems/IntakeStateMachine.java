@@ -30,9 +30,8 @@ public class IntakeStateMachine {
         if(gamepad2.triangle)
             switchState(IntakeStateMachineStates.UNLOAD);
 
-        if(gamepad2.dpadUpWasPressed())
-            switchState(IntakeStateMachineStates.END);
         switch (state){
+
             case INIT:
                 intake.intakeFirstArtifact();
                 if(intake.firstArtifactIn()){

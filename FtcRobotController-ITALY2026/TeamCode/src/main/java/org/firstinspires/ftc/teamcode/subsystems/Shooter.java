@@ -191,12 +191,7 @@ public class Shooter {
     public void TeleOp(Gamepad gamepad1, Gamepad gamepad2, Telemetry telemetry,
                        double yawAngle, boolean isFull){
         aimWithLimelight(yawAngle);
-        if(gamepad1.dpadUpWasPressed())
-            stop = true;
-        if(!stop)
-            preload();
-        else
-            stop();
+        preload();
         if(isFull && (isReady() || gamepad1.left_trigger > 0.1) && gamepad1.right_trigger > 0.1)
             openBlock();
         else if(gamepad1.right_trigger < 0.9 || gamepad1.left_trigger < 0.9)

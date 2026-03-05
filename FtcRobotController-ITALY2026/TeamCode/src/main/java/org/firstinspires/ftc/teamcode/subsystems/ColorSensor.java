@@ -11,8 +11,8 @@ import org.firstinspires.ftc.teamcode.util.Constants;
 public class ColorSensor {
     NormalizedColorSensor colorSensor;
     NormalizedColorSensor colorSensor2;
-    DistanceSensor distanceSensor;
-    DistanceSensor distanceSensor2;
+    public DistanceSensor distanceSensor;
+    public DistanceSensor distanceSensor2;
     public enum DetectedColors {
         PURPLE,
         GREEN,
@@ -55,8 +55,8 @@ public class ColorSensor {
         else {
             return DetectedColors.UNKNOWN;
         }*/
-        if(distanceSensor.getDistance(DistanceUnit.CM) < 2.5 ||
-                distanceSensor2.getDistance(DistanceUnit.CM) < 2.5)
+        if(distanceSensor.getDistance(DistanceUnit.CM) < 3 ||
+                distanceSensor2.getDistance(DistanceUnit.CM) < 3)
             return DetectedColors.PURPLE;
         else
             return DetectedColors.UNKNOWN;
