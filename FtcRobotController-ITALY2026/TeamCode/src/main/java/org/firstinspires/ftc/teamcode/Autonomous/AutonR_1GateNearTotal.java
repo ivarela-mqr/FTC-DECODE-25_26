@@ -47,7 +47,7 @@ public class AutonR_1GateNearTotal extends OpMode {
         pathState = PathState.DRIVE_STARTPOS_SHOOT_POS;
         shootingStateMachine.init(hardwareMap,
                 org.firstinspires.ftc.teamcode.util.Constants.Alliance.RED,
-                1200, IntakeStateMachineStates.FINAL, new Pose(91,90));
+                1200, IntakeStateMachineStates.FINAL, new Pose(87,88));
 
         imu = hardwareMap.get(IMU.class, "imu");
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
@@ -120,7 +120,7 @@ public class AutonR_1GateNearTotal extends OpMode {
                     .addPath(
                             new BezierLine(
                                     new Pose(91, 96),
-                                    new Pose(91, 65)
+                                    new Pose(91, 61)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(46), Math.toRadians(0))
@@ -129,8 +129,8 @@ public class AutonR_1GateNearTotal extends OpMode {
             goTakeSecond2 = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(91, 65),
-                                    new Pose(129, 65)
+                                    new Pose(91, 61),
+                                    new Pose(129, 61)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
@@ -138,8 +138,8 @@ public class AutonR_1GateNearTotal extends OpMode {
             goOpen1 = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(129, 65),
-                                    new Pose(121, 65)
+                                    new Pose(129, 61),
+                                    new Pose(121, 61)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
@@ -147,8 +147,8 @@ public class AutonR_1GateNearTotal extends OpMode {
             goOpen2 = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(121, 65),
-                                    new Pose(130, 73)
+                                    new Pose(121, 61),
+                                    new Pose(130, 72)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
@@ -156,32 +156,31 @@ public class AutonR_1GateNearTotal extends OpMode {
             goShotSecond = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(130, 73),
-                                    new Pose(86, 86)
+                                    new Pose(130, 72),
+                                    new Pose(82, 80)
                             )
                     )
-                    .setTangentHeadingInterpolation()
+                    //.setTangentHeadingInterpolation()
                     .setGlobalDeceleration()
                     //.setReversed()
-                    .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
+                    .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(36))
                     .build();
 
             goTakeFirst = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(86, 86),
-                                    new Pose(124, 90)
+                                    new Pose(79, 79),
+                                    new Pose(124, 88)
                             )
                     )
-                    .setTangentHeadingInterpolation()
-                    //.setLinearHeadingInterpolation(Math.toRadians(144), Math.toRadians(180))
+                    .setLinearHeadingInterpolation(Math.toRadians(36), Math.toRadians(0))
                     .setGlobalDeceleration()
                     .build();
 
             goShotFirst = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(124, 90),
+                                    new Pose(124, 88),
                                     new Pose(88, 96)
                             )
                     )
@@ -192,7 +191,7 @@ public class AutonR_1GateNearTotal extends OpMode {
                     .addPath(
                             new BezierLine(
                                     new Pose(88, 96),
-                                    new Pose(102, 40)
+                                    new Pose(102, 39)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(46), Math.toRadians(0))
@@ -201,8 +200,8 @@ public class AutonR_1GateNearTotal extends OpMode {
             goTakeThird2 = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(102, 40.000),
-                                    new Pose(127, 40.000)
+                                    new Pose(102, 39),
+                                    new Pose(127, 39)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
@@ -211,7 +210,7 @@ public class AutonR_1GateNearTotal extends OpMode {
             goShotThird = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(127, 40.000),
+                                    new Pose(127, 39),
                                     new Pose(88, 99)
                             )
                     )
@@ -237,7 +236,7 @@ public class AutonR_1GateNearTotal extends OpMode {
         actualTimer.resetTimer();
         switch (pathState){
             case DRIVE_STARTPOS_SHOOT_POS:
-                shootingStateMachine.shooter.adjustCover(0.3);
+                shootingStateMachine.shooter.adjustCover(0.4);
                 follower.followPath(paths.goShotLoaded,0.5,true);
                 setPathState(PathState.SHOOT_PRELOAD);
                 break;
@@ -294,7 +293,7 @@ public class AutonR_1GateNearTotal extends OpMode {
                         follower.followPath(paths.goOpen2,0.5,true);
                         setPathState(PathState.OPEN_BLOCK);
                     }else if(lastPathState == PathState.OPEN_BLOCK &&
-                            Math.abs(actualTimer.getElapsedTimeSeconds() - stateTimer.getElapsedTimeSeconds()) > 3){
+                            Math.abs(actualTimer.getElapsedTimeSeconds() - stateTimer.getElapsedTimeSeconds()) > 1){
                         follower.followPath(paths.goShotSecond,0.75, true);
                         setPathState(PathState.SHOOT_PRELOAD);
                     }
@@ -303,7 +302,7 @@ public class AutonR_1GateNearTotal extends OpMode {
                 break;
             case END:
                 shootingStateMachine.shooter.autoAim = false;
-                shootingStateMachine.shooter.resetRotorPosition();
+                //shootingStateMachine.shooter.resetRotorPosition();
             default:
                 break;
         }

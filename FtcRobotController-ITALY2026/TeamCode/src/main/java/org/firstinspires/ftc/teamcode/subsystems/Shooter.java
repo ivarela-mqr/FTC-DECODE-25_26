@@ -37,7 +37,8 @@ public class Shooter {
     public double kD = 0.05;
     double lastError = 0;
     double lastTime = 0;
-    boolean hold = true;
+    Constants.Alliance alliance;
+    public boolean hold = true, reset = false;
     public Shooter (HardwareMap hardwareMap, Constants.Alliance alliance, double targetVel){
         shooter0 = hardwareMap.get(DcMotorEx.class,"shooter0");
         shooter1 = hardwareMap.get(DcMotorEx.class,"shooter1");
@@ -52,6 +53,7 @@ public class Shooter {
         encoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         encoder.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         coverL.setDirection(Servo.Direction.REVERSE);
+        this.alliance = alliance;
         limeLight = new LimeLight(hardwareMap, alliance);
         curTargetVelocity = targetVel;
         timer.reset();
@@ -61,14 +63,18 @@ public class Shooter {
     }
     public void adjustVelAndCover(double distance){
         if(distance > 0 && teleOp && autoAim){
-            curTargetVelocity = 744.8561 + 4.052032*distance - 0.005816 * Math.pow(distance,2);
-            double pos = 1.312238 - 0.01040305*distance + 0.00002366859 * Math.pow(distance,2);
+            curTargetVelocity = 752.1383 + 3.887819*distance - 0.004956243 * Math.pow(distance,2);
+            double pos = 1.31952 - 0.01056727*distance + 0.00002452835 * Math.pow(distance,2);
             adjustCover(pos);
         }
     }
     public void aimWithLimelight(double yaw){
         double[] var = limeLight.getGoalAprilTagData(yaw);
         offset = var[0];
+        if(var[1] > 300 && Constants.Alliance.BLUE == alliance)
+            correctOffset = -5;
+        else if(var[1] > 300 && Constants.Alliance.RED == alliance)
+            correctOffset = 5;
         adjustVelAndCover(var[1]);
         moveServos(offset, offset != 0);
     }
@@ -84,13 +90,13 @@ public class Shooter {
         double output = (kP * offset)
                 + (kD * derivative);
         lastError = offset;
-        if (!hold && Math.abs(offset) < 4.5){
+        if (!hold && Math.abs(offset) < 3){
             output = 0;
             hold = true;
-        }else if(hold && Math.abs(offset) > 6.5){
+        }else if(hold && Math.abs(offset) > 5){
             hold = false;
         }
-        output = Math.max(-1, Math.min(1, output * VELOCITY_FACTOR));
+        output = Math.max(-0.3, Math.min(0.3, output * VELOCITY_FACTOR));
         return -output;
     }
     public void moveServos(double offsetX, boolean objectDetected) {
@@ -103,7 +109,7 @@ public class Shooter {
         if (autoAim) {
             setPowerRotor(power);
         }
-        if ((posR <= LEFT_LIMIT && power > 0) ||
+        if (!reset && (posR <= LEFT_LIMIT && power > 0) ||
                 (posR >= RIGHT_LIMIT && power < 0)) {
             rotorL.setPower(0);
             rotorR.setPower(0);
@@ -111,7 +117,7 @@ public class Shooter {
     }
     public void setPowerRotor(double power){
         int posR = encoder.getCurrentPosition();
-        if ((posR <= LEFT_LIMIT && power > 0) ||
+        if (!reset && (posR <= LEFT_LIMIT && power > 0) ||
                 (posR >= RIGHT_LIMIT && power < 0)) {
             rotorL.setPower(0);
             rotorR.setPower(0);
@@ -119,14 +125,6 @@ public class Shooter {
             rotorL.setPower(power);
             rotorR.setPower(power);
         }
-    }
-    public void resetRotorPosition(){
-        if(encoder.getCurrentPosition()>25)
-            setPowerRotor(5 * VELOCITY_FACTOR);
-        else if(encoder.getCurrentPosition()<-25)
-            setPowerRotor(-5 * VELOCITY_FACTOR);
-        else
-            setPowerRotor(0);
     }
     public boolean isReady(){
         return velocityOffset() < 50
@@ -188,21 +186,37 @@ public class Shooter {
     public double velocityOffset(){
         return curTargetVelocity - Math.max(shooter1.getVelocity(), shooter0.getVelocity());
     }
+    public void stopTurret(){
+        rotorL.setPower(0);
+        rotorR.setPower(0);
+    }
     public void TeleOp(Gamepad gamepad1, Gamepad gamepad2, Telemetry telemetry,
                        double yawAngle, boolean isFull){
-        aimWithLimelight(yawAngle);
+        if(gamepad1.left_bumper)
+            stopTurret();
+        else
+            aimWithLimelight(yawAngle);
         preload();
         if(((isFull && isReady()) || gamepad1.left_trigger > 0.1) && gamepad1.right_trigger > 0.1)
             openBlock();
         else if(gamepad1.right_trigger < 0.5 && gamepad1.left_trigger < 0.5)
             closeBlock();
 
-        if (gamepad2.share)
+        if (gamepad2.share){
             autoAim = true;
-        if (gamepad2.dpad_left)
-            limeLight.switchAlliance(Constants.Alliance.BLUE);
-        else if(gamepad2.dpad_right)
-            limeLight.switchAlliance(Constants.Alliance.RED);
+            reset = false;
+            encoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            encoder.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        }
+        if(gamepad2.options)
+            reset = true;
+        if (gamepad2.dpad_left){
+            alliance = Constants.Alliance.BLUE;
+            limeLight.switchAlliance(alliance);
+        }else if(gamepad2.dpad_right){
+            alliance = Constants.Alliance.RED;
+            limeLight.switchAlliance(alliance);
+        }
 
         if (gamepad2.left_trigger > 0.1){
             autoAim = false;

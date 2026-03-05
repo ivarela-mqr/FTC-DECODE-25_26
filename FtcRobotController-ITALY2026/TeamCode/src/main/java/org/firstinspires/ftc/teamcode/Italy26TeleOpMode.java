@@ -32,6 +32,7 @@ public class Italy26TeleOpMode extends OpMode {
     Follower follower;
     Timer actualTimer,initTimer;
     boolean rumble = false;
+
     @Override
     public void init() {
         actualTimer = new Timer();
@@ -93,15 +94,20 @@ public class Italy26TeleOpMode extends OpMode {
             gamepad2.rumble(2000);
         }
 
-        telemetry.addData("Sensor2", intakeStateMachine.intake.colorSensor.distanceSensor.getDistance(DistanceUnit.CM));
-        telemetry.addData("Sensor2 bis", intakeStateMachine.intake.colorSensor.distanceSensor.getDistance(DistanceUnit.CM));
-        telemetry.addData("Sensor3", intakeStateMachine.intake.distanceSensor1.getDistance(DistanceUnit.CM));
-        telemetry.addData("Sensor1", intakeStateMachine.intake.distanceSensor2.getDistance(DistanceUnit.CM));
-        telemetry.addData("Intake state", intakeStateMachine.state);
+        //telemetry.addData("Sensor2", intakeStateMachine.intake.colorSensor.distanceSensor.getDistance(DistanceUnit.CM));
+        //telemetry.addData("Sensor2 bis", intakeStateMachine.intake.colorSensor.distanceSensor.getDistance(DistanceUnit.CM));
+        //telemetry.addData("Sensor3", intakeStateMachine.intake.distanceSensor1.getDistance(DistanceUnit.CM));
+        //telemetry.addData("Sensor1", intakeStateMachine.intake.distanceSensor2.getDistance(DistanceUnit.CM));
+        //telemetry.addData("Intake state", intakeStateMachine.state);
         telemetry.addData("Pos encoder", shooter.encoder.getCurrentPosition());
-        telemetry.addData("Heading odometry", follower.getHeading());
-        telemetry.addData("SHooter", gamepad1.right_trigger);
-        telemetry.addData("Yaw imu", yawAngleShooter);
+        //telemetry.addData("Heading odometry", follower.getHeading());
+        //telemetry.addData("SHooter", gamepad1.right_trigger);
+        //telemetry.addData("Yaw imu", yawAngleShooter);
+        telemetry.addData("Is reseting", shooter.reset);
+        telemetry.addData("Offset", shooter.offset);
+        telemetry.addData("Power", shooter.rotorR.getPower());
+        telemetry.addData("Bumper", gamepad1.left_bumper);
+
 
         telemetry.update();
     }

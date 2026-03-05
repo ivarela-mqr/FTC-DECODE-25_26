@@ -9,12 +9,14 @@ import org.firstinspires.ftc.teamcode.util.IntakeStateMachineStates;
 public class IntakeStateMachine {
     public Intake intake;
     public IntakeStateMachineStates state;
+    public IntakeStateMachineStates previousState;
     public Timer timer = new Timer();
     public Timer currTime = new Timer();
 
     public IntakeStateMachine(HardwareMap hardwareMap){
         intake = new Intake(hardwareMap);
         state = IntakeStateMachineStates.INIT;
+        previousState = IntakeStateMachineStates.END;
     }
     public boolean isFull(){
         return state == IntakeStateMachineStates.FINAL
@@ -32,6 +34,9 @@ public class IntakeStateMachine {
 
         if(gamepad2.square)
             switchState((IntakeStateMachineStates.INIT));
+
+        if(gamepad1.right_trigger > 0.1 && state != IntakeStateMachineStates.FINAL && state != IntakeStateMachineStates.SHOOTING)
+            switchState(IntakeStateMachineStates.FINAL);
 
         switch (state){
 
@@ -82,6 +87,7 @@ public class IntakeStateMachine {
         }
     }
     public void switchState(IntakeStateMachineStates state){
+        previousState = state;
         this.state = state;
         timer.resetTimer();
     }

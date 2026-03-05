@@ -155,10 +155,10 @@ public class AutonB_2GateNearPartial extends OpMode {
                                     new Pose(58, 86)
                             )
                     )
-                    .setTangentHeadingInterpolation()
+                    //.setTangentHeadingInterpolation()
                     .setGlobalDeceleration()
                     //.setReversed()
-                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
+                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(144))
                     .build();
 
             goTakeFirst = follower.pathBuilder()
@@ -168,8 +168,8 @@ public class AutonB_2GateNearPartial extends OpMode {
                                     new Pose(20, 90)
                             )
                     )
-                    .setTangentHeadingInterpolation()
-                    //.setLinearHeadingInterpolation(Math.toRadians(144), Math.toRadians(180))
+                    //.setTangentHeadingInterpolation()
+                    .setLinearHeadingInterpolation(Math.toRadians(144), Math.toRadians(180))
                     .setGlobalDeceleration()
                     .build();
 
@@ -210,7 +210,7 @@ public class AutonB_2GateNearPartial extends OpMode {
         actualTimer.resetTimer();
         switch (pathState){
             case DRIVE_STARTPOS_SHOOT_POS:
-                shootingStateMachine.shooter.adjustCover(0.3);
+                shootingStateMachine.shooter.adjustCover(0.4);
                 follower.followPath(paths.goShotLoaded,0.5,true);
                 setPathState(PathState.SHOOT_PRELOAD);
                 break;
@@ -254,7 +254,7 @@ public class AutonB_2GateNearPartial extends OpMode {
                         follower.followPath(paths.goOpen2,0.5,true);
                         setPathState(PathState.OPEN_BLOCK);
                     }else if(lastPathState == PathState.OPEN_BLOCK &&
-                            Math.abs(actualTimer.getElapsedTimeSeconds() - stateTimer.getElapsedTimeSeconds()) > 3){
+                            Math.abs(actualTimer.getElapsedTimeSeconds() - stateTimer.getElapsedTimeSeconds()) > 1){
                         follower.followPath(paths.goShotSecond,0.75, true);
                         setPathState(PathState.SHOOT_PRELOAD);
                     }
@@ -263,7 +263,7 @@ public class AutonB_2GateNearPartial extends OpMode {
                 break;
             case END:
                 shootingStateMachine.shooter.autoAim = false;
-                shootingStateMachine.shooter.resetRotorPosition();
+                //shootingStateMachine.shooter.resetRotorPosition();
             default:
                 break;
         }

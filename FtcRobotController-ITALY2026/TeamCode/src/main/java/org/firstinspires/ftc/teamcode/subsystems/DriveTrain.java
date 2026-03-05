@@ -1,21 +1,15 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
-import com.pedropathing.follower.Follower;
-import com.pedropathing.ftc.localization.localizers.PinpointLocalizer;
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
-import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
-
 public class DriveTrain {
     private final DcMotor frontLeft, frontRight, backLeft, backRight;
+    double rotVelFactor = 1;
+    double driveVelFactor = 1;
     public DriveTrain(HardwareMap hardwareMap){
         frontLeft = hardwareMap.get(DcMotor.class, "FrontLeft");
         frontRight = hardwareMap.get(DcMotor.class, "FrontRight");
@@ -31,9 +25,21 @@ public class DriveTrain {
     }
 
     public void TeleOp(Gamepad gamepad, Telemetry telemetry, double yawAngle){
-        double drive = -gamepad.left_stick_y;
-        double strafe = gamepad.left_stick_x;
-        double rotate = gamepad.right_stick_x;
+        if (gamepad.left_stick_button){
+            driveVelFactor = 0.25;
+        }else{
+            driveVelFactor = 1;
+        }
+
+        if (gamepad.right_stick_button){
+            rotVelFactor = 0.15;
+        }else{
+            rotVelFactor = 1;
+        }
+
+        double drive = -gamepad.left_stick_y * driveVelFactor;
+        double strafe = gamepad.left_stick_x * driveVelFactor;
+        double rotate = gamepad.right_stick_x * rotVelFactor;
 
         double headingRad = Math.toRadians(yawAngle);
 
@@ -47,8 +53,8 @@ public class DriveTrain {
 
         frontLeft.setPower(frontLeftPower);
         frontRight.setPower(frontRightPower);
-        backLeft.setPower(backLeftPower );
-        backRight.setPower(backRightPower );
+        backLeft.setPower(backLeftPower);
+        backRight.setPower(backRightPower);
 
         telemetry.addData("yaw",yawAngle);
     }

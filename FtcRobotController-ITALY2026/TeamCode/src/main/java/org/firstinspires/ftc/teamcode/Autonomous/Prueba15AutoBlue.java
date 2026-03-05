@@ -193,8 +193,8 @@ public class Prueba15AutoBlue extends OpMode {
                                     new Pose(20, 90)
                             )
                     )
-                    .setTangentHeadingInterpolation()
-                    //.setLinearHeadingInterpolation(Math.toRadians(144), Math.toRadians(180))
+                    //.setTangentHeadingInterpolation()
+                    .setLinearHeadingInterpolation(Math.toRadians(144), Math.toRadians(180))
                     .setGlobalDeceleration()
                     .build();
 
@@ -257,7 +257,7 @@ public class Prueba15AutoBlue extends OpMode {
         actualTimer.resetTimer();
         switch (pathState){
             case DRIVE_STARTPOS_SHOOT_POS:
-                shootingStateMachine.shooter.adjustCover(0.3);
+                shootingStateMachine.shooter.adjustCover(0.4);
                 follower.followPath(paths.goShotLoaded,0.75,true);
                 setPathState(PathState.SHOOT_PRELOAD);
                 break;
@@ -314,7 +314,7 @@ public class Prueba15AutoBlue extends OpMode {
                 break;
             case END:
                 shootingStateMachine.shooter.autoAim = false;
-                shootingStateMachine.shooter.resetRotorPosition();
+                //shootingStateMachine.shooter.resetRotorPosition();
             default:
                 break;
         }
