@@ -84,10 +84,10 @@ public class Shooter {
         double output = (kP * offset)
                 + (kD * derivative);
         lastError = offset;
-        if (!hold && Math.abs(offset) < 3){
+        if (!hold && Math.abs(offset) < 4.5){
             output = 0;
             hold = true;
-        }else if(hold && Math.abs(offset) > 5){
+        }else if(hold && Math.abs(offset) > 6.5){
             hold = false;
         }
         output = Math.max(-1, Math.min(1, output * VELOCITY_FACTOR));

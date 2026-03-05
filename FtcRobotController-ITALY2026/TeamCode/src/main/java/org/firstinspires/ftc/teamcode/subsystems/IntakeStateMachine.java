@@ -66,7 +66,7 @@ public class IntakeStateMachine {
                 break;
             case SHOOTING:
                 intake.shootArtifacts();
-                if(gamepad1.left_trigger < 0.9){
+                if(gamepad1.right_trigger < 0.9){
                     switchState(IntakeStateMachineStates.INIT);
                 }
                 break;
