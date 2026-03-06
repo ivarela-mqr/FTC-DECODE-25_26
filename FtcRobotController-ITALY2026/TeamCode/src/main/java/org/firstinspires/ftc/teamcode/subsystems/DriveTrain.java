@@ -32,7 +32,7 @@ public class DriveTrain {
         }
 
         if (gamepad.right_stick_button){
-            rotVelFactor = 0.15;
+            rotVelFactor = 0.25;
         }else{
             rotVelFactor = 1;
         }
