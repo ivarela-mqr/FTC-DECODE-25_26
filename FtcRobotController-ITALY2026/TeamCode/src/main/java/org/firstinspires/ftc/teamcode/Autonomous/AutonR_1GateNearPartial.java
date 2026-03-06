@@ -134,7 +134,7 @@ public class AutonR_1GateNearPartial extends OpMode {
                     .addPath(
                             new BezierLine(
                                     new Pose(129, 61),
-                                    new Pose(121, 61)
+                                    new Pose(121, 59)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
@@ -142,7 +142,7 @@ public class AutonR_1GateNearPartial extends OpMode {
             goOpen2 = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(121, 61),
+                                    new Pose(121, 59),
                                     new Pose(130, 72)
                             )
                     )
@@ -152,6 +152,13 @@ public class AutonR_1GateNearPartial extends OpMode {
                     .addPath(
                             new BezierLine(
                                     new Pose(130, 72),
+                                    new Pose(100, 72)
+                            )
+                    )
+                    .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
+                    .addPath(
+                            new BezierLine(
+                                    new Pose(100, 72),
                                     new Pose(82, 80)
                             )
                     )
@@ -164,8 +171,8 @@ public class AutonR_1GateNearPartial extends OpMode {
             goTakeFirst = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(79, 79),
-                                    new Pose(124, 88)
+                                    new Pose(82, 80),
+                                    new Pose(126, 85)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(36), Math.toRadians(0))
@@ -175,7 +182,7 @@ public class AutonR_1GateNearPartial extends OpMode {
             goShotFirst = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(124, 88),
+                                    new Pose(126, 85),
                                     new Pose(88, 96)
                             )
                     )
@@ -185,8 +192,8 @@ public class AutonR_1GateNearPartial extends OpMode {
             finalPath = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(88, 99),
-                                    new Pose(124, 70)
+                                    new Pose(88, 96),
+                                    new Pose(120, 70)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))

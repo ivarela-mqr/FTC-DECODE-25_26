@@ -187,7 +187,7 @@ public class AutonR_1GateNearTotal extends OpMode {
             goShotFirst = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(126, 88),
+                                    new Pose(126, 85),
                                     new Pose(88, 96)
                             )
                     )
