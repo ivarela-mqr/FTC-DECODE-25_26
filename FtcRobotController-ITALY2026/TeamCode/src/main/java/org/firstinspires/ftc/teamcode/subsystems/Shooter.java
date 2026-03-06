@@ -19,8 +19,8 @@ public class Shooter {
     public CRServo rotorL, rotorR;
     public Servo coverL, coverR, block;
     public LimeLight limeLight;
-    int LEFT_LIMIT = -10000;
-    int RIGHT_LIMIT = 10000;
+    int LEFT_LIMIT = -3500;
+    int RIGHT_LIMIT = 3500;
     final double VELOCITY_FACTOR = 0.1;
     public double offset = 0, correctOffset = 0;
     double curTargetVelocity;
@@ -63,8 +63,12 @@ public class Shooter {
     }
     public void adjustVelAndCover(double distance){
         if(distance > 0 && teleOp && autoAim){
-            curTargetVelocity = 752.1383 + 3.887819*distance - 0.004956243 * Math.pow(distance,2);
-            double pos = 1.31952 - 0.01056727*distance + 0.00002452835 * Math.pow(distance,2);
+            double pos = 0.15;
+            curTargetVelocity = 1550;
+            if (distance < 300){
+                pos = 1.31952 - 0.01056727*distance + 0.00002452835 * Math.pow(distance,2);
+                curTargetVelocity = 752.1383 + 3.887819*distance - 0.004956243 * Math.pow(distance,2);
+            }
             adjustCover(pos);
         }
     }
@@ -75,8 +79,11 @@ public class Shooter {
             correctOffset = -5;
         else if(var[1] > 300 && Constants.Alliance.RED == alliance)
             correctOffset = 5;
+        else
+            correctOffset = 0;
         adjustVelAndCover(var[1]);
-        moveServos(offset, offset != 0);
+        boolean offsetCentered = (offset == 0 && Math.abs(lastValidOffset) < 5);
+        moveServos(offset, !offsetCentered);
     }
     public double pid(double offset){
         double currentTime = timer.seconds();
@@ -106,6 +113,15 @@ public class Shooter {
             offsetX = lastValidOffset;
         double power = pid(offsetX);
         int posR = encoder.getCurrentPosition();
+        if (!objectDetected) {
+            if (posR > 500) {
+                setPowerRotor(0.1);
+                return;
+            } else if (posR < -500) {
+                setPowerRotor(-0.1);
+                return;
+            }
+        }
         if (autoAim) {
             setPowerRotor(power);
         }

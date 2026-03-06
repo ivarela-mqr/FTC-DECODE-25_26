@@ -156,7 +156,17 @@ public class AutonB_1GateNearTotal extends OpMode {
                     .addPath(
                             new BezierLine(
                                     new Pose(14, 73),
-                                    new Pose(58, 86)
+                                    new Pose(44, 73)
+                            )
+                    )
+                    //.setTangentHeadingInterpolation()
+                    .setGlobalDeceleration()
+                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(144))
+
+                    .addPath(
+                            new BezierLine(
+                                    new Pose(44, 73),
+                                    new Pose(53, 90)
                             )
                     )
                     //.setTangentHeadingInterpolation()
@@ -168,7 +178,7 @@ public class AutonB_1GateNearTotal extends OpMode {
             goTakeFirst = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(58, 86),
+                                    new Pose(53, 90),
                                     new Pose(20, 90)
                             )
                     )
@@ -223,7 +233,7 @@ public class AutonB_1GateNearTotal extends OpMode {
                     .addPath(
                             new BezierLine(
                                     new Pose(56, 99),
-                                    new Pose(20, 70)
+                                    new Pose(24, 70)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(144), Math.toRadians(180))

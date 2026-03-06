@@ -139,7 +139,7 @@ public class AutonR_1GateNearTotal extends OpMode {
                     .addPath(
                             new BezierLine(
                                     new Pose(129, 61),
-                                    new Pose(121, 61)
+                                    new Pose(121, 59)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
@@ -147,7 +147,7 @@ public class AutonR_1GateNearTotal extends OpMode {
             goOpen2 = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(121, 61),
+                                    new Pose(121, 59),
                                     new Pose(130, 72)
                             )
                     )
@@ -208,7 +208,7 @@ public class AutonR_1GateNearTotal extends OpMode {
                     .addPath(
                             new BezierLine(
                                     new Pose(102, 39),
-                                    new Pose(130, 39)
+                                    new Pose(132, 39)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
@@ -230,7 +230,7 @@ public class AutonR_1GateNearTotal extends OpMode {
                     .addPath(
                             new BezierLine(
                                     new Pose(88, 99),
-                                    new Pose(124, 70)
+                                    new Pose(120, 70)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(36), Math.toRadians(0))
