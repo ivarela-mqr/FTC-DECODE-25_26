@@ -1,27 +1,26 @@
 package org.firstinspires.ftc.teamcode.Autonomous;
 
+import com.bylazar.configurables.annotations.Configurable;
+import com.bylazar.telemetry.PanelsTelemetry;
+import com.bylazar.telemetry.TelemetryManager;
+import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.BezierLine;
+import com.pedropathing.geometry.Pose;
+import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.bylazar.configurables.annotations.Configurable;
-import com.bylazar.telemetry.TelemetryManager;
-import com.bylazar.telemetry.PanelsTelemetry;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.util.IntakeStateMachineStates;
 
-import com.pedropathing.geometry.BezierLine;
-import com.pedropathing.follower.Follower;
-import com.pedropathing.paths.PathChain;
-import com.pedropathing.geometry.Pose;
-import com.qualcomm.robotcore.hardware.IMU;
-
-@Autonomous(name = "BLUE_1GateNearTotal", group = "Autonomous")
+@Autonomous(name = "BLUE_2GateNearTotal", group = "Autonomous")
 @Configurable
-public class AutonB_1GateNearTotal extends OpMode {
+public class AutonB_2GateNearTotal extends OpMode {
     private TelemetryManager panelsTelemetry; // Panels Telemetry instance
     public Follower follower; // Pedro Pathing follower instance
     private PathState pathState; // Current autonomous path state (state machine)
@@ -34,6 +33,8 @@ public class AutonB_1GateNearTotal extends OpMode {
     int ticks = 0;
     Timer stateTimer = new Timer();
     Timer actualTimer = new Timer();
+    boolean gateOpenedTwice = false;
+
     @Override
     public void init() {
         panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
@@ -102,7 +103,7 @@ public class AutonB_1GateNearTotal extends OpMode {
         public PathChain finalPath;
         public PathChain goOpen1;
         public PathChain goOpen2;
-        public PathChain goSHootOpen;
+        public PathChain goPositionOpen;
 
         public Paths(Follower follower) {
             goShotLoaded = follower.pathBuilder()
@@ -147,7 +148,7 @@ public class AutonB_1GateNearTotal extends OpMode {
                     .addPath(
                             new BezierLine(
                                     new Pose(23, 65),
-                                    new Pose(13, 73)
+                                    new Pose(14, 73)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
@@ -155,7 +156,7 @@ public class AutonB_1GateNearTotal extends OpMode {
             goShotSecond = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(13, 73),
+                                    new Pose(14, 73),
                                     new Pose(44, 73)
                             )
                     )
@@ -187,10 +188,20 @@ public class AutonB_1GateNearTotal extends OpMode {
                     .setGlobalDeceleration()
                     .build();
 
-            goShotFirst = follower.pathBuilder()
+            goPositionOpen = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
                                     new Pose(18, 90),
+                                    new Pose(15, 65)
+                            )
+                    )
+                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
+                    .build();
+
+            goShotFirst = follower.pathBuilder()
+                    .addPath(
+                            new BezierLine(
+                                    new Pose(20, 90),
                                     new Pose(56, 96)
                             )
                     )
@@ -255,9 +266,12 @@ public class AutonB_1GateNearTotal extends OpMode {
                     if(lastPathState == PathState.TAKE_FIRST) {
                         follower.followPath(paths.goTakeThird1,0.75,true);
                         setPathState(PathState.TAKE_THIRD);
-                    } else if (lastPathState == PathState.OPEN_BLOCK) {
-                        follower.followPath(paths.goTakeFirst,0.75,true);
-                        setPathState(PathState.TAKE_FIRST);
+                    } else if (lastPathState == PathState.OPEN_BLOCK && gateOpenedTwice) {
+                        follower.followPath(paths.goTakeThird1, 0.75, true);
+                        setPathState(PathState.TAKE_THIRD);
+                    }else if (lastPathState == PathState.OPEN_BLOCK) {
+                            follower.followPath(paths.goTakeFirst,0.75,true);
+                            setPathState(PathState.TAKE_FIRST);
                     } else if (lastPathState == PathState.TAKE_THIRD) {
                         follower.followPath(paths.finalPath,0.75,true);
                         setPathState(PathState.END);
@@ -269,8 +283,9 @@ public class AutonB_1GateNearTotal extends OpMode {
                 break;
             case TAKE_FIRST:
                 if(!follower.isBusy()) {
-                    follower.followPath(paths.goShotFirst,0.5,true);
-                    setPathState(PathState.SHOOT_PRELOAD);
+                    follower.followPath(paths.goPositionOpen,0.5,true);
+                    gateOpenedTwice = true;
+                    setPathState(PathState.OPEN_BLOCK);
                 }
                 break;
             case TAKE_SECOND:
@@ -297,7 +312,7 @@ public class AutonB_1GateNearTotal extends OpMode {
                 break;
             case OPEN_BLOCK:
                 if(!follower.isBusy()){
-                    if(lastPathState == PathState.TAKE_SECOND) {
+                    if(lastPathState == PathState.TAKE_SECOND || lastPathState == PathState.TAKE_FIRST) {
                         follower.followPath(paths.goOpen2,0.5,true);
                         setPathState(PathState.OPEN_BLOCK);
                     }else if(lastPathState == PathState.OPEN_BLOCK &&
