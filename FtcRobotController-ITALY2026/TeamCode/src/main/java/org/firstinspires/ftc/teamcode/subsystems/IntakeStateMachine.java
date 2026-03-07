@@ -48,7 +48,8 @@ public class IntakeStateMachine {
                 break;
             case FIRST_ARTIFACT:
                 intake.intakeNextArtifacts();
-                if(intake.secondArtifactIn()){
+                if(intake.secondArtifactIn()
+                        && Math.abs(timer.getElapsedTimeSeconds() - currTime.getElapsedTimeSeconds()) > 1){
                     intake.transferPosition2ArtifactIn = intake.transfer.getCurrentPosition();
                     switchState(IntakeStateMachineStates.SECOND_ARTIFACT);
                     intake.setTransferPosition(50);

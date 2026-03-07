@@ -94,11 +94,11 @@ public class Italy26TeleOpMode extends OpMode {
             gamepad2.rumble(2000);
         }
 
-        //telemetry.addData("Sensor2", intakeStateMachine.intake.colorSensor.distanceSensor.getDistance(DistanceUnit.CM));
-        //telemetry.addData("Sensor2 bis", intakeStateMachine.intake.colorSensor.distanceSensor.getDistance(DistanceUnit.CM));
-        //telemetry.addData("Sensor3", intakeStateMachine.intake.distanceSensor1.getDistance(DistanceUnit.CM));
-        //telemetry.addData("Sensor1", intakeStateMachine.intake.distanceSensor2.getDistance(DistanceUnit.CM));
-        //telemetry.addData("Intake state", intakeStateMachine.state);
+        telemetry.addData("Sensor2", intakeStateMachine.intake.colorSensor.distanceSensor.getDistance(DistanceUnit.CM));
+        telemetry.addData("Sensor2 bis", intakeStateMachine.intake.colorSensor.distanceSensor.getDistance(DistanceUnit.CM));
+        telemetry.addData("Sensor3", intakeStateMachine.intake.distanceSensor1.getDistance(DistanceUnit.CM));
+        telemetry.addData("Sensor1", intakeStateMachine.intake.distanceSensor2.getDistance(DistanceUnit.CM));
+        telemetry.addData("Intake state", intakeStateMachine.state);
         telemetry.addData("Pos encoder", shooter.encoder.getCurrentPosition());
         //telemetry.addData("Heading odometry", follower.getHeading());
         //telemetry.addData("SHooter", gamepad1.right_trigger);
