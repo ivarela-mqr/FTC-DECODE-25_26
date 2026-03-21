@@ -12,12 +12,14 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.util.IntakeStateMachineStates;
+import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.hardware.IMU;
+import org.firstinspires.ftc.teamcode.util.Constants.Alliance;
 
 @Autonomous(name = "BLUE_1GateNearTotal", group = "Autonomous")
 @Configurable
@@ -27,6 +29,7 @@ public class AutonB_1GateNearTotal extends OpMode {
     private PathState pathState; // Current autonomous path state (state machine)
     private PathState lastPathState; // Current autonomous path state (state machine)
     private Paths paths; // Paths defined in the Paths class
+    public PoseStorage currentPose;
     IMU imu;
     YawPitchRollAngles orientation;
     ShootingStateMachine shootingStateMachine = new ShootingStateMachine();
@@ -34,6 +37,9 @@ public class AutonB_1GateNearTotal extends OpMode {
     int ticks = 0;
     Timer stateTimer = new Timer();
     Timer actualTimer = new Timer();
+    Alliance alliance = Alliance.BLUE;
+
+
     @Override
     public void init() {
         panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
@@ -46,7 +52,7 @@ public class AutonB_1GateNearTotal extends OpMode {
 
         pathState = PathState.DRIVE_STARTPOS_SHOOT_POS;
         shootingStateMachine.init(hardwareMap,
-                org.firstinspires.ftc.teamcode.util.Constants.Alliance.BLUE,1200, IntakeStateMachineStates.FINAL,
+                alliance,1200, IntakeStateMachineStates.FINAL,
                 new Pose(53,90));
 
         imu = hardwareMap.get(IMU.class, "imu");
@@ -55,6 +61,8 @@ public class AutonB_1GateNearTotal extends OpMode {
                 RevHubOrientationOnRobot.UsbFacingDirection.UP
         ));
         imu.initialize(parameters);
+
+
         panelsTelemetry.debug("Status", "Initialized");
         panelsTelemetry.update(telemetry);
     }
@@ -68,6 +76,9 @@ public class AutonB_1GateNearTotal extends OpMode {
         shootingStateMachine.update(pose,telemetry,yawAngle, pathState != PathState.SHOOT_PRELOAD);
         autonomousPathUpdate(); // Update autonomous state machine
         ticks ++;
+
+
+        PoseStorage.update(follower.getPose(), alliance);
         // Log values to Panels and Driver Station
         panelsTelemetry.debug("Last state",lastPathState);
         panelsTelemetry.debug("Path State", pathState);
@@ -78,7 +89,7 @@ public class AutonB_1GateNearTotal extends OpMode {
         panelsTelemetry.debug("Shooter velocity", shootingStateMachine.shooter.shooter0.getVelocity());
         panelsTelemetry.debug("Shooter velocity", shootingStateMachine.shooter.shooter1.getVelocity());
         panelsTelemetry.debug("Ticks", ticks);
-        panelsTelemetry.debug("Is bussy", pathState != PathState.SHOOT_PRELOAD);
+        panelsTelemetry.debug("Is busy", pathState != PathState.SHOOT_PRELOAD);
 
         //panelsTelemetry.debug("Can shoot",shootingStateMachine.canShoot(pose));
         //panelsTelemetry.debug("X", follower.getPose().getX());

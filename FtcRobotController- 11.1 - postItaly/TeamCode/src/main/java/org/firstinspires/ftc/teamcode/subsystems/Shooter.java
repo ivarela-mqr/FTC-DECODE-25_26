@@ -19,7 +19,7 @@ public class Shooter {
     public CRServo rotorL, rotorR;
     public Servo coverL, coverR, block;
     public LimeLight limeLight;
-    int LEFT_LIMIT = -3500;
+    int LEFT_LIMIT = -3500; //todo ampliar
     int RIGHT_LIMIT = 3500;
     final double VELOCITY_FACTOR = 0.1;
     public double offset = 0, correctOffset = 0;
@@ -84,6 +84,10 @@ public class Shooter {
         adjustVelAndCover(var[1]);
         boolean offsetCentered = (offset == 0 && Math.abs(lastValidOffset) < 5);
         moveServos(offset, !offsetCentered);
+    }
+
+    public void aimWithOdometry(){
+
     }
     public double pid(double offset){
         double currentTime = timer.seconds();

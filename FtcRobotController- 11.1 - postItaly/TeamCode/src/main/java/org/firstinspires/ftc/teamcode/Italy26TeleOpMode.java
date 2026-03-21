@@ -18,6 +18,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Tilt;
 import org.firstinspires.ftc.teamcode.util.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.DriveTrain;
 import org.firstinspires.ftc.teamcode.subsystems.Shooter;
+import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
 @TeleOp
 public class Italy26TeleOpMode extends OpMode {
@@ -38,7 +39,7 @@ public class Italy26TeleOpMode extends OpMode {
         actualTimer = new Timer();
         initTimer = new Timer();
         driveTrain = new DriveTrain(hardwareMap);
-        shooter = new Shooter(hardwareMap, Constants.Alliance.BLUE, 1200);
+        shooter = new Shooter(hardwareMap, PoseStorage.alliance, 1200);
         tilt = new Tilt(hardwareMap);
         intakeStateMachine = new IntakeStateMachine(hardwareMap);
         imu = hardwareMap.get(IMU.class, "imu");
@@ -49,7 +50,10 @@ public class Italy26TeleOpMode extends OpMode {
         imu.initialize(parameters);
         follower = createFollower(hardwareMap);
         follower.startTeleOpDrive(true);
-        follower.setStartingPose(new Pose(72,72,0));
+        follower.setStartingPose(PoseStorage.currentPose);
+        if (PoseStorage.currentPose != null) {
+            follower.setPose(PoseStorage.currentPose);
+        }
     }
 
     @Override
@@ -94,19 +98,22 @@ public class Italy26TeleOpMode extends OpMode {
             gamepad2.rumble(2000);
         }
 
-        telemetry.addData("Sensor2", intakeStateMachine.intake.colorSensor.distanceSensor.getDistance(DistanceUnit.CM));
-        telemetry.addData("Sensor2 bis", intakeStateMachine.intake.colorSensor.distanceSensor.getDistance(DistanceUnit.CM));
-        telemetry.addData("Sensor3", intakeStateMachine.intake.distanceSensor1.getDistance(DistanceUnit.CM));
-        telemetry.addData("Sensor1", intakeStateMachine.intake.distanceSensor2.getDistance(DistanceUnit.CM));
-        telemetry.addData("Intake state", intakeStateMachine.state);
-        telemetry.addData("Pos encoder", shooter.encoder.getCurrentPosition());
+        //telemetry.addData("Sensor2", intakeStateMachine.intake.colorSensor.distanceSensor.getDistance(DistanceUnit.CM));
+        //telemetry.addData("Sensor2 bis", intakeStateMachine.intake.colorSensor.distanceSensor.getDistance(DistanceUnit.CM));
+        //telemetry.addData("Sensor3", intakeStateMachine.intake.distanceSensor1.getDistance(DistanceUnit.CM));
+        //telemetry.addData("Sensor1", intakeStateMachine.intake.distanceSensor2.getDistance(DistanceUnit.CM));
+        //telemetry.addData("Intake state", intakeStateMachine.state);
+        //telemetry.addData("Pos encoder", shooter.encoder.getCurrentPosition());
         //telemetry.addData("Heading odometry", follower.getHeading());
         //telemetry.addData("SHooter", gamepad1.right_trigger);
         //telemetry.addData("Yaw imu", yawAngleShooter);
-        telemetry.addData("Is reseting", shooter.reset);
-        telemetry.addData("Offset", shooter.offset);
-        telemetry.addData("Power", shooter.rotorR.getPower());
-        telemetry.addData("Bumper", gamepad1.left_bumper);
+        //telemetry.addData("Is reseting", shooter.reset);
+        //telemetry.addData("Offset", shooter.offset);
+        //telemetry.addData("Power", shooter.rotorR.getPower());
+        //telemetry.addData("Bumper", gamepad1.left_bumper);
+        telemetry.addData("X", follower.getPose().getX());
+        telemetry.addData("Y", follower.getPose().getY());
+        telemetry.addData("Heading", follower.getPose().getHeading());
 
 
         telemetry.update();
