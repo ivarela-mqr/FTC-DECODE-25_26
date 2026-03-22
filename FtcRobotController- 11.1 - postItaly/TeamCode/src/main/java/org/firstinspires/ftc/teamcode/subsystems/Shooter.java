@@ -19,8 +19,8 @@ public class Shooter {
     public CRServo rotorL, rotorR;
     public Servo coverL, coverR, block;
     public LimeLight limeLight;
-    int LEFT_LIMIT = -3500;
-    int RIGHT_LIMIT = 3500;
+    int LEFT_LIMIT = -10000;
+    int RIGHT_LIMIT = 10000;
     final double VELOCITY_FACTOR = 0.1;
     public double offset = 0, correctOffset = 0;
     double curTargetVelocity;
@@ -145,6 +145,9 @@ public class Shooter {
     public boolean isReady(){
         return velocityOffset() < 50
                 && offset < 5;
+    }
+    public boolean isReady2(){
+        return offset < 7.5 && offset > - 7.5;
     }
     public boolean canShoot(Gamepad gamepad){
         return (velocityOffset() < 50

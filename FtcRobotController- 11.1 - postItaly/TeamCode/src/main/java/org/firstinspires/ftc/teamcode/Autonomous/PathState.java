@@ -10,5 +10,6 @@ public enum PathState{
     OPEN_BLOCK,
     TAKE_BASE,
     RETAKE_BASE,
+    TAKE_OPEN,
     END
 }
