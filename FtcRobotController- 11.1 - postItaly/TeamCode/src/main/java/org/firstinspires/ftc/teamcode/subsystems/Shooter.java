@@ -86,9 +86,55 @@ public class Shooter {
         moveServos(offset, !offsetCentered);
     }
 
-    public void aimWithOdometry(){
+    /*public void aimWithOdometry(double yaw) {
+        // Posición actual del robot desde Pedro Pathing
+        Pose robotPose = follower.getPose();
 
-    }
+        // Coordenadas de la canasta según alianza
+        double basketX, basketY;
+        if (Constants.Alliance.BLUE == alliance) {
+            basketX = BLUE_BASKET_X;
+            basketY = BLUE_BASKET_Y;
+        } else {
+            basketX = RED_BASKET_X;
+            basketY = RED_BASKET_Y;
+        }
+
+        // Vector robot → canasta
+        double dx = basketX - robotPose.getX();
+        double dy = basketY - robotPose.getY();
+
+        // Distancia (equivalente a var[1] de limelight)
+        double distance = Math.hypot(dx, dy);
+
+        // Ángulo absoluto al campo hacia la canasta
+        double angleToBasket = Math.atan2(dy, dx);
+
+        // Ángulo relativo a la orientación del robot (usando yaw igual que limelight)
+        double turretTarget = Math.toDegrees(angleToBasket) - yaw;
+
+        // Normalizar a [-180, 180]
+        while (turretTarget >  180) turretTarget -= 360;
+        while (turretTarget < -180) turretTarget += 360;
+
+        // Offset: diferencia entre donde está la torreta y donde debe estar
+        // (igual que limelight devuelve tx como desviación)
+        offset = turretTarget - currentTurretAngle;
+
+        // Mismo correctOffset que en limelight, basado en distancia y alianza
+        if (distance > 300 && Constants.Alliance.BLUE == alliance)
+            correctOffset = -5;
+        else if (distance > 300 && Constants.Alliance.RED == alliance)
+            correctOffset = 5;
+        else
+            correctOffset = 0;
+
+        // Reutiliza exactamente los mismos métodos que limelight
+        adjustVelAndCover(distance);
+
+        boolean offsetCentered = (offset == 0 && Math.abs(lastValidOffset) < 5);
+        moveServos(offset, !offsetCentered);
+    } */
     public double pid(double offset){
         double currentTime = timer.seconds();
         double dt = currentTime - lastTime;
