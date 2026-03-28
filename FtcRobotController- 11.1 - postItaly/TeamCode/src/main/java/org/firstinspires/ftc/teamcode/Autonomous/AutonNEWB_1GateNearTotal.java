@@ -46,8 +46,8 @@ public class AutonNEWB_1GateNearTotal extends OpMode {
 
         pathState = PathState.DRIVE_STARTPOS_SHOOT_POS;
         shootingStateMachine.init(hardwareMap,
-                org.firstinspires.ftc.teamcode.util.Constants.Alliance.BLUE,1200, IntakeStateMachineStates.FINAL,
-                new Pose(60.000, 90.000));
+                org.firstinspires.ftc.teamcode.util.Constants.Alliance.BLUE,1150, IntakeStateMachineStates.FINAL,
+                new Pose(45, 96));
 
         imu = hardwareMap.get(IMU.class, "imu");
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
@@ -109,7 +109,7 @@ public class AutonNEWB_1GateNearTotal extends OpMode {
                     .addPath(
                             new BezierLine(
                                     new Pose(21.305, 126.125),
-                                    new Pose(55, 93)
+                                    new Pose(45,96)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(144), Math.toRadians(230))
@@ -118,19 +118,25 @@ public class AutonNEWB_1GateNearTotal extends OpMode {
             goTakeSecond1 = follower.pathBuilder()
                     .addPath(
                             new BezierCurve(
-                                    new Pose(55, 93),
-                                    new Pose(74, 55),
-                                    new Pose(13.000, 67.000)
+                                    new Pose(45,96),
+                                    new Pose(45, 65)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(230), Math.toRadians(180))
+                    .addPath(
+                            new BezierLine(
+                                    new Pose(45, 65),
+                                    new Pose(13, 65)
+                            )
+                    )
+                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
                     .build();
 
             goOpen1 = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(13, 67),
-                                    new Pose(23, 67)
+                                    new Pose(13, 65),
+                                    new Pose(20, 65)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
@@ -138,7 +144,7 @@ public class AutonNEWB_1GateNearTotal extends OpMode {
             goOpen2 = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(23, 67),
+                                    new Pose(20, 65),
                                     new Pose(13, 73)
                             )
                     )
@@ -150,28 +156,34 @@ public class AutonNEWB_1GateNearTotal extends OpMode {
                             new BezierCurve(
                                     new Pose(13.000, 73.000),
                                     new Pose(39.988, 71.223),
-                                    new Pose(55, 93)
+                                    new Pose(45,96)
                             )
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(230))
+                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
                     .build();
 
             goTakeFirst = follower.pathBuilder()
                     .addPath(
-                            new BezierCurve(
-                                    new Pose(55, 93),
-                                    new Pose(43.430, 89.844),
-                                    new Pose(13.000, 93.000)
+                            new BezierLine(
+                                    new Pose(45, 96),
+                                    new Pose(45,90)
                             )
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(230), Math.toRadians(180))
+                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
+                    .addPath(
+                            new BezierLine(
+                                    new Pose(45, 90),
+                                    new Pose(18,90)
+                            )
+                    )
+                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
                     .build();
 
             goShotFirst = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(13.000, 93.000),
-                                    new Pose(55, 93)
+                                    new Pose(18, 90),
+                                    new Pose(45,96)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(230))
@@ -180,19 +192,25 @@ public class AutonNEWB_1GateNearTotal extends OpMode {
             goTakeThird1 = follower.pathBuilder()
                     .addPath(
                             new BezierCurve(
-                                    new Pose(55, 93),
-                                    new Pose(66.870, 27.825),
-                                    new Pose(13.000, 43.000)
+                                    new Pose(45,96),
+                                    new Pose(45, 43.000)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(230), Math.toRadians(180))
+                    .addPath(
+                            new BezierLine(
+                                    new Pose(45, 43.000),
+                                    new Pose(17,43)
+                            )
+                    )
+                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
                     .build();
 
             goShotThird = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(13.000, 43.000),
-                                    new Pose(55, 93)
+                                    new Pose(17, 43.000),
+                                    new Pose(45,96)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(230))
@@ -200,7 +218,7 @@ public class AutonNEWB_1GateNearTotal extends OpMode {
             finalPath = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(55, 93),
+                                    new Pose(45,96),
                                     new Pose(24, 70)
                             )
                     )
@@ -215,7 +233,7 @@ public class AutonNEWB_1GateNearTotal extends OpMode {
         switch (pathState){
             case DRIVE_STARTPOS_SHOOT_POS:
                 shootingStateMachine.shooter.adjustCover(0.4);
-                follower.followPath(paths.goShotLoaded,0.75,true);
+                follower.followPath(paths.goShotLoaded,1,true);
                 setPathState(PathState.SHOOT_PRELOAD);
                 break;
             case SHOOT_PRELOAD:
@@ -237,14 +255,14 @@ public class AutonNEWB_1GateNearTotal extends OpMode {
                 break;
             case TAKE_FIRST:
                 if(!follower.isBusy()) {
-                    follower.followPath(paths.goShotFirst,0.5,true);
+                    follower.followPath(paths.goShotFirst,1,true);
                     setPathState(PathState.SHOOT_PRELOAD);
                 }
                 break;
             case TAKE_SECOND:
                 if(!follower.isBusy()) {
                     if (lastPathState == PathState.SHOOT_PRELOAD){
-                        follower.followPath(paths.goOpen1,0.5,true);
+                        follower.followPath(paths.goOpen1,1,true);
                         setPathState(PathState.OPEN_BLOCK);
                     }
                 }
@@ -252,7 +270,7 @@ public class AutonNEWB_1GateNearTotal extends OpMode {
             case TAKE_THIRD:
                 if(!follower.isBusy()) {
                     if (lastPathState == PathState.SHOOT_PRELOAD) {
-                        follower.followPath(paths.goShotThird,0.75,true);
+                        follower.followPath(paths.goShotThird,1,true);
                         setPathState(PathState.SHOOT_PRELOAD);
                     }
                 }
@@ -263,8 +281,8 @@ public class AutonNEWB_1GateNearTotal extends OpMode {
                         follower.followPath(paths.goOpen2,0.5,true);
                         setPathState(PathState.OPEN_BLOCK);
                     }else if(lastPathState == PathState.OPEN_BLOCK &&
-                            Math.abs(actualTimer.getElapsedTimeSeconds() - stateTimer.getElapsedTimeSeconds()) > 1){
-                        follower.followPath(paths.goShotSecond,0.75, true);
+                            Math.abs(actualTimer.getElapsedTimeSeconds() - stateTimer.getElapsedTimeSeconds()) > 1.5){
+                        follower.followPath(paths.goShotSecond,1, true);
                         setPathState(PathState.SHOOT_PRELOAD);
                     }
                 }
