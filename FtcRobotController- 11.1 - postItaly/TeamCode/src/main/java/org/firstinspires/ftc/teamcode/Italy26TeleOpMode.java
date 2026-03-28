@@ -28,18 +28,22 @@ public class Italy26TeleOpMode extends OpMode {
     Tilt tilt;
     IMU imu;
     YawPitchRollAngles orientation;
+    double headingReset;
     double yawOffset = 0;
     double yawOffsetShooter = 0;
     Follower follower;
     Timer actualTimer,initTimer;
     boolean rumble = false;
+    Constants.Alliance alliance;
 
     @Override
     public void init() {
+        alliance = PoseStorage.alliance;
+
         actualTimer = new Timer();
         initTimer = new Timer();
         driveTrain = new DriveTrain(hardwareMap);
-        shooter = new Shooter(hardwareMap, PoseStorage.alliance, 1200);
+        shooter = new Shooter(hardwareMap, alliance, 1200);
         tilt = new Tilt(hardwareMap);
         intakeStateMachine = new IntakeStateMachine(hardwareMap);
         imu = hardwareMap.get(IMU.class, "imu");
@@ -53,9 +57,13 @@ public class Italy26TeleOpMode extends OpMode {
         follower.setStartingPose(PoseStorage.currentPose);
         if (PoseStorage.currentPose != null) {
             follower.setPose(PoseStorage.currentPose);
-            yawOffset = PoseStorage.currentPose.getHeading();
         }
 
+        if (alliance == Constants.Alliance.BLUE){
+            headingReset = 180;
+        }else{
+            headingReset = 0;
+        }
     }
 
     @Override
@@ -73,26 +81,28 @@ public class Italy26TeleOpMode extends OpMode {
         orientation = imu.getRobotYawPitchRollAngles();
         double yawAngleShooter = orientation.getYaw(AngleUnit.DEGREES)
                                     - yawOffsetShooter;
-        double rawYaw = Math.toDegrees(follower.getHeading());
-        double yawAngle = rawYaw - yawOffset;
+
+        double rawYaw = Math.toDegrees(follower.getPose().getHeading());
+        double yawAngle = rawYaw - yawOffset + headingReset;
+
         if (gamepad1.options) {
             yawOffset = rawYaw;
             follower.setPose(new Pose(
                     follower.getPose().getX(),
                     follower.getPose().getY(),
-                    0
+                    headingReset
             ));
             yawOffsetShooter = orientation.getYaw();
         }
         follower.update();
 
         driveTrain.TeleOp(gamepad1,telemetry,yawAngle);
-        intakeStateMachine.TeleOp((shooter.canShoot(gamepad1) && gamepad1.right_trigger > 0.1),
+        /*intakeStateMachine.TeleOp((shooter.canShoot(gamepad1) && gamepad1.right_trigger > 0.1),
                                     gamepad1, gamepad2);
         shooter.TeleOp(gamepad1, gamepad2, telemetry, yawAngleShooter,
                                     intakeStateMachine.isFull());
         tilt.Teleop(gamepad1);
-
+        */
         actualTimer.resetTimer();
         if(!rumble && timeElapsed() > 105){
             rumble = true;
@@ -116,6 +126,9 @@ public class Italy26TeleOpMode extends OpMode {
         //telemetry.addData("Bumper", gamepad1.left_bumper);
         */
 
+        telemetry.addData("alliance",alliance);
+        telemetry.addData("YawAngle", yawAngle);
+        telemetry.addData("YawOffset", yawOffset);
         telemetry.addData("X", follower.getPose().getX());
         telemetry.addData("Y", follower.getPose().getY());
         telemetry.addData("Heading", follower.getPose().getHeading());

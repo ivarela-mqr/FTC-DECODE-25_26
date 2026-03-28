@@ -25,6 +25,8 @@ public class DriveTrain {
     }
 
     public void TeleOp(Gamepad gamepad, Telemetry telemetry, double yawAngle){
+        double targetHeading = yawAngle;
+
         if (gamepad.left_stick_button){
             driveVelFactor = 0.25;
         }else{
@@ -40,6 +42,18 @@ public class DriveTrain {
         double drive = -gamepad.left_stick_y * driveVelFactor;
         double strafe = gamepad.left_stick_x * driveVelFactor;
         double rotate = gamepad.right_stick_x * rotVelFactor;
+
+
+        // Heading correction
+        double error = targetHeading - yawAngle; // yawAngle = current heading
+        // Normalize to [-180, 180]
+        error = ((error + 180) % 360) - 180;
+
+        // Small P controller
+        double kP = 0.03; // todo tune this
+        double correction = error * kP;
+
+        rotate+=correction;
 
         double headingRad = Math.toRadians(yawAngle);
 
