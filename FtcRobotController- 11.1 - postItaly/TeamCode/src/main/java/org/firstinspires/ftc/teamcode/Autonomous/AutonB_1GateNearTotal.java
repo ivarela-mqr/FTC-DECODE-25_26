@@ -29,7 +29,6 @@ public class AutonB_1GateNearTotal extends OpMode {
     private PathState pathState; // Current autonomous path state (state machine)
     private PathState lastPathState; // Current autonomous path state (state machine)
     private Paths paths; // Paths defined in the Paths class
-    public PoseStorage currentPose;
     IMU imu;
     YawPitchRollAngles orientation;
     ShootingStateMachine shootingStateMachine = new ShootingStateMachine();
@@ -113,7 +112,6 @@ public class AutonB_1GateNearTotal extends OpMode {
         public PathChain finalPath;
         public PathChain goOpen1;
         public PathChain goOpen2;
-        public PathChain goSHootOpen;
 
         public Paths(Follower follower) {
             goShotLoaded = follower.pathBuilder()

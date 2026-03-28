@@ -53,7 +53,9 @@ public class Italy26TeleOpMode extends OpMode {
         follower.setStartingPose(PoseStorage.currentPose);
         if (PoseStorage.currentPose != null) {
             follower.setPose(PoseStorage.currentPose);
+            yawOffset = PoseStorage.currentPose.getHeading();
         }
+
     }
 
     @Override
@@ -98,6 +100,7 @@ public class Italy26TeleOpMode extends OpMode {
             gamepad2.rumble(2000);
         }
 
+        /*
         //telemetry.addData("Sensor2", intakeStateMachine.intake.colorSensor.distanceSensor.getDistance(DistanceUnit.CM));
         //telemetry.addData("Sensor2 bis", intakeStateMachine.intake.colorSensor.distanceSensor.getDistance(DistanceUnit.CM));
         //telemetry.addData("Sensor3", intakeStateMachine.intake.distanceSensor1.getDistance(DistanceUnit.CM));
@@ -111,6 +114,8 @@ public class Italy26TeleOpMode extends OpMode {
         //telemetry.addData("Offset", shooter.offset);
         //telemetry.addData("Power", shooter.rotorR.getPower());
         //telemetry.addData("Bumper", gamepad1.left_bumper);
+        */
+
         telemetry.addData("X", follower.getPose().getX());
         telemetry.addData("Y", follower.getPose().getY());
         telemetry.addData("Heading", follower.getPose().getHeading());
