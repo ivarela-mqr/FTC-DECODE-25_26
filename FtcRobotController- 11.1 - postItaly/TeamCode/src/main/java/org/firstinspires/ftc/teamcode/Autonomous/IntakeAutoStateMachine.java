@@ -17,7 +17,9 @@ public class IntakeAutoStateMachine {
         this.state = state;
     }
     public boolean isBusy() {
-        return state != IntakeStateMachineStates.INIT && state != IntakeStateMachineStates.FIRST_ARTIFACT && state != IntakeStateMachineStates.SECOND_ARTIFACT;
+        return state != IntakeStateMachineStates.INIT
+                && state != IntakeStateMachineStates.FIRST_ARTIFACT
+                && state != IntakeStateMachineStates.SECOND_ARTIFACT;
     }
     public boolean isShooting() {
         return intake.numArtifactsIn() > 0;

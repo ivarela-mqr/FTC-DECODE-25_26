@@ -3,18 +3,18 @@ package org.firstinspires.ftc.teamcode.subsystems;
 import com.pedropathing.geometry.Pose;
 
 public class Zone {
+
     public static class Point {
-        public double x, y;
+        public final double x, y;
 
         public Point(double x, double y) {
             this.x = x;
             this.y = y;
         }
     }
-    private Point a, b, c;
 
-    // bounding box del triángulo
-    private double minX, maxX, minY, maxY,radius;
+    private final Point a, b, c;
+    private final double minX, maxX, minY, maxY, radius;
 
     public Zone(Point a, Point b, Point c, double radius) {
         this.a = a;
@@ -33,54 +33,40 @@ public class Zone {
         double px = pose.getX();
         double py = pose.getY();
 
-        if (px + radius < minX || px - radius > maxX ||
-                py + radius < minY || py - radius > maxY) {
+        // Bounding box check
+        if (px - radius > maxX || px + radius < minX ||
+                py - radius > maxY || py + radius < minY) {
             return false;
         }
 
+        // Inside triangle
         if (isInsideTriangle(px, py)) return true;
 
-        if (distanceToSegment(px, py, a.x, a.y, b.x, b.y) <= radius) return true;
-        if (distanceToSegment(px, py, b.x, b.y, c.x, c.y) <= radius) return true;
-        return distanceToSegment(px, py, c.x, c.y, a.x, a.y) <= radius;
+        // Close to edges
+        return distanceToSegment(px, py, a, b) <= radius ||
+                distanceToSegment(px, py, b, c) <= radius ||
+                distanceToSegment(px, py, c, a) <= radius;
     }
 
     private boolean isInsideTriangle(double px, double py) {
-        double areaABC = area(a.x, a.y, b.x, b.y, c.x, c.y);
-        double areaPAB = area(px, py, a.x, a.y, b.x, b.y);
-        double areaPBC = area(px, py, b.x, b.y, c.x, c.y);
-        double areaPCA = area(px, py, c.x, c.y, a.x, a.y);
-
-        return Math.abs((areaPAB + areaPBC + areaPCA) - areaABC) < 1e-6;
+        double denominator = ((b.y - c.y)*(a.x - c.x) + (c.x - b.x)*(a.y - c.y));
+        double alpha = ((b.y - c.y)*(px - c.x) + (c.x - b.x)*(py - c.y)) / denominator;
+        double beta  = ((c.y - a.y)*(px - c.x) + (a.x - c.x)*(py - c.y)) / denominator;
+        double gamma = 1.0 - alpha - beta;
+        return alpha >= 0 && beta >= 0 && gamma >= 0;
     }
 
-    private double area(double x1, double y1,
-                        double x2, double y2,
-                        double x3, double y3) {
-        return Math.abs(
-                (x1 * (y2 - y3) +
-                        x2 * (y3 - y1) +
-                        x3 * (y1 - y2)) * 0.5
-        );
-    }
+    private double distanceToSegment(double px, double py, Point p1, Point p2) {
+        double dx = p2.x - p1.x;
+        double dy = p2.y - p1.y;
 
-    private double distanceToSegment(double px, double py,
-                                     double x1, double y1,
-                                     double x2, double y2) {
-        double dx = x2 - x1;
-        double dy = y2 - y1;
+        if (dx == 0 && dy == 0) return Math.hypot(px - p1.x, py - p1.y);
 
-        if (dx == 0 && dy == 0) {
-            return Math.hypot(px - x1, py - y1);
-        }
+        double t = ((px - p1.x) * dx + (py - p1.y) * dy) / (dx*dx + dy*dy);
+        t = Math.max(0, Math.min(1, t));
 
-        double t = ((px - x1) * dx + (py - y1) * dy) / (dx * dx + dy * dy);
-
-        if (t < 0) t = 0;
-        else if (t > 1) t = 1;
-
-        double closestX = x1 + t * dx;
-        double closestY = y1 + t * dy;
+        double closestX = p1.x + t * dx;
+        double closestY = p1.y + t * dy;
 
         return Math.hypot(px - closestX, py - closestY);
     }

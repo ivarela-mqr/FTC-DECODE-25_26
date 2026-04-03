@@ -15,6 +15,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.subsystems.IntakeStateMachine;
 import org.firstinspires.ftc.teamcode.subsystems.Tilt;
+import org.firstinspires.ftc.teamcode.subsystems.Zone;
 import org.firstinspires.ftc.teamcode.util.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.DriveTrain;
 import org.firstinspires.ftc.teamcode.subsystems.Shooter;
@@ -35,6 +36,8 @@ public class Italy26TeleOpMode extends OpMode {
     Timer actualTimer,initTimer;
     boolean rumble = false;
     Constants.Alliance alliance;
+    Zone farZone,nearZone;
+    double radius;
 
     @Override
     public void init() {
@@ -54,9 +57,9 @@ public class Italy26TeleOpMode extends OpMode {
         imu.initialize(parameters);
         follower = createFollower(hardwareMap);
         follower.startTeleOpDrive(true);
-        follower.setStartingPose(PoseStorage.currentPose);
         if (PoseStorage.currentPose != null) {
             follower.setPose(PoseStorage.currentPose);
+            //follower.setStartingPose(PoseStorage.currentPose);
         }
 
         if (alliance == Constants.Alliance.BLUE){
@@ -64,6 +67,9 @@ public class Italy26TeleOpMode extends OpMode {
         }else{
             headingReset = 0;
         }
+        radius = Math.hypot(15.5,17.5)/2;
+        farZone = new Zone(new Zone.Point(72,24), new Zone.Point(96,0),new Zone.Point(48,0),radius);
+        nearZone = new Zone(new Zone.Point(72,72), new Zone.Point(0,144),new Zone.Point(144,144),radius);
     }
 
     @Override
@@ -95,14 +101,16 @@ public class Italy26TeleOpMode extends OpMode {
             yawOffsetShooter = orientation.getYaw();
         }
         follower.update();
-
+        if(isInShootZone()){
+            gamepad1.rumble(100);
+        }
         driveTrain.TeleOp(gamepad1,telemetry,yawAngle);
-        /*intakeStateMachine.TeleOp((shooter.canShoot(gamepad1) && gamepad1.right_trigger > 0.1),
+        intakeStateMachine.TeleOp((shooter.canShoot(gamepad1) && gamepad1.right_trigger > 0.1),
                                     gamepad1, gamepad2);
         shooter.TeleOp(gamepad1, gamepad2, telemetry, yawAngleShooter,
                                     intakeStateMachine.isFull());
         tilt.Teleop(gamepad1);
-        */
+
         actualTimer.resetTimer();
         if(!rumble && timeElapsed() > 105){
             rumble = true;
@@ -138,5 +146,12 @@ public class Italy26TeleOpMode extends OpMode {
     }
     public int timeElapsed(){
         return (int)Math.abs(actualTimer.getElapsedTimeSeconds() - initTimer.getElapsedTimeSeconds());
+    }
+
+    boolean isInShootZone(){
+        Pose pose = follower.getPose();
+        if(farZone.isRobotInZone(pose))
+            return true;
+        return nearZone.isRobotInZone(pose);
     }
 }

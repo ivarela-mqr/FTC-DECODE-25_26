@@ -1,6 +1,5 @@
-package org.firstinspires.ftc.teamcode.subsystems;
+package org.firstinspires.ftc.teamcode.mechanisms;
 
-import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -12,23 +11,17 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.util.Constants;
-import org.firstinspires.ftc.teamcode.util.Debouncer;
 
 public class Shooter {
     public  DcMotorEx shooter0, shooter1, encoder;
     public CRServo rotorL, rotorR;
     public Servo coverL, coverR, block;
-    public LimeLight limeLight;
     int LEFT_LIMIT = -10000;
     int RIGHT_LIMIT = 10000;
     final double VELOCITY_FACTOR = 0.1;
     public double offset = 0, correctOffset = 0;
     double curTargetVelocity;
-    public Timer init = new Timer();
     public boolean autoAim = true, teleOp = false;
-    public Debouncer debouncer = new Debouncer(200);
-    public Debouncer velDebouncer = new Debouncer(200);
-    public Debouncer blockDebouncer = new Debouncer(500);
     PIDFCoefficients coefficients = new PIDFCoefficients(22, 0, 1.7, 15);
     private double lastValidOffset = 0;
     public boolean stop = false;
@@ -37,9 +30,9 @@ public class Shooter {
     public double kD = 0.05;
     double lastError = 0;
     double lastTime = 0;
-    Constants.Alliance alliance;
     public boolean hold = true, reset = false;
-    public Shooter (HardwareMap hardwareMap, Constants.Alliance alliance, double targetVel){
+    double pos;
+    public Shooter (HardwareMap hardwareMap, double targetVel){
         shooter0 = hardwareMap.get(DcMotorEx.class,"shooter0");
         shooter1 = hardwareMap.get(DcMotorEx.class,"shooter1");
         encoder = hardwareMap.get(DcMotorEx.class, "intake");
@@ -53,39 +46,21 @@ public class Shooter {
         encoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         encoder.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         coverL.setDirection(Servo.Direction.REVERSE);
-        this.alliance = alliance;
-        limeLight = new LimeLight(hardwareMap, alliance);
         curTargetVelocity = targetVel;
         timer.reset();
-    }
-    public void resetTimer(){
-        init.resetTimer();
+
+        openBlock();
     }
     public void adjustVelAndCover(double distance){
         if(distance > 0 && teleOp && autoAim){
             double pos = 0.15;
             curTargetVelocity = 1550;
             if (distance < 300){
-                pos = 0.7553513 - 0.006106451*distance
-                        + 0.0000244524*Math.pow(distance,2) - 3.402742e-8*Math.pow(distance,3);
-                curTargetVelocity = 1282.327 + 6.476417*distance
-                        - 0.02771772*Math.pow(distance,2) + 0.00004286212*Math.pow(distance,3);
+                pos = 1.31952 - 0.01056727*distance + 0.00002452835 * Math.pow(distance,2);
+                curTargetVelocity = 752.1383 + 3.887819*distance - 0.004956243 * Math.pow(distance,2);
             }
             adjustCover(pos);
         }
-    }
-    public void aimWithLimelight(double yaw){
-        double[] var = limeLight.getGoalAprilTagData(yaw);
-        offset = var[0];
-        if(var[1] > 300 && Constants.Alliance.BLUE == alliance)
-            correctOffset = -5;
-        else if(var[1] > 300 && Constants.Alliance.RED == alliance)
-            correctOffset = 5;
-        else
-            correctOffset = 0;
-        adjustVelAndCover(var[1]);
-        boolean offsetCentered = (offset == 0 && Math.abs(lastValidOffset) < 5);
-        moveServos(offset, !offsetCentered);
     }
 
     /*public void aimWithOdometry(double yaw) {
@@ -195,8 +170,7 @@ public class Shooter {
         }
     }
     public boolean isReady(){
-        return velocityOffset() < 50
-                && offset < 5;
+        return velocityOffset() < 50;
     }
     public boolean isReady2(){
         return offset < 7.5 && offset > - 7.5;
@@ -249,11 +223,6 @@ public class Shooter {
             block.setPosition(0);
         }else{block.setPosition(1);}
     }
-    public void startTeleop(){
-        teleOp = true;
-        RIGHT_LIMIT = Constants.RIGHT_TELEOP_LIMIT;
-        LEFT_LIMIT = Constants.LEFT_TELEOP_LIMIT;
-    }
     public double velocityOffset(){
         return curTargetVelocity - Math.max(shooter1.getVelocity(), shooter0.getVelocity());
     }
@@ -261,58 +230,11 @@ public class Shooter {
         rotorL.setPower(0);
         rotorR.setPower(0);
     }
-    public void TeleOp(Gamepad gamepad1, Gamepad gamepad2, Telemetry telemetry,
-                       double yawAngle, boolean isFull){
-        if(gamepad1.left_bumper)
-            stopTurret();
-        else
-            aimWithLimelight(yawAngle);
-        preload();
-        if(((isFull && isReady()) || gamepad1.left_trigger > 0.1) && gamepad1.right_trigger > 0.1)
-            openBlock();
-        else if(gamepad1.right_trigger < 0.5 && gamepad1.left_trigger < 0.5)
-            closeBlock();
+    public void TeleOp(double vel, double pos){
+        curTargetVelocity = vel;
+        shooter0.setVelocity(curTargetVelocity);
+        shooter1.setVelocity(curTargetVelocity);
 
-        if (gamepad2.share){
-            autoAim = true;
-            reset = false;
-            encoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            encoder.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        }
-        if(gamepad2.options)
-            reset = true;
-        if (gamepad2.dpad_left){
-            alliance = Constants.Alliance.BLUE;
-            limeLight.switchAlliance(alliance);
-        }else if(gamepad2.dpad_right){
-            alliance = Constants.Alliance.RED;
-            limeLight.switchAlliance(alliance);
-        }
-
-        if (gamepad2.left_trigger > 0.1){
-            autoAim = false;
-            setPowerRotor(10);
-        }else if (gamepad2.right_trigger > 0.1) {
-            autoAim = false;
-            setPowerRotor(-10);
-        } else if (!autoAim){
-            setPowerRotor(0);
-            autoAim = false;
-        }
-
-        if(gamepad2.dpad_up && velDebouncer.isReady())
-            curTargetVelocity += 50;
-        if(gamepad2.dpad_down && velDebouncer.isReady())
-            curTargetVelocity -= 50;
-        if(gamepad2.left_bumper && debouncer.isReady())
-            correctCover(-1);
-        if(gamepad2.right_bumper && debouncer.isReady())
-            correctCover(1);
-//        if (gamepad2.circle && blockDebouncer.isReady())
-//            switchBlock();
-
-        telemetry.addData("velocity shooter",shooter0.getVelocity());
-        telemetry.addData("curTargetVelocity",curTargetVelocity);
-        telemetry.addData("cover pos", coverR.getPosition());
+        adjustCover(pos);
     }
 }
