@@ -91,7 +91,11 @@ public class Italy26TeleOpMode extends OpMode {
                                     - yawOffsetShooter;
 
         double rawYaw = Math.toDegrees(follower.getHeading());
-        double yawAngle = rawYaw - yawOffset;
+        double yawAngle;
+        if (rawYaw > 0)
+            yawAngle = rawYaw - yawOffset;
+        else
+            yawAngle = rawYaw + yawOffset;
 
         if (gamepad1.options) {
             yawOffset = rawYaw;
