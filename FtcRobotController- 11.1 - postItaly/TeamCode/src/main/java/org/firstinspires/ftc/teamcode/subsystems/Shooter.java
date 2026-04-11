@@ -19,8 +19,8 @@ public class Shooter {
     public CRServo rotorL, rotorR;
     public Servo coverL, coverR, block;
     public LimeLight limeLight;
-    int LEFT_LIMIT = -10000;
-    int RIGHT_LIMIT = 10000;
+    int LEFT_LIMIT = -20000;
+    int RIGHT_LIMIT = 20000;
     final double VELOCITY_FACTOR = 0.1;
     public double offset = 0, correctOffset = 0;
     double curTargetVelocity;
@@ -87,7 +87,36 @@ public class Shooter {
         boolean offsetCentered = (offset == 0 && Math.abs(lastValidOffset) < 5);
         moveServos(offset, !offsetCentered);
     }
-
+    public void aim(double yawLimelight, double yawOdometry,boolean isInShootingPos){
+        double[] var = limeLight.getGoalAprilTagData(yawLimelight);
+        if(isInShootingPos) {
+            if (var[0] < 10)
+                aimWithLimelight(yawLimelight);
+            else {
+                aimWithOdometry(yawOdometry);
+                offset = 100;
+            }
+        }else{
+            resetTurret();
+        }
+    }
+    public double translateEncoderToAngle(double posEncoder){
+        return -0.0075*posEncoder + 180;
+    }
+    public void aimWithOdometry(double yaw){
+        double shooterAngle = translateEncoderToAngle(encoder.getCurrentPosition());
+        if(alliance == Constants.Alliance.BLUE) {
+            if (((yaw + 144)%360 - shooterAngle) > 0)
+                setPowerRotor(-20);
+            else
+                setPowerRotor(20);
+        }else{
+            if (((yaw + 36)%360 - shooterAngle) > 0)
+                setPowerRotor(20);
+            else
+                setPowerRotor(-20);
+        }
+    }
     /*public void aimWithOdometry(double yaw) {
         // Posición actual del robot desde Pedro Pathing
         Pose robotPose = follower.getPose();
@@ -158,12 +187,15 @@ public class Shooter {
         output = Math.max(-0.3, Math.min(0.3, output * VELOCITY_FACTOR));
         return -output;
     }
+    public void resetTurret(){
+        int posR = encoder.getCurrentPosition();
+        if (posR > 1000) {
+            setPowerRotor(10);
+        } else if (posR < -1000) {
+            setPowerRotor(-10);
+        }
+    }
     public void moveServos(double offsetX, boolean objectDetected) {
-        if (objectDetected)
-            lastValidOffset = offsetX;
-        else
-            offsetX = lastValidOffset;
-        double power = pid(offsetX);
         int posR = encoder.getCurrentPosition();
         if (!objectDetected) {
             if (posR > 500) {
@@ -174,6 +206,11 @@ public class Shooter {
                 return;
             }
         }
+        if (objectDetected)
+            lastValidOffset = offsetX;
+        else
+            offsetX = lastValidOffset;
+        double power = pid(offsetX);
         if (autoAim) {
             setPowerRotor(power);
         }
@@ -262,11 +299,11 @@ public class Shooter {
         rotorR.setPower(0);
     }
     public void TeleOp(Gamepad gamepad1, Gamepad gamepad2, Telemetry telemetry,
-                       double yawAngle, boolean isFull){
+                       double yawAngleLimeLight,double yawOdometry ,boolean isFull){
         if(gamepad1.left_bumper)
             stopTurret();
         else
-            aimWithLimelight(yawAngle);
+            aimWithLimelight(yawAngleLimeLight);
         preload();
         if(((isFull && isReady()) || gamepad1.left_trigger > 0.1) && gamepad1.right_trigger > 0.1)
             openBlock();

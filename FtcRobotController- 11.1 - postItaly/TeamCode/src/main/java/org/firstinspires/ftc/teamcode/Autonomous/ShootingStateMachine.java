@@ -97,9 +97,11 @@ public class ShootingStateMachine {
         this.shootingPose = shootingPose;
     }
 
-    public void update(Pose pose, Telemetry telemetry, double yawAngle, boolean isBussyFollower){
+    public void update(Pose pose, Telemetry telemetry, double yawAngleLimeLight, double yawAngleOdometry,boolean isBussyFollower,
+                       boolean insideTriangle){
         isInShootingPos = canShoot(pose);
-        shooter.aimWithLimelight(yawAngle);
+        //shooter.aimWithLimelight(yawAngleLimeLight);
+        shooter.aim(yawAngleLimeLight,yawAngleOdometry,insideTriangle);
         intakeAutoStateMachine.updateIntakeStateMachine(canShoot);
         actualTime.resetTimer();
         switch (state){
@@ -112,7 +114,7 @@ public class ShootingStateMachine {
                 }
                 break;
             case LOADING:
-                if(shooter.isReady2() && !isBussyFollower
+                if(shooter.isReady() && !isBussyFollower
                     && Math.abs(timer.getElapsedTimeSeconds() - actualTime.getElapsedTimeSeconds())> 0.5) {
                     switchState(States.SHOOTING);
                 } else
@@ -130,7 +132,7 @@ public class ShootingStateMachine {
             case INTAKING:
                 shooter.closeBlock();
                 shooter.calm();
-                if(!intakeAutoStateMachine.isBusy())
+                if(!intakeAutoStateMachine.isBusy() )
                     switchState(States.INIT);
                 break;
             default:

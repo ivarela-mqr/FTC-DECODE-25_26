@@ -41,7 +41,7 @@ public class LimeLight {
             data[1] = getDistanceFromTargeta(llResult.getTa());
             return  data;
         }
-        data[0] = 0;
+        data[0] = 10000;
         data[1] = 0;
         return data;
     }

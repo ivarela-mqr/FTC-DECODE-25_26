@@ -85,7 +85,7 @@ public class Italy26TeleOpMode extends OpMode {
     @Override
     public void loop() {
         orientation = imu.getRobotYawPitchRollAngles();
-        double yawAngleShooter = orientation.getYaw(AngleUnit.DEGREES)
+        double yawAngleLimelight = orientation.getYaw(AngleUnit.DEGREES)
                                     - yawOffsetShooter;
 
         double rawYaw = Math.toDegrees(follower.getPose().getHeading());
@@ -107,7 +107,7 @@ public class Italy26TeleOpMode extends OpMode {
         driveTrain.TeleOp(gamepad1,telemetry,yawAngle);
         intakeStateMachine.TeleOp((shooter.canShoot(gamepad1) && gamepad1.right_trigger > 0.1),
                                     gamepad1, gamepad2);
-        shooter.TeleOp(gamepad1, gamepad2, telemetry, yawAngleShooter,
+        shooter.TeleOp(gamepad1, gamepad2, telemetry, yawAngleLimelight,yawAngle,
                                     intakeStateMachine.isFull());
         tilt.Teleop(gamepad1);
 
@@ -124,7 +124,6 @@ public class Italy26TeleOpMode extends OpMode {
         //telemetry.addData("Sensor3", intakeStateMachine.intake.distanceSensor1.getDistance(DistanceUnit.CM));
         //telemetry.addData("Sensor1", intakeStateMachine.intake.distanceSensor2.getDistance(DistanceUnit.CM));
         //telemetry.addData("Intake state", intakeStateMachine.state);
-        //telemetry.addData("Pos encoder", shooter.encoder.getCurrentPosition());
         //telemetry.addData("Heading odometry", follower.getHeading());
         //telemetry.addData("SHooter", gamepad1.right_trigger);
         //telemetry.addData("Yaw imu", yawAngleShooter);
@@ -133,7 +132,7 @@ public class Italy26TeleOpMode extends OpMode {
         //telemetry.addData("Power", shooter.rotorR.getPower());
         //telemetry.addData("Bumper", gamepad1.left_bumper);
         */
-
+        telemetry.addData("Pos encoder", shooter.encoder.getCurrentPosition());
         telemetry.addData("alliance",alliance);
         telemetry.addData("YawAngle", yawAngle);
         telemetry.addData("YawOffset", yawOffset);
