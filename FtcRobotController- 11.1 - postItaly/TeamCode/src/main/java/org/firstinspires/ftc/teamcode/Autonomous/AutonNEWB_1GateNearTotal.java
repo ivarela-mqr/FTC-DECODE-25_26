@@ -70,7 +70,8 @@ public class AutonNEWB_1GateNearTotal extends OpMode {
         double yawAngle = orientation.getYaw(AngleUnit.DEGREES);
         follower.update(); // Update Pedro Pathing
         Pose pose = pathState == PathState.SHOOT_PRELOAD ? follower.getPose() : new Pose();
-        shootingStateMachine.update(pose,telemetry,yawAngle, Math.toDegrees(follower.getPose().getHeading())
+        double heading =  Math.toDegrees(follower.getPose().getHeading());
+        shootingStateMachine.update(pose,telemetry,yawAngle, heading < 0 ? heading + 360 : heading
                 ,pathState != PathState.SHOOT_PRELOAD,zone.isRobotInZone(follower.getPose()));        autonomousPathUpdate(); // Update autonomous state machine
         ticks ++;
         // Log values to Panels and Driver Station
@@ -89,7 +90,7 @@ public class AutonNEWB_1GateNearTotal extends OpMode {
         //panelsTelemetry.debug("Can shoot",shootingStateMachine.canShoot(pose));
         //panelsTelemetry.debug("X", follower.getPose().getX());
         //panelsTelemetry.debug("Y", follower.getPose().getY());
-        //panelsTelemetry.debug("Heading", follower.getPose().getHeading());
+        panelsTelemetry.debug("Heading", Math.toDegrees(follower.getPose().getHeading()));
 
         panelsTelemetry.update(telemetry);
     }

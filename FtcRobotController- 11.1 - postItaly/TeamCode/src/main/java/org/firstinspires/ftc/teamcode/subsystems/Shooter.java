@@ -94,7 +94,7 @@ public class Shooter {
                 aimWithLimelight(yawLimelight);
             else {
                 aimWithOdometry(yawOdometry);
-                offset = 100;
+                //offset = 100;
             }
         }else{
             resetTurret();
@@ -191,11 +191,14 @@ public class Shooter {
     }
     public void resetTurret(){
         int posR = encoder.getCurrentPosition();
-        if (posR > 1000) {
+        if (posR > 3000) {
             setPowerRotor(5);
-        } else if (posR < -1000) {
+        } else if (posR < -3000) {
             setPowerRotor(-5);
-        }
+        }else if(posR > 1000)
+            setPowerRotor(0.2);
+        else if(posR < -1000)
+            setPowerRotor(-0.2);
     }
     public void moveServos(double offsetX, boolean objectDetected) {
         int posR = encoder.getCurrentPosition();
@@ -301,11 +304,11 @@ public class Shooter {
         rotorR.setPower(0);
     }
     public void TeleOp(Gamepad gamepad1, Gamepad gamepad2, Telemetry telemetry,
-                       double yawAngleLimeLight,double yawOdometry ,boolean isFull){
+                       double yawAngleLimeLight,double yawOdometry ,boolean isFull, boolean isInshootPos){
         if(gamepad1.left_bumper)
             stopTurret();
         else
-            aimWithLimelight(yawAngleLimeLight);
+            aim(yawAngleLimeLight,yawOdometry,isInshootPos);
         preload();
         if(((isFull && isReady()) || gamepad1.left_trigger > 0.1) && gamepad1.right_trigger > 0.1)
             openBlock();

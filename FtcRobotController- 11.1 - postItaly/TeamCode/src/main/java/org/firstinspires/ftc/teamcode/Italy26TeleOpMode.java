@@ -60,12 +60,14 @@ public class Italy26TeleOpMode extends OpMode {
         if (PoseStorage.currentPose != null) {
             follower.setPose(PoseStorage.currentPose);
             //follower.setStartingPose(PoseStorage.currentPose);
+            yawOffset = PoseStorage.currentPose.getHeading() > 0 ? 180 : -180;
         }
 
         if (alliance == Constants.Alliance.BLUE){
             headingReset = 180;
         }else{
             headingReset = 0;
+            yawOffset = 0;
         }
         radius = Math.hypot(15.5,17.5)/2;
         farZone = new Zone(new Zone.Point(72,24), new Zone.Point(96,0),new Zone.Point(48,0),radius);
@@ -101,14 +103,16 @@ public class Italy26TeleOpMode extends OpMode {
             yawOffsetShooter = orientation.getYaw();
         }
         follower.update();
+        boolean isInShootZone = isInShootZone();
         if(isInShootZone()){
             gamepad1.rumble(100);
         }
         driveTrain.TeleOp(gamepad1,telemetry,yawAngle);
         //intakeStateMachine.TeleOp((shooter.canShoot(gamepad1) && gamepad1.right_trigger > 0.1),
           //                          gamepad1, gamepad2);
-        shooter.TeleOp(gamepad1, gamepad2, telemetry, yawAngleLimelight, yawAngle < 0 ? yawAngle + 360 : yawAngle,
-                                    intakeStateMachine.isFull());
+        double heading = Math.toDegrees(follower.getPose().getHeading());
+        shooter.TeleOp(gamepad1, gamepad2, telemetry, yawAngleLimelight, heading < 0 ? heading + 360 : heading,
+                                    intakeStateMachine.isFull(),isInShootZone);
         //tilt.Teleop(gamepad1);
 
         actualTimer.resetTimer();
