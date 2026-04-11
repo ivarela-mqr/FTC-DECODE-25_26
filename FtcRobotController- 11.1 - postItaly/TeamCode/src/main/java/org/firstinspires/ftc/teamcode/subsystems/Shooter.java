@@ -105,17 +105,19 @@ public class Shooter {
     }
     public void aimWithOdometry(double yaw){
         double shooterAngle = translateEncoderToAngle(encoder.getCurrentPosition());
-        if(alliance == Constants.Alliance.BLUE) {
-            if (((yaw + 144)%360 - shooterAngle) > 0)
-                setPowerRotor(-20);
-            else
-                setPowerRotor(20);
-        }else{
-            if (((yaw + 36)%360 - shooterAngle) > 0)
-                setPowerRotor(20);
-            else
-                setPowerRotor(-20);
-        }
+        double offset = (alliance == Constants.Alliance.BLUE) ? 144 : 36;
+
+        // calcular objetivo
+        double target = (yaw + offset) % 360;
+
+        // error angular mínimo
+        double error = ((target - shooterAngle + 540) % 360) - 180;
+
+        // control básico
+        if (error > 0)
+            setPowerRotor(20);
+        else
+            setPowerRotor(-20);
     }
     /*public void aimWithOdometry(double yaw) {
         // Posición actual del robot desde Pedro Pathing
@@ -190,9 +192,9 @@ public class Shooter {
     public void resetTurret(){
         int posR = encoder.getCurrentPosition();
         if (posR > 1000) {
-            setPowerRotor(10);
+            setPowerRotor(5);
         } else if (posR < -1000) {
-            setPowerRotor(-10);
+            setPowerRotor(-5);
         }
     }
     public void moveServos(double offsetX, boolean objectDetected) {

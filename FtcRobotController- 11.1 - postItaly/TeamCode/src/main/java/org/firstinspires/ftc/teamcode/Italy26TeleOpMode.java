@@ -88,15 +88,15 @@ public class Italy26TeleOpMode extends OpMode {
         double yawAngleLimelight = orientation.getYaw(AngleUnit.DEGREES)
                                     - yawOffsetShooter;
 
-        double rawYaw = Math.toDegrees(follower.getPose().getHeading());
-        double yawAngle = rawYaw - yawOffset + headingReset;
+        double rawYaw = Math.toDegrees(follower.getHeading());
+        double yawAngle = rawYaw - yawOffset;
 
         if (gamepad1.options) {
             yawOffset = rawYaw;
             follower.setPose(new Pose(
                     follower.getPose().getX(),
                     follower.getPose().getY(),
-                    headingReset
+                    Math.toRadians(headingReset)
             ));
             yawOffsetShooter = orientation.getYaw();
         }
@@ -105,11 +105,11 @@ public class Italy26TeleOpMode extends OpMode {
             gamepad1.rumble(100);
         }
         driveTrain.TeleOp(gamepad1,telemetry,yawAngle);
-        intakeStateMachine.TeleOp((shooter.canShoot(gamepad1) && gamepad1.right_trigger > 0.1),
-                                    gamepad1, gamepad2);
-        shooter.TeleOp(gamepad1, gamepad2, telemetry, yawAngleLimelight,yawAngle,
+        //intakeStateMachine.TeleOp((shooter.canShoot(gamepad1) && gamepad1.right_trigger > 0.1),
+          //                          gamepad1, gamepad2);
+        shooter.TeleOp(gamepad1, gamepad2, telemetry, yawAngleLimelight, yawAngle < 0 ? yawAngle + 360 : yawAngle,
                                     intakeStateMachine.isFull());
-        tilt.Teleop(gamepad1);
+        //tilt.Teleop(gamepad1);
 
         actualTimer.resetTimer();
         if(!rumble && timeElapsed() > 105){
@@ -138,7 +138,7 @@ public class Italy26TeleOpMode extends OpMode {
         telemetry.addData("YawOffset", yawOffset);
         telemetry.addData("X", follower.getPose().getX());
         telemetry.addData("Y", follower.getPose().getY());
-        telemetry.addData("Heading", follower.getPose().getHeading());
+        telemetry.addData("Heading",Math.toDegrees(follower.getPose().getHeading()));
 
 
         telemetry.update();
