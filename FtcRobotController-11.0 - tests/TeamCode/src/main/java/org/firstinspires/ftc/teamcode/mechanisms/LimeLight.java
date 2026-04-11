@@ -1,30 +1,15 @@
-package org.firstinspires.ftc.teamcode.subsystems;
+package org.firstinspires.ftc.teamcode.mechanisms;
 
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
-import org.firstinspires.ftc.teamcode.util.Constants;
-
 public class LimeLight {
     private final Limelight3A limelight;
-    public LimeLight(HardwareMap hardwareMap, Constants.Alliance alliance) {
+    public LimeLight(HardwareMap hardwareMap) {
         limelight = hardwareMap.get(Limelight3A.class,"limelight");
-        if (alliance == Constants.Alliance.BLUE)
-            limelight.pipelineSwitch(8); // Blue alliance aprilTag
-        else if (alliance == Constants.Alliance.RED)
-            limelight.pipelineSwitch(9); // Red alliance aprilTag
-
+        limelight.pipelineSwitch(8);
         limelight.start();
-    }
-
-    public void switchAlliance(Constants.Alliance newAlliance){
-        if (newAlliance == Constants.Alliance.BLUE)
-            limelight.pipelineSwitch(8); // Blue alliance aprilTag
-        else if (newAlliance == Constants.Alliance.RED)
-            limelight.pipelineSwitch(9); // Red alliance aprilTag
     }
     public double[] getGoalAprilTagData(double yawAngle){
         limelight.updateRobotOrientation(yawAngle);
@@ -41,7 +26,7 @@ public class LimeLight {
             data[1] = getDistanceFromTargeta(llResult.getTa());
             return  data;
         }
-        data[0] = 10000;
+        data[0] = 0;
         data[1] = 0;
         return data;
     }

@@ -18,6 +18,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.util.IntakeStateMachineStates;
+import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
 @Autonomous(name = "Prueba15AutoBlue", group = "Autonomous")
 @Configurable
@@ -47,7 +48,7 @@ public class Prueba15AutoBlue extends OpMode {
 
         pathState = PathState.DRIVE_STARTPOS_SHOOT_POS;
         shootingStateMachine.init(hardwareMap,
-                org.firstinspires.ftc.teamcode.util.Constants.Alliance.BLUE,1125, IntakeStateMachineStates.FINAL,
+                org.firstinspires.ftc.teamcode.util.Constants.Alliance.BLUE,1750, IntakeStateMachineStates.FINAL,
                 new Pose(45, 96));
 
         imu = hardwareMap.get(IMU.class, "imu");
@@ -66,8 +67,8 @@ public class Prueba15AutoBlue extends OpMode {
         double yawAngle = orientation.getYaw(AngleUnit.DEGREES);
         follower.update(); // Update Pedro Pathing
         Pose pose = pathState == PathState.SHOOT_PRELOAD ? follower.getPose() : new Pose();
-        shootingStateMachine.update(pose,telemetry,yawAngle, pathState != PathState.SHOOT_PRELOAD);
-        autonomousPathUpdate(); // Update autonomous state machine
+        shootingStateMachine.update(pose,telemetry,yawAngle, Math.toDegrees(follower.getPose().getHeading())
+                ,pathState != PathState.SHOOT_PRELOAD,false);        autonomousPathUpdate(); // Update autonomous state machine
         ticks ++;
         // Log values to Panels and Driver Station
         //panelsTelemetry.debug("Last state",lastPathState);
@@ -80,7 +81,7 @@ public class Prueba15AutoBlue extends OpMode {
         //panelsTelemetry.debug("Shooter velocity", shootingStateMachine.shooter.shooter1.getVelocity());
         //panelsTelemetry.debug("Ticks", ticks);
         //panelsTelemetry.debug("Is bussy", pathState != PathState.SHOOT_PRELOAD);
-
+        PoseStorage.update(follower.getPose(), org.firstinspires.ftc.teamcode.util.Constants.Alliance.BLUE);
         //panelsTelemetry.debug("Can shoot",shootingStateMachine.canShoot(pose));
         panelsTelemetry.debug("X", follower.getPose().getX());
         panelsTelemetry.debug("Y", follower.getPose().getY());
@@ -253,7 +254,7 @@ public class Prueba15AutoBlue extends OpMode {
         actualTimer.resetTimer();
         switch (pathState){
             case DRIVE_STARTPOS_SHOOT_POS:
-                shootingStateMachine.shooter.adjustCover(0.4);
+                shootingStateMachine.shooter.adjustCover(0.3);
                 follower.followPath(paths.goShotLoaded,1,true);
                 setPathState(PathState.SHOOT_PRELOAD);
                 break;

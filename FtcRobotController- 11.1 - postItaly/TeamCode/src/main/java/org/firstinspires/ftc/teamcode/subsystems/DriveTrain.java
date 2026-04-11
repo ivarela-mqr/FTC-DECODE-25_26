@@ -53,7 +53,7 @@ public class DriveTrain {
         double kP = 0.03; // todo tune this
         double correction = error * kP;
 
-        rotate+=correction;
+        //rotate+=correction;
 
         double headingRad = Math.toRadians(yawAngle);
 

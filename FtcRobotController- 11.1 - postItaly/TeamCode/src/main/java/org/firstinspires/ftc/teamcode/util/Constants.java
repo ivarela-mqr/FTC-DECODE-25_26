@@ -18,6 +18,6 @@ public class Constants {
     public static final float PLAIN_PURPLE_G  = 4.2f;
     public static final float PLAIN_PURPLE_B  = 2f;
 
-    public static final int LEFT_TELEOP_LIMIT = -3300;
-    public static final int RIGHT_TELEOP_LIMIT = 3300;
+    public static final int LEFT_TELEOP_LIMIT = -20000;
+    public static final int RIGHT_TELEOP_LIMIT = 20000;
     }

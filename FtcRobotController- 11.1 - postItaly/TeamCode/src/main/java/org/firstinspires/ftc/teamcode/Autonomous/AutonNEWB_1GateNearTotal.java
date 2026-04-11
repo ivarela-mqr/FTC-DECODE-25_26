@@ -17,7 +17,9 @@ import com.qualcomm.robotcore.hardware.IMU;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.subsystems.Zone;
 import org.firstinspires.ftc.teamcode.util.IntakeStateMachineStates;
+import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
 @Autonomous(name = "AutonNEWB_1GateNearTotal", group = "Autonomous")
 @Configurable
@@ -34,6 +36,7 @@ public class AutonNEWB_1GateNearTotal extends OpMode {
     int ticks = 0;
     Timer stateTimer = new Timer();
     Timer actualTimer = new Timer();
+    Zone zone;
     @Override
     public void init() {
         panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
@@ -46,7 +49,7 @@ public class AutonNEWB_1GateNearTotal extends OpMode {
 
         pathState = PathState.DRIVE_STARTPOS_SHOOT_POS;
         shootingStateMachine.init(hardwareMap,
-                org.firstinspires.ftc.teamcode.util.Constants.Alliance.BLUE,1150, IntakeStateMachineStates.FINAL,
+                org.firstinspires.ftc.teamcode.util.Constants.Alliance.BLUE,1750, IntakeStateMachineStates.FINAL,
                 new Pose(45, 96));
 
         imu = hardwareMap.get(IMU.class, "imu");
@@ -57,6 +60,8 @@ public class AutonNEWB_1GateNearTotal extends OpMode {
         imu.initialize(parameters);
         panelsTelemetry.debug("Status", "Initialized");
         panelsTelemetry.update(telemetry);
+        zone = new Zone(new Zone.Point(72,72), new Zone.Point(0,144),new Zone.Point(144,144),
+                Math.hypot(15.5,17.5)/2);
     }
 
     @Override
@@ -65,21 +70,22 @@ public class AutonNEWB_1GateNearTotal extends OpMode {
         double yawAngle = orientation.getYaw(AngleUnit.DEGREES);
         follower.update(); // Update Pedro Pathing
         Pose pose = pathState == PathState.SHOOT_PRELOAD ? follower.getPose() : new Pose();
-        shootingStateMachine.update(pose,telemetry,yawAngle, pathState != PathState.SHOOT_PRELOAD);
-        autonomousPathUpdate(); // Update autonomous state machine
+        shootingStateMachine.update(pose,telemetry,yawAngle, Math.toDegrees(follower.getPose().getHeading())
+                ,pathState != PathState.SHOOT_PRELOAD,zone.isRobotInZone(follower.getPose()));        autonomousPathUpdate(); // Update autonomous state machine
         ticks ++;
         // Log values to Panels and Driver Station
-        panelsTelemetry.debug("Last state",lastPathState);
-        panelsTelemetry.debug("Path State", pathState);
-        panelsTelemetry.debug("Shooter state",shootingStateMachine.state);
-        panelsTelemetry.debug("Intake state",shootingStateMachine.intakeAutoStateMachine.state);
-        panelsTelemetry.debug("Is aiming auto", shootingStateMachine.shooter.autoAim);
+        panelsTelemetry.debug("Position",shootingStateMachine.shooter.encoder.getCurrentPosition());
+        //panelsTelemetry.debug("Last state",lastPathState);
+        //panelsTelemetry.debug("Path State", pathState);
+        //panelsTelemetry.debug("Shooter state",shootingStateMachine.state);
+        //panelsTelemetry.debug("Intake state",shootingStateMachine.intakeAutoStateMachine.state);
+        //panelsTelemetry.debug("Is aiming auto", shootingStateMachine.shooter.autoAim);
         panelsTelemetry.debug("Rotors power", shootingStateMachine.shooter.rotorL.getPower());
-        panelsTelemetry.debug("Shooter velocity", shootingStateMachine.shooter.shooter0.getVelocity());
-        panelsTelemetry.debug("Shooter velocity", shootingStateMachine.shooter.shooter1.getVelocity());
-        panelsTelemetry.debug("Ticks", ticks);
-        panelsTelemetry.debug("Is bussy", pathState != PathState.SHOOT_PRELOAD);
-
+        //panelsTelemetry.debug("Shooter velocity", shootingStateMachine.shooter.shooter0.getVelocity());
+        //panelsTelemetry.debug("Shooter velocity", shootingStateMachine.shooter.shooter1.getVelocity());
+        //panelsTelemetry.debug("Ticks", ticks);
+        //panelsTelemetry.debug("Is bussy", pathState != PathState.SHOOT_PRELOAD);
+        PoseStorage.update(follower.getPose(), org.firstinspires.ftc.teamcode.util.Constants.Alliance.BLUE);
         //panelsTelemetry.debug("Can shoot",shootingStateMachine.canShoot(pose));
         //panelsTelemetry.debug("X", follower.getPose().getX());
         //panelsTelemetry.debug("Y", follower.getPose().getY());
@@ -232,7 +238,7 @@ public class AutonNEWB_1GateNearTotal extends OpMode {
         actualTimer.resetTimer();
         switch (pathState){
             case DRIVE_STARTPOS_SHOOT_POS:
-                shootingStateMachine.shooter.adjustCover(0.4);
+                shootingStateMachine.shooter.adjustCover(0.3);
                 follower.followPath(paths.goShotLoaded,1,true);
                 setPathState(PathState.SHOOT_PRELOAD);
                 break;
