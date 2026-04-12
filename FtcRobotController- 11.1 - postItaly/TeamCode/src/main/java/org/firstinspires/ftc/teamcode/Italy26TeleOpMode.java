@@ -112,10 +112,9 @@ public class Italy26TeleOpMode extends OpMode {
             gamepad1.rumble(100);
         }
         driveTrain.TeleOp(gamepad1,telemetry,yawAngle);
-        //intakeStateMachine.TeleOp((shooter.canShoot(gamepad1) && gamepad1.right_trigger > 0.1),
-          //                          gamepad1, gamepad2);
-        double heading = Math.toDegrees(follower.getPose().getHeading());
-        shooter.TeleOp(gamepad1, gamepad2, telemetry, yawAngleLimelight, heading < 0 ? heading + 360 : heading,
+        intakeStateMachine.TeleOp((shooter.canShoot(gamepad1) && gamepad1.right_trigger > 0.1),
+                                    gamepad1, gamepad2);
+        shooter.TeleOp(gamepad1, gamepad2, telemetry, yawAngleLimelight, follower,
                                     intakeStateMachine.isFull(),isInShootZone);
         //tilt.Teleop(gamepad1);
 
@@ -141,13 +140,14 @@ public class Italy26TeleOpMode extends OpMode {
         //telemetry.addData("Bumper", gamepad1.left_bumper);
         */
         telemetry.addData("Pos encoder", shooter.encoder.getCurrentPosition());
-        telemetry.addData("alliance",alliance);
-        telemetry.addData("YawAngle", yawAngle);
-        telemetry.addData("YawOffset", yawOffset);
+        //telemetry.addData("alliance",alliance);
+        //telemetry.addData("YawAngle", yawAngle);
+        //telemetry.addData("YawOffset", yawOffset);
         telemetry.addData("X", follower.getPose().getX());
         telemetry.addData("Y", follower.getPose().getY());
-        telemetry.addData("Heading",Math.toDegrees(follower.getPose().getHeading()));
-
+        telemetry.addData("Heading",Math.toDegrees(follower.getHeading()));
+        telemetry.addData("Turret Angle",shooter.getTurretAngle());
+        telemetry.addData("Target angle",shooter.getTargetAngle(follower));
 
         telemetry.update();
     }

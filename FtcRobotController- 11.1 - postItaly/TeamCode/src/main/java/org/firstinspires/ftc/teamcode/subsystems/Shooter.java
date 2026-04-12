@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.Pose;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -13,6 +15,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.util.Constants;
 import org.firstinspires.ftc.teamcode.util.Debouncer;
+import org.opencv.core.Mat;
 
 public class Shooter {
     public  DcMotorEx shooter0, shooter1, encoder;
@@ -38,6 +41,7 @@ public class Shooter {
     double lastError = 0;
     double lastTime = 0;
     Constants.Alliance alliance;
+    Pose goalPose;
     public boolean hold = true, reset = false;
     public Shooter (HardwareMap hardwareMap, Constants.Alliance alliance, double targetVel){
         shooter0 = hardwareMap.get(DcMotorEx.class,"shooter0");
@@ -54,7 +58,11 @@ public class Shooter {
         encoder.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         coverL.setDirection(Servo.Direction.REVERSE);
         this.alliance = alliance;
-        limeLight = new LimeLight(hardwareMap, alliance);
+        //limeLight = new LimeLight(hardwareMap, alliance);
+        if(alliance == Constants.Alliance.BLUE)
+            goalPose = new Pose(3,130);
+        else
+            goalPose = new Pose(141,137);
         curTargetVelocity = targetVel;
         timer.reset();
     }
@@ -62,17 +70,25 @@ public class Shooter {
         init.resetTimer();
     }
     public void adjustVelAndCover(double distance){
-        if(distance > 0 && teleOp && autoAim){
-            double pos = 0.15;
-            curTargetVelocity = 1550;
-            if (distance < 300){
-                pos = 0.7553513 - 0.006106451*distance
-                        + 0.0000244524*Math.pow(distance,2) - 3.402742e-8*Math.pow(distance,3);
-                curTargetVelocity = 1282.327 + 6.476417*distance
-                        - 0.02771772*Math.pow(distance,2) + 0.00004286212*Math.pow(distance,3);
-            }
-            adjustCover(pos);
+        double pos = 0;
+        if(distance > 105){
+            pos = 0.4;
+            curTargetVelocity = 1450;
+        } else if (distance > 72){
+            pos = 0.3;
+            curTargetVelocity = 1600;
+            if(velocityOffset() > 100)
+                pos += 0.1;
+            if(velocityOffset() > 150)
+                pos += 0.15;
+        }else {
+            pos = 0.2;
+            curTargetVelocity = 1900;
+            if(velocityOffset() > 50)
+                pos += 0.2;
         }
+        adjustCover(pos);
+
     }
     public void aimWithLimelight(double yaw){
         double[] var = limeLight.getGoalAprilTagData(yaw);
@@ -83,41 +99,71 @@ public class Shooter {
             correctOffset = 5;
         else
             correctOffset = 0;
-        adjustVelAndCover(var[1]);
         boolean offsetCentered = (offset == 0 && Math.abs(lastValidOffset) < 5);
         moveServos(offset, !offsetCentered);
     }
-    public void aim(double yawLimelight, double yawOdometry,boolean isInShootingPos){
-        double[] var = limeLight.getGoalAprilTagData(yawLimelight);
+    public void aim(double yawLimelight, Follower pose, boolean isInShootingPos){
+        //double[] var = limeLight.getGoalAprilTagData(yawLimelight);
         if(isInShootingPos) {
-            if (var[0] < 10)
-                aimWithLimelight(yawLimelight);
-            else {
-                aimWithOdometry(yawOdometry);
-                //offset = 100;
-            }
-        }else{
-            resetTurret();
+//            if (var[0] < 10)
+//                aimWithLimelight(yawLimelight);
+//            else {
+//                aimWithOdometry(yawOdometry);
+//                //offset = 100;
+//            }
+            aimWithOdometry(pose);
+        }else if(autoAim){
+            setPowerRotor(0);
+            //resetTurret();
         }
     }
-    public double translateEncoderToAngle(double posEncoder){
-        return -0.0075*posEncoder + 180;
+    public int translateEncoderToAngle(double posEncoder){
+        return Math.toIntExact((long)(-0.0075 * posEncoder));
     }
-    public void aimWithOdometry(double yaw){
+    public int getTurretAngle(){
+        return translateEncoderToAngle(encoder.getCurrentPosition());
+    }
+    public int getTargetAngle(Follower follower){
+        double allianceAngle = 0;
+        if(alliance == Constants.Alliance.BLUE){
+            allianceAngle = 180 - Math.toDegrees(Math.atan((goalPose.getY() - follower.getPose().getY())/(follower.getPose().getX() - goalPose.getX())));
+        }else{
+            allianceAngle = Math.toDegrees(Math.atan((goalPose.getY() - follower.getPose().getY())/( goalPose.getX() -follower.getPose().getX())));
+        }
+        return Math.toIntExact((long)allianceAngle);
+    }
+    public void aimWithOdometry(Follower follower){
         double shooterAngle = translateEncoderToAngle(encoder.getCurrentPosition());
-        double offset = (alliance == Constants.Alliance.BLUE) ? 144 : 36;
+        double allianceAngle = getTargetAngle(follower);
 
-        // calcular objetivo
-        double target = (yaw + offset) % 360;
+        double targetAngle = 0;
+        offset = targetAngle - shooterAngle;
+        double relativeGoal = allianceAngle - Math.toDegrees(follower.getHeading());
+        if(relativeGoal > 330 || relativeGoal < 30) {
+            setPowerRotor(0);
+            return;
+        }
+        if(relativeGoal > 180){
+            relativeGoal -= 360;
+        }
+        if(relativeGoal > 0){
+            targetAngle = relativeGoal - 180;
+        }else{
+            targetAngle = relativeGoal + 180;
+        }
+        offset = targetAngle - shooterAngle;
 
-        // error angular mínimo
-        double error = ((target - shooterAngle + 540) % 360) - 180;
+        if(offset > 7){
+            setPowerRotor(1);
+        }else if(offset < -7){
+            setPowerRotor(-1);
+        } else if(offset > 0){
+            setPowerRotor(0.1);
+        }else if(offset < 0){
+            setPowerRotor(-0.1);
+        }else
+            setPowerRotor(0);
 
-        // control básico
-        if (error > 0)
-            setPowerRotor(20);
-        else
-            setPowerRotor(-20);
     }
     /*public void aimWithOdometry(double yaw) {
         // Posición actual del robot desde Pedro Pathing
@@ -195,10 +241,12 @@ public class Shooter {
             setPowerRotor(5);
         } else if (posR < -3000) {
             setPowerRotor(-5);
-        }else if(posR > 1000)
+        }else if(posR > 500)
             setPowerRotor(0.2);
-        else if(posR < -1000)
+        else if(posR < -500)
             setPowerRotor(-0.2);
+        else
+            setPowerRotor(0);
     }
     public void moveServos(double offsetX, boolean objectDetected) {
         int posR = encoder.getCurrentPosition();
@@ -238,7 +286,7 @@ public class Shooter {
     }
     public boolean isReady(){
         return velocityOffset() < 50
-                && offset < 5;
+                && offset < 3;
     }
     public boolean isReady2(){
         return offset < 7.5 && offset > - 7.5;
@@ -304,12 +352,13 @@ public class Shooter {
         rotorR.setPower(0);
     }
     public void TeleOp(Gamepad gamepad1, Gamepad gamepad2, Telemetry telemetry,
-                       double yawAngleLimeLight,double yawOdometry ,boolean isFull, boolean isInshootPos){
+                       double yawAngleLimeLight, Follower follower , boolean isFull, boolean isInshootPos){
         if(gamepad1.left_bumper)
             stopTurret();
         else
-            aim(yawAngleLimeLight,yawOdometry,isInshootPos);
+            aim(yawAngleLimeLight,follower,isInshootPos);
         preload();
+        adjustVelAndCover(follower.getPose().getY());
         if(((isFull && isReady()) || gamepad1.left_trigger > 0.1) && gamepad1.right_trigger > 0.1)
             openBlock();
         else if(gamepad1.right_trigger < 0.5 && gamepad1.left_trigger < 0.5)
@@ -325,11 +374,14 @@ public class Shooter {
             reset = true;
         if (gamepad2.dpad_left){
             alliance = Constants.Alliance.BLUE;
-            limeLight.switchAlliance(alliance);
+            //limeLight.switchAlliance(alliance);
+            goalPose = new Pose(7,137);
         }else if(gamepad2.dpad_right){
             alliance = Constants.Alliance.RED;
-            limeLight.switchAlliance(alliance);
+            //limeLight.switchAlliance(alliance);
+            goalPose = new Pose(137,137);
         }
+
 
         if (gamepad2.left_trigger > 0.1){
             autoAim = false;
