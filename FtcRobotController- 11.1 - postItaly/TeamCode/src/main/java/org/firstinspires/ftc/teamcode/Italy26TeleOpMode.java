@@ -35,17 +35,21 @@ public class Italy26TeleOpMode extends OpMode {
     Follower follower;
     Timer actualTimer,initTimer;
     boolean rumble = false;
-    Constants.Alliance alliance;
+    Constants.Alliance alliance = Constants.Alliance.BLUE;
     Zone farZone,nearZone;
     double radius;
 
     @Override
     public void init() {
-        alliance = PoseStorage.alliance;
+        if (PoseStorage.currentPose != null) {
+            alliance = PoseStorage.alliance;
+        }
 
         actualTimer = new Timer();
         initTimer = new Timer();
         driveTrain = new DriveTrain(hardwareMap);
+
+
         shooter = new Shooter(hardwareMap, alliance, 1200);
         tilt = new Tilt(hardwareMap);
         intakeStateMachine = new IntakeStateMachine(hardwareMap);
@@ -61,6 +65,9 @@ public class Italy26TeleOpMode extends OpMode {
             follower.setPose(PoseStorage.currentPose);
             //follower.setStartingPose(PoseStorage.currentPose);
             yawOffset = PoseStorage.currentPose.getHeading() > 0 ? 180 : -180;
+        }else{
+            follower.setPose(new Pose(8, 8, Math.toRadians(180)));
+            yawOffset = 180;
         }
 
         if (alliance == Constants.Alliance.BLUE){
