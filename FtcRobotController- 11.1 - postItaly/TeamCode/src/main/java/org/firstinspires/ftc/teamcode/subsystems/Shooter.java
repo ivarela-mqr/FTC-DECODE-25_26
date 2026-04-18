@@ -69,26 +69,13 @@ public class Shooter {
     public void resetTimer(){
         init.resetTimer();
     }
-    public void adjustVelAndCover(double distance){
-        double pos = 0;
-        if(distance > 105){
-            pos = 0.4;
-            curTargetVelocity = 1450;
-        } else if (distance > 72){
-            pos = 0.3;
-            curTargetVelocity = 1600;
-            if(velocityOffset() > 100)
-                pos += 0.1;
-            if(velocityOffset() > 150)
-                pos += 0.15;
-        }else {
-            pos = 0.2;
-            curTargetVelocity = 1900;
-            if(velocityOffset() > 50)
-                pos += 0.2;
+    public void adjustVelAndCover(Follower follower){
+        double distance = getDistanceInches(follower);
+        if(distance > 0 && teleOp && autoAim){
+            double pos = 1.115469 - 0.02326466*distance + 0.0002217587 * Math.pow(distance,2) - 7.880699e-7 * Math.pow(distance,3);
+            curTargetVelocity = 1029.427 + 9.038895*distance - 0.01495748 * Math.pow(distance,2);
+            adjustCover(pos);
         }
-        adjustCover(pos);
-
     }
     public void aimWithLimelight(double yaw){
         double[] var = limeLight.getGoalAprilTagData(yaw);
@@ -351,6 +338,10 @@ public class Shooter {
         rotorL.setPower(0);
         rotorR.setPower(0);
     }
+
+    public double getDistanceInches (Follower follower){
+        return (follower.getPose().distanceFrom(goalPose));
+    }
     public void TeleOp(Gamepad gamepad1, Gamepad gamepad2, Telemetry telemetry,
                        double yawAngleLimeLight, Follower follower , boolean isFull, boolean isInshootPos){
         if(gamepad1.left_bumper)
@@ -358,7 +349,7 @@ public class Shooter {
         else
             aim(yawAngleLimeLight,follower,isInshootPos);
         preload();
-        adjustVelAndCover(follower.getPose().getY());
+        adjustVelAndCover(follower);
         if(((isFull && isReady()) || gamepad1.left_trigger > 0.1) && gamepad1.right_trigger > 0.1)
             openBlock();
         else if(gamepad1.right_trigger < 0.5 && gamepad1.left_trigger < 0.5)

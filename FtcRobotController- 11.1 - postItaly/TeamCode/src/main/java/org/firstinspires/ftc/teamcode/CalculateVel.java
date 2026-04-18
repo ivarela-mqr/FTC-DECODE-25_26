@@ -54,6 +54,6 @@ public class CalculateVel extends OpMode {
         telemetry.addData("Target Vel",currVel);
         telemetry.addData("Actual Vel",shooter.shooter0.getVelocity());
         telemetry.addData("Pos",pos);
-        telemetry.addData("Distance",shooter.limeLight.getGoalAprilTagData(orientation)[0]);
+        //telemetry.addData("Distance",shooter.limeLight.getGoalAprilTagData(orientation)[0]);
     }
 }

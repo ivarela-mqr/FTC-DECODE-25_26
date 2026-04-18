@@ -10,7 +10,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class Intake {
     public DcMotorEx transfer;
-    DcMotor intake;
+    public DcMotor intake;
     public DistanceSensor distanceSensor1, distanceSensor2;
     public ColorSensor colorSensor = new ColorSensor();
     public double transferPosition2ArtifactIn;
