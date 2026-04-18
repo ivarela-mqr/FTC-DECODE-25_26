@@ -46,7 +46,7 @@ public class Presentation extends OpMode {
     }
     @Override
     public void loop() {
-        shooter.aimWithLimelight(imu.getRobotYawPitchRollAngles().getYaw());
+        //shooter.aimWithLimelight(imu.getRobotYawPitchRollAngles().getYaw());
         actualTimer.resetTimer();
         if(gamepad1.x){
             timer.resetTimer();

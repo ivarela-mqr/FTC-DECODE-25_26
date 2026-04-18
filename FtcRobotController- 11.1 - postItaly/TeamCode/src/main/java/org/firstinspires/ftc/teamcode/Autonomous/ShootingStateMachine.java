@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Autonomous;
 
+import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -97,11 +98,11 @@ public class ShootingStateMachine {
         this.shootingPose = shootingPose;
     }
 
-    public void update(Pose pose, Telemetry telemetry, double yawAngleLimeLight, double yawAngleOdometry,boolean isBussyFollower,
+    public void update(Pose pose, Telemetry telemetry, double yawAngleLimeLight, Follower follower, boolean isBussyFollower,
                        boolean insideTriangle){
         isInShootingPos = canShoot(pose);
         //shooter.aimWithLimelight(yawAngleLimeLight);
-        shooter.aim(yawAngleLimeLight,yawAngleOdometry,insideTriangle);
+        shooter.aim(yawAngleLimeLight,follower,insideTriangle);
         intakeAutoStateMachine.updateIntakeStateMachine(canShoot);
         actualTime.resetTimer();
         switch (state){

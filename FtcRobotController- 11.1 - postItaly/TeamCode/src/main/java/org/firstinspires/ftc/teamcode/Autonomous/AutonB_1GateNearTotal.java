@@ -72,7 +72,7 @@ public class AutonB_1GateNearTotal extends OpMode {
         double yawAngle = orientation.getYaw(AngleUnit.DEGREES);
         follower.update(); // Update Pedro Pathing
         Pose pose = pathState == PathState.SHOOT_PRELOAD ? follower.getPose() : new Pose();
-        shootingStateMachine.update(pose,telemetry,yawAngle, Math.toDegrees(follower.getPose().getHeading())
+        shootingStateMachine.update(pose,telemetry,yawAngle, follower
                 ,pathState != PathState.SHOOT_PRELOAD,false);        autonomousPathUpdate(); // Update autonomous state machine
         ticks ++;
 

@@ -49,7 +49,7 @@ public class AutonNEWB_1GateNearTotal extends OpMode {
 
         pathState = PathState.DRIVE_STARTPOS_SHOOT_POS;
         shootingStateMachine.init(hardwareMap,
-                org.firstinspires.ftc.teamcode.util.Constants.Alliance.BLUE,1750, IntakeStateMachineStates.FINAL,
+                org.firstinspires.ftc.teamcode.util.Constants.Alliance.BLUE,1600, IntakeStateMachineStates.FINAL,
                 new Pose(45, 96));
 
         imu = hardwareMap.get(IMU.class, "imu");
@@ -70,8 +70,7 @@ public class AutonNEWB_1GateNearTotal extends OpMode {
         double yawAngle = orientation.getYaw(AngleUnit.DEGREES);
         follower.update(); // Update Pedro Pathing
         Pose pose = pathState == PathState.SHOOT_PRELOAD ? follower.getPose() : new Pose();
-        double heading =  Math.toDegrees(follower.getPose().getHeading());
-        shootingStateMachine.update(pose,telemetry,yawAngle, heading < 0 ? heading + 360 : heading
+        shootingStateMachine.update(pose,telemetry,yawAngle,follower
                 ,pathState != PathState.SHOOT_PRELOAD,zone.isRobotInZone(follower.getPose()));        autonomousPathUpdate(); // Update autonomous state machine
         ticks ++;
         // Log values to Panels and Driver Station
@@ -90,8 +89,9 @@ public class AutonNEWB_1GateNearTotal extends OpMode {
         //panelsTelemetry.debug("Can shoot",shootingStateMachine.canShoot(pose));
         //panelsTelemetry.debug("X", follower.getPose().getX());
         //panelsTelemetry.debug("Y", follower.getPose().getY());
-        panelsTelemetry.debug("Heading", Math.toDegrees(follower.getPose().getHeading()));
-
+        panelsTelemetry.debug("Heading", Math.toDegrees(follower.getHeading()));
+        panelsTelemetry.debug("Turret angle",shootingStateMachine.shooter.getTurretAngle());
+        panelsTelemetry.debug("Target angle",shootingStateMachine.shooter.getTargetAngle(follower));
         panelsTelemetry.update(telemetry);
     }
 
@@ -296,7 +296,7 @@ public class AutonNEWB_1GateNearTotal extends OpMode {
                 break;
             case END:
                 shootingStateMachine.shooter.autoAim = false;
-                //shootingStateMachine.shooter.resetRotorPosition();
+                shootingStateMachine.shooter.resetTurret();
             default:
                 break;
         }
