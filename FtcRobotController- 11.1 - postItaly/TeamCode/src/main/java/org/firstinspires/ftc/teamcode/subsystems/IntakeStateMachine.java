@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.subsystems;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.util.IntakeStateMachineStates;
 
@@ -44,15 +45,20 @@ public class IntakeStateMachine {
                 intake.intakeFirstArtifact();
                 if(intake.firstArtifactIn()){
                     switchState(IntakeStateMachineStates.FIRST_ARTIFACT);
+                    intake.led.setPosition(0);
                 }
                 break;
             case FIRST_ARTIFACT:
                 intake.intakeNextArtifacts();
+
                 if(intake.secondArtifactIn()
                         && Math.abs(timer.getElapsedTimeSeconds() - currTime.getElapsedTimeSeconds()) > 1){
                     intake.transferPosition2ArtifactIn = intake.transfer.getCurrentPosition();
                     switchState(IntakeStateMachineStates.SECOND_ARTIFACT);
+
                     intake.setTransferPosition(50);
+
+                    intake.led.setPosition(0);
                 }
                 break;
             case SECOND_ARTIFACT:
@@ -62,27 +68,33 @@ public class IntakeStateMachine {
                     switchState(IntakeStateMachineStates.FINAL);
                     gamepad1.rumble(1000);
                     gamepad2.rumble(1000);
+                    intake.led.setPosition(0.5);
                 }
                 break;
             case FINAL:
                 intake.stopArtifacts();
                 if(canShoot){
                     switchState(IntakeStateMachineStates.SHOOTING);
+                    intake.led.setPosition(1);
                 }
                 break;
             case SHOOTING:
                 intake.shootArtifacts();
                 if(gamepad1.right_trigger < 0.9){
                     switchState(IntakeStateMachineStates.INIT);
+                    intake.led.setPosition(0);
                 }
                 break;
             case UNLOAD:
-                if(Math.abs(timer.getElapsedTimeSeconds() - currTime.getElapsedTimeSeconds()) > 0.5)
+                if(Math.abs(timer.getElapsedTimeSeconds() - currTime.getElapsedTimeSeconds()) > 0.5) {
                     switchState(IntakeStateMachineStates.INIT);
+                }
+                intake.led.setPosition(0);
                 intake.unload();
                 break;
             case END:
                 intake.stopArtifacts();
+                intake.led.setPosition(0);
             default:
                 break;
         }
