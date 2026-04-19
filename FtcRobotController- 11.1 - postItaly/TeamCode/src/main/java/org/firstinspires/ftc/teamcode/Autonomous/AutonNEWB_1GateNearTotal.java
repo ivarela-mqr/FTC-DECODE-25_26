@@ -93,7 +93,6 @@ public class AutonNEWB_1GateNearTotal extends OpMode {
         panelsTelemetry.debug("Heading", Math.toDegrees(follower.getHeading()));
         panelsTelemetry.debug("Turret angle",shootingStateMachine.shooter.getTurretAngle());
         panelsTelemetry.debug("Target angle",shootingStateMachine.shooter.getTargetAngle(follower));
-        panelsTelemetry.debug("Is in Zone",zone.isRobotInZone(follower.getPose()));
         panelsTelemetry.update(telemetry);
     }
 
@@ -126,7 +125,7 @@ public class AutonNEWB_1GateNearTotal extends OpMode {
 
             goTakeSecond1 = follower.pathBuilder()
                     .addPath(
-                            new BezierLine(
+                            new BezierCurve(
                                     new Pose(45,96),
                                     new Pose(45, 65)
                             )
@@ -135,7 +134,7 @@ public class AutonNEWB_1GateNearTotal extends OpMode {
                     .addPath(
                             new BezierLine(
                                     new Pose(45, 65),
-                                    new Pose(9, 65)
+                                    new Pose(13, 65)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
@@ -144,7 +143,7 @@ public class AutonNEWB_1GateNearTotal extends OpMode {
             goOpen1 = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(9, 65),
+                                    new Pose(13, 65),
                                     new Pose(20, 65)
                             )
                     )
@@ -182,7 +181,7 @@ public class AutonNEWB_1GateNearTotal extends OpMode {
                     .addPath(
                             new BezierLine(
                                     new Pose(45, 90),
-                                    new Pose(13,90)
+                                    new Pose(18,90)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
@@ -191,7 +190,7 @@ public class AutonNEWB_1GateNearTotal extends OpMode {
             goShotFirst = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(13, 90),
+                                    new Pose(18, 90),
                                     new Pose(45,96)
                             )
                     )
@@ -200,7 +199,7 @@ public class AutonNEWB_1GateNearTotal extends OpMode {
 
             goTakeThird1 = follower.pathBuilder()
                     .addPath(
-                            new BezierLine(
+                            new BezierCurve(
                                     new Pose(45,96),
                                     new Pose(45, 43.000)
                             )
@@ -209,7 +208,7 @@ public class AutonNEWB_1GateNearTotal extends OpMode {
                     .addPath(
                             new BezierLine(
                                     new Pose(45, 43.000),
-                                    new Pose(8,43)
+                                    new Pose(17,43)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
@@ -218,7 +217,7 @@ public class AutonNEWB_1GateNearTotal extends OpMode {
             goShotThird = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(8, 43.000),
+                                    new Pose(17, 43.000),
                                     new Pose(45,96)
                             )
                     )
@@ -241,7 +240,7 @@ public class AutonNEWB_1GateNearTotal extends OpMode {
         actualTimer.resetTimer();
         switch (pathState){
             case DRIVE_STARTPOS_SHOOT_POS:
-                shootingStateMachine.shooter.adjustCover(0.35);
+                shootingStateMachine.shooter.adjustCover(0.3);
                 follower.followPath(paths.goShotLoaded,1,true);
                 setPathState(PathState.SHOOT_PRELOAD);
                 break;

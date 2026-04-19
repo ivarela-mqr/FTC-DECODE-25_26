@@ -12,17 +12,18 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 public class Intake {
     public DcMotorEx transfer;
     public DcMotor intake;
-    public Servo led;
     public DistanceSensor distanceSensor1, distanceSensor2;
     public ColorSensor colorSensor = new ColorSensor();
     public double transferPosition2ArtifactIn;
+    public Servo led;
+
 
     public Intake(HardwareMap hardwareMap) {
         intake = hardwareMap.get(DcMotor.class, "intake");
         transfer = hardwareMap.get(DcMotorEx.class, "transfer");
         distanceSensor1 = hardwareMap.get(DistanceSensor.class, "distanceSensor1");
         distanceSensor2 = hardwareMap.get(DistanceSensor.class, "distanceSensor2");
-        led = hardwareMap.get(Servo.class,"led");
+        led = hardwareMap.get(Servo.class, "led");
         colorSensor.init(hardwareMap);
         intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         intake.setDirection(DcMotorSimple.Direction.REVERSE);

@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -25,7 +26,8 @@ import org.firstinspires.ftc.teamcode.util.PoseStorage;
 @TeleOp
 public class BasicTeleOpMode extends OpMode {
     DriveTrain driveTrain;
-    Intake intake;
+    DcMotor intake;
+    DcMotorEx transfer;
     IMU imu;
     YawPitchRollAngles orientation;
     double headingReset;
@@ -40,9 +42,12 @@ public class BasicTeleOpMode extends OpMode {
         initTimer = new Timer();
         driveTrain = new DriveTrain(hardwareMap);
 
-        intake.intake = hardwareMap.get(DcMotor.class, "intake");
-        intake.transfer = hardwareMap.get(DcMotorEx.class, "transfer");
+        intake = hardwareMap.get(DcMotor.class, "intake");
+        transfer = hardwareMap.get(DcMotorEx.class, "transfer");
 
+        intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        transfer.setDirection(DcMotorSimple.Direction.REVERSE);
+        transfer.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         imu = hardwareMap.get(IMU.class, "imu");
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
@@ -66,11 +71,7 @@ public class BasicTeleOpMode extends OpMode {
         orientation = imu.getRobotYawPitchRollAngles();
 
         double rawYaw = orientation.getYaw(AngleUnit.DEGREES);
-        double yawAngle;
-        if (rawYaw > 0)
-            yawAngle = rawYaw - yawOffset;
-        else
-            yawAngle = rawYaw + yawOffset;
+        double yawAngle = rawYaw - yawOffset;
 
         if (gamepad1.options) {
             yawOffset = rawYaw;
@@ -86,8 +87,11 @@ public class BasicTeleOpMode extends OpMode {
             gamepad2.rumble(2000);
         }
         if (gamepad1.left_trigger>0.1) {
-            intake.intake.setPower(1);
-            intake.transfer.setPower(1);
+            intake.setPower(1);
+            transfer.setPower(1);
+        }else {
+            intake.setPower(0);
+            transfer.setPower(0);
         }
 
         /*
