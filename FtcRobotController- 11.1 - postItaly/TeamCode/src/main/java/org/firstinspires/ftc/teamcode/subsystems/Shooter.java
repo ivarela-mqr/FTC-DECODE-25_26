@@ -41,7 +41,7 @@ public class Shooter {
     double lastError = 0;
     double lastTime = 0;
     Constants.Alliance alliance;
-    Pose goalPose;
+    public Pose goalPose;
     public boolean hold = true, reset = false;
     public Shooter (HardwareMap hardwareMap, Constants.Alliance alliance, double targetVel){
         shooter0 = hardwareMap.get(DcMotorEx.class,"shooter0");
@@ -72,8 +72,8 @@ public class Shooter {
     public void adjustVelAndCover(Follower follower){
         double distance = getDistanceInches(follower);
         if(distance > 0 && teleOp && autoAim){
-            double pos = 1.115469 - 0.02326466*distance + 0.0002217587 * Math.pow(distance,2) - 7.880699e-7 * Math.pow(distance,3);
-            curTargetVelocity = 1029.427 + 9.038895*distance - 0.01495748 * Math.pow(distance,2);
+            double pos = 0.5042418 + 0.0003379807*distance - 0.00005000763*Math.pow(distance,2) + 1.815475e-7*Math.pow(distance,3);
+            curTargetVelocity = 1967.261 - 25.41657*distance + 0.3601524*Math.pow(distance,2) - 0.001263507*Math.pow(distance,3);
             adjustCover(pos);
         }
     }
@@ -126,7 +126,7 @@ public class Shooter {
         double targetAngle = 0;
         offset = targetAngle - shooterAngle;
         double relativeGoal = allianceAngle - Math.toDegrees(follower.getHeading());
-        if(relativeGoal > 330 || relativeGoal < 30) {
+        if((relativeGoal > 330 || relativeGoal < 30) && teleOp) {
             setPowerRotor(0);
             return;
         }

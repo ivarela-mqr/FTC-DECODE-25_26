@@ -62,11 +62,13 @@ public class IntakeStateMachine {
                     switchState(IntakeStateMachineStates.FINAL);
                     gamepad1.rumble(1000);
                     gamepad2.rumble(1000);
+                    intake.led.setPosition(0.5);
                 }
                 break;
             case FINAL:
                 intake.stopArtifacts();
                 if(canShoot){
+                    intake.led.setPosition(0);
                     switchState(IntakeStateMachineStates.SHOOTING);
                 }
                 break;

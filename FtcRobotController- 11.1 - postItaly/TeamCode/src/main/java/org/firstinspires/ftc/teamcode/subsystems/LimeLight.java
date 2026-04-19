@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -36,7 +37,6 @@ public class LimeLight {
             //telemetry.addData("Ty", llResult.getTy());
             //telemetry.addData("Ta", llResult.getTa());
             //telemetry.addData("distance in cm",getDistanceFromTargeta(llResult.getTa()));
-
             data[0] = llResult.getTx();
             data[1] = getDistanceFromTargeta(llResult.getTa());
             return  data;
@@ -44,6 +44,15 @@ public class LimeLight {
         data[0] = 10000;
         data[1] = 0;
         return data;
+    }
+    public Pose resetPose(double yawAngle){
+        limelight.updateRobotOrientation(yawAngle);
+        LLResult llResult = limelight.getLatestResult();
+        if (llResult != null && llResult.isValid()){
+            Pose3D pose = llResult.getBotpose();
+            return new Pose(pose.getPosition().x,pose.getPosition().y,pose.getOrientation().getYaw());
+        }
+        return null;
     }
     private double getDistanceFromTargeta(double ta){
         return 180.5062* Math.pow(ta,-0.5018798);

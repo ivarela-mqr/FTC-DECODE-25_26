@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.Autonomous;
 
 import com.bylazar.configurables.annotations.Configurable;
+import com.bylazar.field.Line;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.follower.Follower;
@@ -17,6 +18,7 @@ import com.qualcomm.robotcore.hardware.IMU;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.subsystems.Zone;
 import org.firstinspires.ftc.teamcode.util.IntakeStateMachineStates;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
@@ -36,6 +38,7 @@ public class Prueba15AutoBlue extends OpMode {
     Timer stateTimer = new Timer();
     Timer actualTimer = new Timer();
     int numOpen = 0;
+    Zone zone;
     @Override
     public void init() {
         panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
@@ -48,7 +51,7 @@ public class Prueba15AutoBlue extends OpMode {
 
         pathState = PathState.DRIVE_STARTPOS_SHOOT_POS;
         shootingStateMachine.init(hardwareMap,
-                org.firstinspires.ftc.teamcode.util.Constants.Alliance.BLUE,1750, IntakeStateMachineStates.FINAL,
+                org.firstinspires.ftc.teamcode.util.Constants.Alliance.BLUE,1600, IntakeStateMachineStates.FINAL,
                 new Pose(45, 96));
 
         imu = hardwareMap.get(IMU.class, "imu");
@@ -59,6 +62,8 @@ public class Prueba15AutoBlue extends OpMode {
         imu.initialize(parameters);
         panelsTelemetry.debug("Status", "Initialized");
         panelsTelemetry.update(telemetry);
+        zone = new Zone(new Zone.Point(72,72), new Zone.Point(0,144),new Zone.Point(144,144),
+                Math.hypot(15.5,17.5)/2);
     }
 
     @Override
@@ -67,9 +72,9 @@ public class Prueba15AutoBlue extends OpMode {
         double yawAngle = orientation.getYaw(AngleUnit.DEGREES);
         follower.update(); // Update Pedro Pathing
         Pose pose = pathState == PathState.SHOOT_PRELOAD ? follower.getPose() : new Pose();
-        shootingStateMachine.update(pose,telemetry,yawAngle, follower
-                ,pathState != PathState.SHOOT_PRELOAD,false);        autonomousPathUpdate(); // Update autonomous state machine
-        ticks ++;
+        shootingStateMachine.update(pose,telemetry,yawAngle,follower
+                ,pathState != PathState.SHOOT_PRELOAD,zone.isRobotInZone(follower.getPose()));
+        autonomousPathUpdate(); // Update autonomous state machine
         // Log values to Panels and Driver Station
         //panelsTelemetry.debug("Last state",lastPathState);
         //panelsTelemetry.debug("Path State", pathState);
@@ -119,7 +124,7 @@ public class Prueba15AutoBlue extends OpMode {
 
             goTakeSecond1 = follower.pathBuilder()
                     .addPath(
-                            new BezierCurve(
+                            new BezierLine(
                                     new Pose(42,90),
                                     new Pose(45, 65)
                             )
@@ -128,7 +133,7 @@ public class Prueba15AutoBlue extends OpMode {
                     .addPath(
                             new BezierLine(
                                     new Pose(45, 65),
-                                    new Pose(19, 65)
+                                    new Pose(9, 65)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
@@ -137,7 +142,7 @@ public class Prueba15AutoBlue extends OpMode {
             goOpen1 = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(13, 65),
+                                    new Pose(9, 65),
                                     new Pose(20, 65)
                             )
                     )
@@ -147,7 +152,7 @@ public class Prueba15AutoBlue extends OpMode {
                     .addPath(
                             new BezierLine(
                                     new Pose(20, 65),
-                                    new Pose(13, 73)
+                                    new Pose(9, 73)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
@@ -156,7 +161,7 @@ public class Prueba15AutoBlue extends OpMode {
             goShotSecond = follower.pathBuilder()
                     .addPath(
                             new BezierCurve(
-                                    new Pose(19, 65),
+                                    new Pose(9, 65),
                                     new Pose(39.988, 71.223),
                                     new Pose(42,90)
                             )
@@ -168,7 +173,7 @@ public class Prueba15AutoBlue extends OpMode {
                             new BezierCurve(
                                     new Pose(42,90),
                                     new Pose(50, 40),
-                                    new Pose(11.5, 66.5)
+                                    new Pose(11.5, 70)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(230), Math.toRadians(148))
@@ -177,7 +182,7 @@ public class Prueba15AutoBlue extends OpMode {
             goSHootOpen = follower.pathBuilder()
                     .addPath(
                             new BezierCurve(
-                                    new Pose(11.5, 66.5),
+                                    new Pose(11.5, 70),
                                     new Pose(39.988, 71.223),
                                     new Pose(42,90)
                             )
@@ -195,7 +200,7 @@ public class Prueba15AutoBlue extends OpMode {
                     .addPath(
                             new BezierLine(
                                     new Pose(45, 90),
-                                    new Pose(20,90)
+                                    new Pose(13,90)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
@@ -204,7 +209,7 @@ public class Prueba15AutoBlue extends OpMode {
             goShotFirst = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(20, 90),
+                                    new Pose(13, 90),
                                     new Pose(42,90)
                             )
                     )
@@ -213,7 +218,7 @@ public class Prueba15AutoBlue extends OpMode {
 
             goTakeThird1 = follower.pathBuilder()
                     .addPath(
-                            new BezierCurve(
+                            new BezierLine(
                                     new Pose(42,90),
                                     new Pose(45, 43.000)
                             )
@@ -254,7 +259,7 @@ public class Prueba15AutoBlue extends OpMode {
         actualTimer.resetTimer();
         switch (pathState){
             case DRIVE_STARTPOS_SHOOT_POS:
-                shootingStateMachine.shooter.adjustCover(0.3);
+                shootingStateMachine.shooter.adjustCover(0.35);
                 follower.followPath(paths.goShotLoaded,1,true);
                 setPathState(PathState.SHOOT_PRELOAD);
                 break;
@@ -326,7 +331,7 @@ public class Prueba15AutoBlue extends OpMode {
                 break;
             case END:
                 shootingStateMachine.shooter.autoAim = false;
-                //shootingStateMachine.shooter.resetRotorPosition();
+                shootingStateMachine.shooter.resetTurret();
             default:
                 break;
         }

@@ -66,10 +66,9 @@ public class Italy26TeleOpMode extends OpMode {
             //follower.setStartingPose(PoseStorage.currentPose);
             yawOffset = PoseStorage.currentPose.getHeading() > 0 ? 180 : -180;
         }else{
-            follower.setPose(new Pose(8, 8, Math.toRadians(180)));
+            follower.setPose(new Pose(5.648, 14.589, Math.toRadians(180)));
             yawOffset = 180;
         }
-
         if (alliance == Constants.Alliance.BLUE){
             headingReset = 180;
         }else{
@@ -146,15 +145,18 @@ public class Italy26TeleOpMode extends OpMode {
         //telemetry.addData("Power", shooter.rotorR.getPower());
         //telemetry.addData("Bumper", gamepad1.left_bumper);
         */
-        telemetry.addData("Pos encoder", shooter.encoder.getCurrentPosition());
+        //telemetry.addData("Pos encoder", shooter.encoder.getCurrentPosition());
         //telemetry.addData("alliance",alliance);
         //telemetry.addData("YawAngle", yawAngle);
         //telemetry.addData("YawOffset", yawOffset);
         telemetry.addData("X", follower.getPose().getX());
         telemetry.addData("Y", follower.getPose().getY());
         telemetry.addData("Heading",Math.toDegrees(follower.getHeading()));
-        telemetry.addData("Turret Angle",shooter.getTurretAngle());
-        telemetry.addData("Target angle",shooter.getTargetAngle(follower));
+        //telemetry.addData("Turret Angle",shooter.getTurretAngle());
+        //telemetry.addData("Target angle",shooter.getTargetAngle(follower));
+        telemetry.addData("Shooter Vel",shooter.shooter0.getVelocity());
+        telemetry.addData("Pos hood",shooter.coverR.getPosition());
+        telemetry.addData("Distance",follower.getPose().distanceFrom(shooter.goalPose));
 
         telemetry.update();
     }
