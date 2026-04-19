@@ -173,7 +173,7 @@ public class Prueba15AutoBlue extends OpMode {
                             new BezierCurve(
                                     new Pose(42,90),
                                     new Pose(50, 40),
-                                    new Pose(11.5, 70)
+                                    new Pose(9, 70)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(230), Math.toRadians(148))
@@ -182,8 +182,8 @@ public class Prueba15AutoBlue extends OpMode {
             goSHootOpen = follower.pathBuilder()
                     .addPath(
                             new BezierCurve(
-                                    new Pose(11.5, 70),
-                                    new Pose(39.988, 71.223),
+                                    new Pose(9, 70),
+                                    new Pose(40, 71),
                                     new Pose(42,90)
                             )
                     )

@@ -273,7 +273,7 @@ public class Shooter {
     }
     public boolean isReady(){
         return velocityOffset() < 50
-                && offset < 3;
+                && offset < 2;
     }
     public boolean isReady2(){
         return offset < 7.5 && offset > - 7.5;

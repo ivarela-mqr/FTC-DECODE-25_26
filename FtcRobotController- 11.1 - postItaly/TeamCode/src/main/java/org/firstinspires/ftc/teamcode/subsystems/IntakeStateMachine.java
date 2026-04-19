@@ -45,7 +45,6 @@ public class IntakeStateMachine {
                 intake.intakeFirstArtifact();
                 if(intake.firstArtifactIn()){
                     switchState(IntakeStateMachineStates.FIRST_ARTIFACT);
-                    intake.led.setPosition(0);
                 }
                 break;
             case FIRST_ARTIFACT:
@@ -58,7 +57,6 @@ public class IntakeStateMachine {
 
                     intake.setTransferPosition(50);
 
-                    intake.led.setPosition(0);
                 }
                 break;
             case SECOND_ARTIFACT:
@@ -90,12 +88,10 @@ public class IntakeStateMachine {
                 if(Math.abs(timer.getElapsedTimeSeconds() - currTime.getElapsedTimeSeconds()) > 0.5) {
                     switchState(IntakeStateMachineStates.INIT);
                 }
-                intake.led.setPosition(0);
                 intake.unload();
                 break;
             case END:
                 intake.stopArtifacts();
-                intake.led.setPosition(0);
             default:
                 break;
         }
