@@ -71,7 +71,8 @@ public class AutonNEWB_1GateNearTotal extends OpMode {
         follower.update(); // Update Pedro Pathing
         Pose pose = pathState == PathState.SHOOT_PRELOAD ? follower.getPose() : new Pose();
         shootingStateMachine.update(pose,telemetry,yawAngle,follower
-                ,pathState != PathState.SHOOT_PRELOAD,zone.isRobotInZone(follower.getPose()));        autonomousPathUpdate(); // Update autonomous state machine
+                ,pathState != PathState.SHOOT_PRELOAD,zone.isRobotInZone(follower.getPose()));
+        autonomousPathUpdate(); // Update autonomous state machine
         ticks ++;
         // Log values to Panels and Driver Station
         panelsTelemetry.debug("Position",shootingStateMachine.shooter.encoder.getCurrentPosition());
@@ -90,8 +91,9 @@ public class AutonNEWB_1GateNearTotal extends OpMode {
         //panelsTelemetry.debug("X", follower.getPose().getX());
         //panelsTelemetry.debug("Y", follower.getPose().getY());
         panelsTelemetry.debug("Heading", Math.toDegrees(follower.getHeading()));
-        panelsTelemetry.debug("Turret angle",shootingStateMachine.shooter.getTurretAngle());
-        panelsTelemetry.debug("Target angle",shootingStateMachine.shooter.getTargetAngle(follower));
+        //panelsTelemetry.debug("Turret angle",shootingStateMachine.shooter.getTurretAngle());
+        //panelsTelemetry.debug("Target angle",shootingStateMachine.shooter.getTargetAngle(follower));
+        panelsTelemetry.debug("Distance",follower.getPreviousClosestPose().getPose().distanceFrom(follower.getPose()));
         panelsTelemetry.update(telemetry);
     }
 
@@ -239,7 +241,7 @@ public class AutonNEWB_1GateNearTotal extends OpMode {
         actualTimer.resetTimer();
         switch (pathState){
             case DRIVE_STARTPOS_SHOOT_POS:
-                shootingStateMachine.shooter.adjustCover(0.3);
+                shootingStateMachine.shooter.adjustCover(0.35);
                 follower.followPath(paths.goShotLoaded,1,true);
                 setPathState(PathState.SHOOT_PRELOAD);
                 break;
@@ -283,7 +285,7 @@ public class AutonNEWB_1GateNearTotal extends OpMode {
                 }
                 break;
             case OPEN_BLOCK:
-                if(!follower.isBusy()){
+                if(!follower.isBusy() || isBlocked(3)){
                     if(lastPathState == PathState.TAKE_SECOND) {
                         follower.followPath(paths.goOpen2,0.5,true);
                         setPathState(PathState.OPEN_BLOCK);
@@ -305,5 +307,9 @@ public class AutonNEWB_1GateNearTotal extends OpMode {
         stateTimer.resetTimer();
         lastPathState = pathState;
         pathState = state;
+    }
+    public boolean isBlocked(int limitTime){
+        return (stateTimer.getElapsedTimeSeconds() > limitTime)
+                || (follower.getPreviousClosestPose().getPose().distanceFrom(follower.getPose()) < 0.5);
     }
 }
