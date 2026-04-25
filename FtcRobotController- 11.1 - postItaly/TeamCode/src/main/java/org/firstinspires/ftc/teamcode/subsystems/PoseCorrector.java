@@ -31,7 +31,7 @@ public class PoseCorrector {
         Pose limelightPose = limeLight.getCorrectedVisionPos(alliance,turretAngle);
         Pose encoderPose = follower.getPose();
 
-        double r;
+        double r; //ratio correction
         double distanceToGoal = encoderPose.getPose().distanceFrom(goalPose);
         if(distanceToGoal < 40)
             r = 0.2;
@@ -47,5 +47,7 @@ public class PoseCorrector {
                 encoderPose.getY() + r * (limelightPose.getY() - encoderPose.getY()),
                 follower.getHeading()
         ));
+
+        lastCorrection = follower.getPose();
     }
 }

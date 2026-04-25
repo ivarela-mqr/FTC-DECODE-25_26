@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
+import com.pedropathing.math.Vector;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -45,6 +46,8 @@ public class Shooter {
     public Pose goalPose;
     public PoseCorrector poseCorrector;
     public boolean hold = true, reset = false;
+
+    //constructor
     public Shooter (HardwareMap hardwareMap, Constants.Alliance alliance, double targetVel){
         shooter0 = hardwareMap.get(DcMotorEx.class,"shooter0");
         shooter1 = hardwareMap.get(DcMotorEx.class,"shooter1");
@@ -60,29 +63,28 @@ public class Shooter {
         encoder.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         coverL.setDirection(Servo.Direction.REVERSE);
         this.alliance = alliance;
-        //limeLight = new LimeLight(hardwareMap, alliance);
+        limeLight = new LimeLight(hardwareMap, alliance);
         if(alliance == Constants.Alliance.BLUE)
             goalPose = new Pose(3,130);
         else
             goalPose = new Pose(141,137);
         curTargetVelocity = targetVel;
 
-        //poseCorrector = new PoseCorrector(limeLight)
+        poseCorrector = new PoseCorrector(limeLight, alliance);
 
         timer.reset();
     }
     public void resetTimer(){
         init.resetTimer();
     }
-    public void adjustVelAndCover(Follower follower){
-        double distance = getDistanceInches(follower);
-        if(distance > 0 && teleOp && autoAim){
-            double pos = 0.5042418 + 0.0003379807*distance - 0.00005000763*Math.pow(distance,2) + 1.815475e-7*Math.pow(distance,3);
-            curTargetVelocity = 1967.261 - 25.41657*distance + 0.3601524*Math.pow(distance,2) - 0.001263507*Math.pow(distance,3);
-            adjustCover(pos);
-        }
-    }
-    public void aimWithLimelight(double yaw){//todo
+
+
+
+
+
+
+    //aiming functions
+    public void aimWithLimelight(double yaw){   //todo
         double[] var = limeLight.getGoalAprilTagData(yaw);
         offset = var[0];
         if(var[1] > 300 && Constants.Alliance.BLUE == alliance)
@@ -94,47 +96,7 @@ public class Shooter {
         boolean offsetCentered = (offset == 0 && Math.abs(lastValidOffset) < 5);
         moveServos(offset, !offsetCentered);
     }
-    public void aim(double yawLimelight, Follower pose, boolean isInShootingPos){
-        //double[] var = limeLight.getGoalAprilTagData(yawLimelight);
-        if(isInShootingPos) {
-            //todo
-            /*
-            if(turretOffset<margin && robotStable()){
-                aimWithLimelight(yawLimelight);
-                if(poseCorrector.shouldReset(pose, getTargetAngle(pose))){
-                    poseCorrector.correctPose();
-                }
-            }else{
-                aimWithOdometry(pose);
-            }
-             */
-//            if (var[0] < 10)   turretOffset<margin && robotStable():
-//                aimWithLimelight(yawLimelight);   aimAndCorrectWithLimelight
-//            else {
-//                aimWithOdometry(yawOdometry);
-//                //offset = 100;
-//            }
-            aimWithOdometry(pose);
-        }else if(autoAim){
-            setPowerRotor(0);
-            //resetTurret();
-        }
-    }
-    public int translateEncoderToAngle(double posEncoder){
-        return Math.toIntExact((long)(-0.0075 * posEncoder));
-    }
-    public int getTurretAngle(){
-        return translateEncoderToAngle(encoder.getCurrentPosition());
-    }
-    public int getTargetAngle(Follower follower){
-        double allianceAngle = 0;
-        if(alliance == Constants.Alliance.BLUE){
-            allianceAngle = 180 - Math.toDegrees(Math.atan((goalPose.getY() - follower.getPose().getY())/(follower.getPose().getX() - goalPose.getX())));
-        }else{
-            allianceAngle = Math.toDegrees(Math.atan((goalPose.getY() - follower.getPose().getY())/( goalPose.getX() -follower.getPose().getX())));
-        }
-        return Math.toIntExact((long)allianceAngle);
-    }
+
     public void aimWithOdometry(Follower follower){
         double shooterAngle = translateEncoderToAngle(encoder.getCurrentPosition()); //shooter relative to robot
         double allianceAngle = getTargetAngle(follower);//goal relative to field
@@ -167,56 +129,47 @@ public class Shooter {
             setPowerRotor(0);
 
     }
+    public void aim(double yawLimelight, Follower pose, boolean isInShootingPos){
+        if(isInShootingPos) {
+            if (turretOffset<10 &&isStable(pose)){
+                aimWithLimelight(yawLimelight);
+                if(poseCorrector.shouldReset(pose, getTargetAngle(pose))){
+                    poseCorrector.correctPose(pose, getTurretAngle(), goalPose);
+                }
+            }else{
+                aimWithOdometry(pose);
+            }
 
-    /*public void aimWithOdometry(double yaw) {
-        // Posición actual del robot desde Pedro Pathing
-        Pose robotPose = follower.getPose();
-
-        // Coordenadas de la canasta según alianza
-        double basketX, basketY;
-        if (Constants.Alliance.BLUE == alliance) {
-            basketX = BLUE_BASKET_X;
-            basketY = BLUE_BASKET_Y;
-        } else {
-            basketX = RED_BASKET_X;
-            basketY = RED_BASKET_Y;
+//            if (var[0] < 10)
+//                aimWithLimelight(yawLimelight);
+//            else {
+//                aimWithOdometry(yawOdometry);
+//                //offset = 100;
+//            }
+        }else if(autoAim){
+            setPowerRotor(0);
+            //resetTurret();
         }
+    }
 
-        // Vector robot → canasta
-        double dx = basketX - robotPose.getX();
-        double dy = basketY - robotPose.getY();
+    //Trig utilities
+    public int translateEncoderToAngle(double posEncoder){
+        return Math.toIntExact((long)(-0.0075 * posEncoder));
+    }
+    public int getTurretAngle(){
+        return translateEncoderToAngle(encoder.getCurrentPosition());
+    }
+    public int getTargetAngle(Follower follower){
+        double allianceAngle = 0;
+        if(alliance == Constants.Alliance.BLUE){
+            allianceAngle = 180 - Math.toDegrees(Math.atan((goalPose.getY() - follower.getPose().getY())/(follower.getPose().getX() - goalPose.getX())));
+        }else{
+            allianceAngle = Math.toDegrees(Math.atan((goalPose.getY() - follower.getPose().getY())/( goalPose.getX() -follower.getPose().getX())));
+        }
+        return Math.toIntExact((long)allianceAngle);
+    }
 
-        // Distancia (equivalente a var[1] de limelight)
-        double distance = Math.hypot(dx, dy);
 
-        // Ángulo absoluto al campo hacia la canasta
-        double angleToBasket = Math.atan2(dy, dx);
-
-        // Ángulo relativo a la orientación del robot (usando yaw igual que limelight)
-        double turretTarget = Math.toDegrees(angleToBasket) - yaw;
-
-        // Normalizar a [-180, 180]
-        while (turretTarget >  180) turretTarget -= 360;
-        while (turretTarget < -180) turretTarget += 360;
-
-        // Offset: diferencia entre donde está la torreta y donde debe estar
-        // (igual que limelight devuelve tx como desviación)
-        offset = turretTarget - currentTurretAngle;
-
-        // Mismo correctOffset que en limelight, basado en distancia y alianza
-        if (distance > 300 && Constants.Alliance.BLUE == alliance)
-            correctOffset = -5;
-        else if (distance > 300 && Constants.Alliance.RED == alliance)
-            correctOffset = 5;
-        else
-            correctOffset = 0;
-
-        // Reutiliza exactamente los mismos métodos que limelight
-        adjustVelAndCover(distance);
-
-        boolean offsetCentered = (offset == 0 && Math.abs(lastValidOffset) < 5);
-        moveServos(offset, !offsetCentered);
-    } */
     public double pid(double offset){
         double currentTime = timer.seconds();
         double dt = currentTime - lastTime;
@@ -238,6 +191,54 @@ public class Shooter {
         output = Math.max(-0.3, Math.min(0.3, output * VELOCITY_FACTOR));
         return -output;
     }
+
+
+
+//BOOL states
+    public boolean isReady(){
+        return velocityOffset() < 50
+                && offset < 2;
+    }
+    public boolean isReady2(){
+        return offset < 7.5 && offset > - 7.5;
+    }
+    public boolean canShoot(Gamepad gamepad){
+        return (velocityOffset() < 50
+                && block.getPosition() < 0.1) || gamepad.left_trigger > 0.1;
+    }
+
+
+
+//STATES
+    public void preload() {
+        if (velocityOffset() > 100) {
+            shooter0.setPower(1);
+            shooter1.setPower(1);
+        } else {
+            shooter0.setVelocity(curTargetVelocity);
+            shooter1.setVelocity(curTargetVelocity);
+        }
+    }
+
+    public void calm(){
+        if(velocityOffset() > 100){
+            shooter0.setPower(1);
+            shooter1.setPower(1);
+        }else {
+            shooter0.setVelocity(curTargetVelocity);
+            shooter1.setVelocity(curTargetVelocity);
+        }
+    }
+    public void stop() {
+        shooter0.setPower(0);
+        shooter1.setPower(0);
+    }
+
+
+
+
+
+//TURRET usage
     public void resetTurret(){
         int posR = encoder.getCurrentPosition();
         if (posR > 3000) {
@@ -280,60 +281,28 @@ public class Shooter {
         int posR = encoder.getCurrentPosition();
         if (!reset && (posR <= LEFT_LIMIT && power > 0) ||
                 (posR >= RIGHT_LIMIT && power < 0)) {
-            rotorL.setPower(0);
-            rotorR.setPower(0);
+            stopTurret();
         }else{
             rotorL.setPower(power);
             rotorR.setPower(power);
         }
     }
-    public boolean isReady(){
-        return velocityOffset() < 50
-                && offset < 2;
+
+    public void stopTurret(){
+        rotorL.setPower(0);
+        rotorR.setPower(0);
     }
-    public boolean isReady2(){
-        return offset < 7.5 && offset > - 7.5;
-    }
-    public boolean canShoot(Gamepad gamepad){
-        return (velocityOffset() < 50
-                && block.getPosition() < 0.1) || gamepad.left_trigger > 0.1;
-    }
-    public void adjustCover(double dist){
-        coverL.setPosition(dist);
-        coverR.setPosition(dist);
-    }
-    public void correctCover(double direction){
-        coverL.setPosition(coverL.getPosition()+(direction*0.05));
-        coverR.setPosition(coverR.getPosition()+(direction*0.05));
-    }
-    public void preload() {
-        if (velocityOffset() > 100) {
-            shooter0.setPower(1);
-            shooter1.setPower(1);
-        } else {
-            shooter0.setVelocity(curTargetVelocity);
-            shooter1.setVelocity(curTargetVelocity);
-        }
+
+
+
+//BLOCK usage
+    public double getBlockPos() {
+        return block.getPosition();
     }
     public void closeBlock() {
         block.setPosition(1);
     }
-    public double getBlockPos() {
-        return block.getPosition();
-    }
-    public void calm(){
-        if(velocityOffset() > 100){
-            shooter0.setPower(1);
-            shooter1.setPower(1);
-        }else {
-            shooter0.setVelocity(curTargetVelocity);
-            shooter1.setVelocity(curTargetVelocity);
-        }
-    }
-    public void stop() {
-        shooter0.setPower(0);
-        shooter1.setPower(0);
-    }
+
     public void openBlock(){
         block.setPosition(0);
     }
@@ -342,21 +311,66 @@ public class Shooter {
             block.setPosition(0);
         }else{block.setPosition(1);}
     }
+
+
+
+
+//COVER usage
+    public void adjustCover(double dist){
+        coverL.setPosition(dist);
+        coverR.setPosition(dist);
+    }
+    public void correctCover(double direction){
+        coverL.setPosition(coverL.getPosition()+(direction*0.05));
+        coverR.setPosition(coverR.getPosition()+(direction*0.05));
+    }
+
+
+    public void adjustVelAndCover(Follower follower){
+        double distance = getDistanceInches(follower);
+        if(distance > 0 && teleOp && autoAim){
+            double pos = 0.5042418 + 0.0003379807*distance - 0.00005000763*Math.pow(distance,2) + 1.815475e-7*Math.pow(distance,3);
+            curTargetVelocity = 1967.261 - 25.41657*distance + 0.3601524*Math.pow(distance,2) - 0.001263507*Math.pow(distance,3);
+            adjustCover(pos);
+        }
+    }
+
+
+
+
+
+    public double velocityOffset(){
+        return curTargetVelocity - Math.max(shooter1.getVelocity(), shooter0.getVelocity());
+    }
+
+
+
+    //Follower utilities
+    public double getDistanceInches (Follower follower){
+        return (follower.getPose().distanceFrom(goalPose));
+    }
+    public boolean isStable(Follower follower) {
+
+        Vector vel = follower.getVelocity();
+
+        double linearVel = Math.sqrt(Math.pow(vel.getXComponent(),2) + Math.pow(vel.getYComponent(),2));
+        double angularVel = follower.getAngularVelocity();
+
+        Vector accel = follower.getAcceleration();
+        double linearAccel = Math.sqrt(Math.pow(accel.getXComponent(),2) + Math.pow(accel.getYComponent(),2));
+
+        boolean lowLinear = linearVel < 3.0; // in/s
+        boolean lowAngular = Math.abs(angularVel) < Math.toRadians(10);
+        boolean lowAccel = linearAccel < 10.0; // in/s^2
+
+        return lowLinear && lowAngular && lowAccel;
+    }
+
+
     public void startTeleop(){
         teleOp = true;
         RIGHT_LIMIT = Constants.RIGHT_TELEOP_LIMIT;
         LEFT_LIMIT = Constants.LEFT_TELEOP_LIMIT;
-    }
-    public double velocityOffset(){
-        return curTargetVelocity - Math.max(shooter1.getVelocity(), shooter0.getVelocity());
-    }
-    public void stopTurret(){
-        rotorL.setPower(0);
-        rotorR.setPower(0);
-    }
-
-    public double getDistanceInches (Follower follower){
-        return (follower.getPose().distanceFrom(goalPose));
     }
     public void TeleOp(Gamepad gamepad1, Gamepad gamepad2, Telemetry telemetry,
                        double yawAngleLimeLight, Follower follower , boolean isFull, boolean isInshootPos){
@@ -409,11 +423,14 @@ public class Shooter {
             correctCover(-1);
         if(gamepad2.right_bumper && debouncer.isReady())
             correctCover(1);
-//        if (gamepad2.circle && blockDebouncer.isReady())
-//            switchBlock();
+
 
         telemetry.addData("velocity shooter",shooter0.getVelocity());
         telemetry.addData("curTargetVelocity",curTargetVelocity);
         telemetry.addData("cover pos", coverR.getPosition());
+
+        telemetry.addData("vision pos x", limeLight.getCorrectedVisionPos(alliance,getTurretAngle()).getX());
+        telemetry.addData("vision pos y", limeLight.getCorrectedVisionPos(alliance,getTurretAngle()).getY());
+
     }
 }

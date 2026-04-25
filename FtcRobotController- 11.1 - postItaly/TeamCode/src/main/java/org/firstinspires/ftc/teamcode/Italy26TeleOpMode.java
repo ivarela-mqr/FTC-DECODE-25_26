@@ -26,7 +26,7 @@ public class Italy26TeleOpMode extends OpMode {
     DriveTrain driveTrain;
     Shooter shooter;
     IntakeStateMachine intakeStateMachine;
-    Tilt tilt;
+    //Tilt tilt;
     IMU imu;
     YawPitchRollAngles orientation;
     double headingReset;
@@ -51,7 +51,7 @@ public class Italy26TeleOpMode extends OpMode {
 
 
         shooter = new Shooter(hardwareMap, alliance, 1200);
-        tilt = new Tilt(hardwareMap);
+        //tilt = new Tilt(hardwareMap);
         intakeStateMachine = new IntakeStateMachine(hardwareMap);
         imu = hardwareMap.get(IMU.class, "imu");
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
@@ -84,7 +84,7 @@ public class Italy26TeleOpMode extends OpMode {
     public void start(){
         gamepad1.rumble(20);
         gamepad2.rumble(20);
-        tilt.resetTimer();
+        //tilt.resetTimer();
         initTimer.resetTimer();
         actualTimer.resetTimer();
         shooter.startTeleop();
