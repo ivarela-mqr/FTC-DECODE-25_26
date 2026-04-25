@@ -26,6 +26,7 @@ public class Shooter {
     int RIGHT_LIMIT = 20000;
     final double VELOCITY_FACTOR = 0.1;
     public double offset = 0, correctOffset = 0;
+    public double turretOffset;
     double curTargetVelocity;
     public Timer init = new Timer();
     public boolean autoAim = true, teleOp = false;
@@ -42,6 +43,7 @@ public class Shooter {
     double lastTime = 0;
     Constants.Alliance alliance;
     public Pose goalPose;
+    public PoseCorrector poseCorrector;
     public boolean hold = true, reset = false;
     public Shooter (HardwareMap hardwareMap, Constants.Alliance alliance, double targetVel){
         shooter0 = hardwareMap.get(DcMotorEx.class,"shooter0");
@@ -64,6 +66,9 @@ public class Shooter {
         else
             goalPose = new Pose(141,137);
         curTargetVelocity = targetVel;
+
+        //poseCorrector = new PoseCorrector(limeLight)
+
         timer.reset();
     }
     public void resetTimer(){
@@ -77,7 +82,7 @@ public class Shooter {
             adjustCover(pos);
         }
     }
-    public void aimWithLimelight(double yaw){
+    public void aimWithLimelight(double yaw){//todo
         double[] var = limeLight.getGoalAprilTagData(yaw);
         offset = var[0];
         if(var[1] > 300 && Constants.Alliance.BLUE == alliance)
@@ -92,8 +97,19 @@ public class Shooter {
     public void aim(double yawLimelight, Follower pose, boolean isInShootingPos){
         //double[] var = limeLight.getGoalAprilTagData(yawLimelight);
         if(isInShootingPos) {
-//            if (var[0] < 10)
-//                aimWithLimelight(yawLimelight);
+            //todo
+            /*
+            if(turretOffset<margin && robotStable()){
+                aimWithLimelight(yawLimelight);
+                if(poseCorrector.shouldReset(pose, getTargetAngle(pose))){
+                    poseCorrector.correctPose();
+                }
+            }else{
+                aimWithOdometry(pose);
+            }
+             */
+//            if (var[0] < 10)   turretOffset<margin && robotStable():
+//                aimWithLimelight(yawLimelight);   aimAndCorrectWithLimelight
 //            else {
 //                aimWithOdometry(yawOdometry);
 //                //offset = 100;
@@ -120,12 +136,11 @@ public class Shooter {
         return Math.toIntExact((long)allianceAngle);
     }
     public void aimWithOdometry(Follower follower){
-        double shooterAngle = translateEncoderToAngle(encoder.getCurrentPosition());
-        double allianceAngle = getTargetAngle(follower);
+        double shooterAngle = translateEncoderToAngle(encoder.getCurrentPosition()); //shooter relative to robot
+        double allianceAngle = getTargetAngle(follower);//goal relative to field
 
-        double targetAngle = 0;
-        offset = targetAngle - shooterAngle;
-        double relativeGoal = allianceAngle - Math.toDegrees(follower.getHeading());
+        double targetAngle = 0; //target shooter relative to bot
+        double relativeGoal = allianceAngle - Math.toDegrees(follower.getHeading()); //goal relative to bot
         if((relativeGoal > 330 || relativeGoal < 30) && teleOp) {
             setPowerRotor(0);
             return;
@@ -138,20 +153,21 @@ public class Shooter {
         }else{
             targetAngle = relativeGoal + 180;
         }
-        offset = targetAngle - shooterAngle;
+        turretOffset = targetAngle - shooterAngle; //diff shooter relative to bot
 
-        if(offset > 7){
+        if(turretOffset > 7){
             setPowerRotor(1);
-        }else if(offset < -7){
+        }else if(turretOffset < -7){
             setPowerRotor(-1);
-        } else if(offset > 0){
+        } else if(turretOffset > 0){
             setPowerRotor(0.1);
-        }else if(offset < 0){
+        }else if(turretOffset < 0){
             setPowerRotor(-0.1);
         }else
             setPowerRotor(0);
 
     }
+
     /*public void aimWithOdometry(double yaw) {
         // Posición actual del robot desde Pedro Pathing
         Pose robotPose = follower.getPose();

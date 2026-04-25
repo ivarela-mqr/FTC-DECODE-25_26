@@ -54,6 +54,29 @@ public class LimeLight {
         }
         return null;
     }
+
+    public Pose getCorrectedVisionPos(Constants.Alliance alliance, double turretAngle){ //Robot pose according to camera (corrected)
+        LLResult llResult = limelight.getLatestResult();
+        if (llResult != null && llResult.isValid()){
+            Pose3D pose = llResult.getBotpose();
+            Pose corrPose;
+            if(alliance == Constants.Alliance.BLUE) {
+                corrPose = new Pose(
+                        pose.getPosition().x + Math.abs(Math.cos(turretAngle) * 6.5),
+                        pose.getPosition().y - Math.abs(Math.sin(turretAngle) * 6.5),
+                        pose.getOrientation().getYaw()
+                );
+            }else{
+                corrPose = new Pose(
+                        pose.getPosition().x - Math.abs(Math.cos(turretAngle) * 6.5),
+                        pose.getPosition().y - Math.abs(Math.sin(turretAngle) * 6.5),
+                        pose.getOrientation().getYaw()
+                );
+            }
+            return corrPose;
+        }
+        return null;
+    }
     private double getDistanceFromTargeta(double ta){
         return 180.5062* Math.pow(ta,-0.5018798);
     }
