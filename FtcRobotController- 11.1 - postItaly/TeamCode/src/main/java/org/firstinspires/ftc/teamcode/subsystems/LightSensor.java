@@ -12,7 +12,7 @@ public class LightSensor extends OpMode {
     @Override
     public void init() {
         lightSensor = hardwareMap.get(TouchSensor.class,"lightSensor");
-        lightSensor2 = hardwareMap.get(TouchSensor.class,"lightSensor2");
+        //lightSensor2 = hardwareMap.get(TouchSensor.class,"lightSensor2");
     }
 
     @Override
