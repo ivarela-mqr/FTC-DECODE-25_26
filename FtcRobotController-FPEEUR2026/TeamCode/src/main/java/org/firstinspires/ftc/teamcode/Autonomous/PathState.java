@@ -11,11 +11,6 @@ public enum PathState{
     TAKE_BASE,
     RETAKE_BASE,
     TAKE_OPEN,
-    END,
-
-    PATH1,
-    PATH2,
-    PATH3,
-    PATH4
+    END
 
 }
