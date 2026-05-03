@@ -30,7 +30,7 @@ public class IntakeStateMachine {
         if(gamepad2.circle)
             switchState(IntakeStateMachineStates.FINAL);
 
-        if(gamepad2.triangle)
+        if(gamepad1.triangle)
             switchState(IntakeStateMachineStates.UNLOAD);
 
         if(gamepad2.square)

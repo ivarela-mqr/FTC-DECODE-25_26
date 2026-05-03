@@ -80,11 +80,15 @@ public class BasicTeleOpMode extends OpMode {
         }
         if (gamepad1.left_trigger>0.1) {
             intake.setPower(1);
-            transfer.setPower(1);
         }else {
             intake.setPower(0);
+        }
+        if (gamepad1.right_trigger>0.1) {
+            transfer.setPower(1);
+        }else {
             transfer.setPower(0);
         }
+
 
         telemetry.update();
     }

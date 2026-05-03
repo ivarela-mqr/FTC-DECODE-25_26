@@ -77,7 +77,7 @@ public class BasicTeleOpMode extends OpMode {
             yawOffset = rawYaw;
         }
 
-        driveTrain.TeleOp(gamepad1,telemetry,yawAngle);
+        driveTrain.TeleOp(gamepad1,telemetry);
         //tilt.Teleop(gamepad1);
 
         actualTimer.resetTimer();
