@@ -129,7 +129,7 @@ public class CalculateShooterCurvature extends OpMode {
     public void loop() {
         YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
         offset = limelight.getGoalAprilTagData(orientation.getYaw())[0];
-        driveTrain.TeleOp(gamepad1,telemetry, orientation.getYaw());
+        driveTrain.TeleOp(gamepad1,telemetry);
 
 
         if(gamepad1.dpadLeftWasPressed())
