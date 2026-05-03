@@ -20,8 +20,7 @@ import org.opencv.core.Mat;
 
 public class Shooter {
     public  DcMotorEx shooter0, shooter1, encoder;
-    public CRServo rotorL, rotorR;
-    public Servo coverL, coverR, block;
+    public Servo coverL, coverR, block, rotorL, rotorR;
     //public LimeLight limeLight;
     int LEFT_LIMIT = -20000;
     int RIGHT_LIMIT = 20000;
@@ -52,8 +51,8 @@ public class Shooter {
         shooter0 = hardwareMap.get(DcMotorEx.class,"shooter0");
         shooter1 = hardwareMap.get(DcMotorEx.class,"shooter1");
         encoder = hardwareMap.get(DcMotorEx.class, "intake");
-        rotorL = hardwareMap.get(CRServo.class,"rotorL");
-        rotorR = hardwareMap.get(CRServo.class,"rotorR");
+        rotorL = hardwareMap.get(Servo.class,"rotorL");
+        rotorR = hardwareMap.get(Servo.class,"rotorR");
         coverL = hardwareMap.get(Servo.class,"coverL");
         coverR = hardwareMap.get(Servo.class,"coverR");
         block = hardwareMap.get(Servo.class, "block");
@@ -100,9 +99,8 @@ public class Shooter {
      */
 
     public void aimWithOdometry(Follower follower){
-        double shooterAngle = translateEncoderToAngle(encoder.getCurrentPosition()); //shooter relative to robot
+        double shooterAngle = translateRotorToAngle(encoder.getCurrentPosition()); //shooter relative to robot
         double allianceAngle = getTargetAngle(follower);//goal relative to field
-
         double targetAngle = 0; //target shooter relative to bot
         double relativeGoal = allianceAngle - Math.toDegrees(follower.getHeading()); //goal relative to bot
         if((relativeGoal > 330 || relativeGoal < 30) && teleOp) {
@@ -117,18 +115,9 @@ public class Shooter {
         }else{
             targetAngle = relativeGoal + 180;
         }
-        turretOffset = targetAngle - shooterAngle; //diff shooter relative to bot
 
-        if(turretOffset > 7){
-            setPowerRotor(1);
-        }else if(turretOffset < -7){
-            setPowerRotor(-1);
-        } else if(turretOffset > 0){
-            setPowerRotor(0.1);
-        }else if(turretOffset < 0){
-            setPowerRotor(-0.1);
-        }else
-            setPowerRotor(0);
+        rotorR.setPosition(0.003030303*targetAngle + 0.5);
+        rotorL.setPosition(0.003030303*targetAngle + 0.5);
 
     }
     public void aim(double yawLimelight, Follower pose, boolean isInShootingPos){
@@ -155,11 +144,11 @@ public class Shooter {
     }
 
     //Trig utilities
-    public int translateEncoderToAngle(double posEncoder){
-        return Math.toIntExact((long)(-0.0075 * posEncoder));
+    public int translateRotorToAngle(double posRotor){
+        return Math.toIntExact((long)(330*rotorR.getPosition() - 165));
     }
     public int getTurretAngle(){
-        return translateEncoderToAngle(encoder.getCurrentPosition());
+        return translateRotorToAngle(encoder.getCurrentPosition());
     }
     public int getTargetAngle(Follower follower){
         double allianceAngle = 0;
@@ -274,8 +263,8 @@ public class Shooter {
         }
         if (!reset && (posR <= LEFT_LIMIT && power > 0) ||
                 (posR >= RIGHT_LIMIT && power < 0)) {
-            rotorL.setPower(0);
-            rotorR.setPower(0);
+            rotorL.setPosition(0);
+            rotorR.setPosition(0);
         }
     }
     public void setPowerRotor(double power){
@@ -284,8 +273,8 @@ public class Shooter {
                 (posR >= RIGHT_LIMIT && power < 0)) {
             stopTurret();
         }else{
-            rotorL.setPower(power);
-            rotorR.setPower(power);
+            rotorL.setPosition(power);
+            rotorR.setPosition(power);
         }
     }
 

@@ -18,7 +18,7 @@ public class Constants {
 
     public static FollowerConstants followerConstants = new FollowerConstants()
             .mass(8)
-            .predictiveBrakingCoefficients(new PredictiveBrakingCoefficients(0.1, 0.05598397, 0.00205139));
+            .predictiveBrakingCoefficients(new PredictiveBrakingCoefficients(0.1, 0.056648593064809884, 0.0016755211791537532));
 
     public static MecanumConstants driveConstants = new MecanumConstants()
             .maxPower(1)
@@ -30,15 +30,15 @@ public class Constants {
             .leftRearMotorDirection(DcMotorSimple.Direction.REVERSE)
             .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
             .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD)
-            .xVelocity(72.26)
-            .yVelocity(57.16)
+            .xVelocity(68.09)
+            .yVelocity(80.4267)
             .useBrakeModeInTeleOp(true);
 
     public static PathConstraints pathConstraints = new PathConstraints(0.7, 60, 1, 1);
 
     public static PinpointConstants pinpointConstants = new PinpointConstants()
             .distanceUnit(DistanceUnit.INCH)
-            .forwardPodY(-2.0625)      // distance from robot center
+            .forwardPodY(2.0625)      // distance from robot center
             .strafePodX(-6.875)
             .hardwareMapName("odometry")
             .encoderResolution(
@@ -48,7 +48,7 @@ public class Constants {
                     GoBildaPinpointDriver.EncoderDirection.FORWARD
             )
             .strafeEncoderDirection(
-                    GoBildaPinpointDriver.EncoderDirection.FORWARD
+                    GoBildaPinpointDriver.EncoderDirection.REVERSED
             )
             ;
 
