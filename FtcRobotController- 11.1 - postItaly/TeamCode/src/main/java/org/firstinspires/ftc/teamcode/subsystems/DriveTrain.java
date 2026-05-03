@@ -74,14 +74,14 @@ public class DriveTrain {
             resetPose = new Pose(
                     14.72,
                     78.30,
-                    headingReset
+                    Math.toRadians(headingReset)
             );
         }else{
             headingReset = 0;
             resetPose = new Pose(
                     129.28,
                     78.30,
-                    headingReset
+                    Math.toRadians(headingReset)
             );
             yawOffset = 0;
         }
@@ -99,6 +99,8 @@ public class DriveTrain {
 
 
         if (gamepad.options) {
+            yawOffset = rawYaw;
+
             follower.setPose(resetPose);
         }
         follower.update();
