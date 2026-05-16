@@ -1,22 +1,21 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.TouchSensor;
-@TeleOp
-public class LightSensor extends OpMode {
+public class LightSensor {
     public TouchSensor lightSensor;
     public TouchSensor lightSensor2;
 
 
-    @Override
-    public void init() {
-        lightSensor = hardwareMap.get(TouchSensor.class,"lightSensor");
-        //lightSensor2 = hardwareMap.get(TouchSensor.class,"lightSensor2");
+    LightSensor(HardwareMap hardwareMap, String name1, String name2){
+        lightSensor = hardwareMap.get(TouchSensor.class,name1);
+        lightSensor2 = hardwareMap.get(TouchSensor.class,name2);
     }
 
-    @Override
-    public void loop() {
-         telemetry.addData("Hay bola",(lightSensor.isPressed() || lightSensor2.isPressed()));
+    public boolean isDetecting (){
+        return (lightSensor.isPressed() || lightSensor2.isPressed());
     }
+
 }

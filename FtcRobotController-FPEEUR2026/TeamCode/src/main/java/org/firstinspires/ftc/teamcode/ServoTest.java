@@ -11,7 +11,7 @@ public class ServoTest extends OpMode {
     public void init() {
         servoL = hardwareMap.get(Servo.class,"servoL");
         servoR = hardwareMap.get(Servo.class,"servoR");
-        servoL.setDirection(Servo.Direction.REVERSE);
+        //servoL.setDirection(Servo.Direction.REVERSE);
         //servoL.scaleRange(0.25,0.75);
         //servoR.scaleRange(0.25,0.75);
     }

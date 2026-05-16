@@ -12,8 +12,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 public class Intake {
     public DcMotorEx transfer;
     public DcMotor intake;
-    public DistanceSensor distanceSensor1, distanceSensor2;
-    public ColorSensor colorSensor = new ColorSensor();
+    public LightSensor lightSensor1, lightSensor2, lightSensor3;
     public double transferPosition2ArtifactIn;
     public Servo led;
 
@@ -21,10 +20,10 @@ public class Intake {
     public Intake(HardwareMap hardwareMap) {
         intake = hardwareMap.get(DcMotor.class, "intake");
         transfer = hardwareMap.get(DcMotorEx.class, "transfer");
-        distanceSensor1 = hardwareMap.get(DistanceSensor.class, "distanceSensor1");
-        distanceSensor2 = hardwareMap.get(DistanceSensor.class, "distanceSensor2");
+        lightSensor1 = new LightSensor(hardwareMap, "lSensor11", "lSensor12");
+        lightSensor2 = new LightSensor(hardwareMap, "lSensor21", "lSensor22");
+        lightSensor3 = new LightSensor(hardwareMap, "lSensor31", "lSensor32");
         led = hardwareMap.get(Servo.class, "led");
-        colorSensor.init(hardwareMap);
         intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         intake.setDirection(DcMotorSimple.Direction.REVERSE);
         transfer.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -70,13 +69,11 @@ public class Intake {
         }
     }
     public boolean firstArtifactIn() {
-        return distanceSensor2.getDistance(DistanceUnit.CM) < 2.5;
+        return lightSensor1.isDetecting();
     }
-    public boolean secondArtifactIn() {
-        return colorSensor.getDetectedColor() != ColorSensor.DetectedColors.UNKNOWN;
-    }
+    public boolean secondArtifactIn() { return lightSensor2.isDetecting();}
     public boolean thirdArtifactIn() {
-        return distanceSensor1.getDistance(DistanceUnit.CM) < 12.5;
+        return lightSensor3.isDetecting();
     }
 
 }
