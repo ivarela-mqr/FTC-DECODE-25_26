@@ -279,8 +279,8 @@ public class Shooter {
     }
 
     public void stopTurret(){
-        rotorL.setPower(0);
-        rotorR.setPower(0);
+        //rotorL.setPower(0);
+        //rotorR.setPower(0);
     }
 
 

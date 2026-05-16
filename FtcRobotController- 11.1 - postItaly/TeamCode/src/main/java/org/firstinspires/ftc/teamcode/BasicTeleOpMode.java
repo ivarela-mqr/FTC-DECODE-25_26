@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import static org.firstinspires.ftc.teamcode.pedroPathing.Constants.createFollower;
 
 
+import com.pedropathing.geometry.Pose;
 import com.pedropathing.util.Timer;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -77,7 +78,7 @@ public class BasicTeleOpMode extends OpMode {
             yawOffset = rawYaw;
         }
 
-        driveTrain.TeleOp(gamepad1,telemetry);
+        driveTrain.TeleOp(gamepad1,telemetry,1,new Pose());
         //tilt.Teleop(gamepad1);
 
         actualTimer.resetTimer();

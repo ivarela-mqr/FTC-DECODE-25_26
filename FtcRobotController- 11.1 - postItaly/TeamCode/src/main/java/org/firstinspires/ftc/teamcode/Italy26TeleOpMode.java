@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 
 
+import com.pedropathing.ftc.PoseConverter;
 import com.pedropathing.util.Timer;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -9,6 +10,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.subsystems.IntakeStateMachine;
+import org.firstinspires.ftc.teamcode.subsystems.PoseCorrector;
 import org.firstinspires.ftc.teamcode.subsystems.Tilt;
 import org.firstinspires.ftc.teamcode.util.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.DriveTrain;
@@ -50,7 +52,8 @@ public class Italy26TeleOpMode extends OpMode {
 
     @Override
     public void loop() {
-        double yawAngle = driveTrain.TeleOp(gamepad1,telemetry);
+        double yawAngle = driveTrain.TeleOp(gamepad1,telemetry,Math.toRadians(shooter.getTurretAngle()),
+                            shooter.goalPose);
 
         boolean isInShootZone = driveTrain.isInShootZone();
 
@@ -68,6 +71,9 @@ public class Italy26TeleOpMode extends OpMode {
             gamepad2.rumble(2000);
         }
 
+        if(isInShootZone){
+            gamepad1.rumble(10);
+        }
         telemetry.addData("Offset", shooter.turretOffset);
         telemetry.addData("Shooter Vel",shooter.shooter0.getVelocity());
         telemetry.addData("Pos hood",shooter.coverR.getPosition());

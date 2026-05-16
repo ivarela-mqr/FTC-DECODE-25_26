@@ -28,9 +28,11 @@ public class DriveTrain {
 
     public Follower follower;
     public Constants.Alliance alliance = Constants.Alliance.BLUE;
-    private double radius;
-    private Zone farZone,nearZone;
-    private Pose resetPose;
+    private final Zone farZone;
+    private final Zone nearZone;
+    private final Pose resetPose;
+    private Pose lastPose = new Pose(8,8);
+    PoseCorrector poseCorrector;
 
     public DriveTrain(HardwareMap hardwareMap){
         //motors
@@ -53,12 +55,12 @@ public class DriveTrain {
                 RevHubOrientationOnRobot.UsbFacingDirection.UP
         ));
         imu.initialize(parameters);
-
         //follower
         if (PoseStorage.currentPose != null) {
             alliance = PoseStorage.alliance;
         }
 
+        poseCorrector = new PoseCorrector(new LimeLight(hardwareMap,alliance),alliance);
         follower = createFollower(hardwareMap);
         follower.startTeleOpDrive(true);
         if (PoseStorage.currentPose != null) {
@@ -66,7 +68,7 @@ public class DriveTrain {
             //follower.setStartingPose(PoseStorage.currentPose);
             yawOffset = PoseStorage.currentPose.getHeading() > 0 ? 180 : -180;
         }else{
-            follower.setPose(new Pose(8, 8, Math.toRadians(180)));
+            follower.setPose(new Pose(8.5, 7.75, Math.toRadians(180)));
             yawOffset = 180;
         }
         if (alliance == Constants.Alliance.BLUE){
@@ -85,13 +87,12 @@ public class DriveTrain {
             );
             yawOffset = 0;
         }
-
-        farZone = new Zone(new Zone.Point(72,24), new Zone.Point(96,0),new Zone.Point(48,0),radius);
-        nearZone = new Zone(new Zone.Point(72,72), new Zone.Point(0,144),new Zone.Point(144,144),radius);
-        radius = Math.hypot(15.5,17.5)/2;
+        double radius = Math.hypot(15.5, 17.5) / 2;
+        farZone = new Zone(new Zone.Point(72,24), new Zone.Point(96,0),new Zone.Point(48,0), radius);
+        nearZone = new Zone(new Zone.Point(72,72), new Zone.Point(0,144),new Zone.Point(144,144), radius);
     }
 
-    public double TeleOp(Gamepad gamepad, Telemetry telemetry){
+    public double TeleOp(Gamepad gamepad, Telemetry telemetry, double turretAngle, Pose goalPose){
         orientation = imu.getRobotYawPitchRollAngles();
 
         double rawYaw = Math.toDegrees(follower.getHeading());
@@ -102,6 +103,12 @@ public class DriveTrain {
             yawOffset = rawYaw;
 
             follower.setPose(resetPose);
+        }
+        if(gamepad.share){
+            lastPose = follower.getPose();
+            Pose pose = poseCorrector.correctPose(follower,turretAngle,goalPose);
+            if(pose != null)
+                follower.setPose(pose);
         }
         follower.update();
 
@@ -144,7 +151,11 @@ public class DriveTrain {
 
         telemetry.addData("X", follower.getPose().getX());
         telemetry.addData("Y", follower.getPose().getY());
+        telemetry.addData("Heading",Math.toDegrees(follower.getPose().getHeading()));
 
+        telemetry.addData("X previous", lastPose.getX());
+        telemetry.addData("Y previous", lastPose.getY());
+        telemetry.addData("Heading previous",Math.toDegrees(lastPose.getHeading()));
         //telemetry.addData("yaw",yawAngle);
         return yawAngle;
     }

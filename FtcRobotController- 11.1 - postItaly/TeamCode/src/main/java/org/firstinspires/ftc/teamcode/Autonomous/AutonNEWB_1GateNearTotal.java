@@ -117,7 +117,7 @@ public class AutonNEWB_1GateNearTotal extends OpMode {
                     .addPath(
                             new BezierLine(
                                     new Pose(21.305, 126.125),
-                                    new Pose(45,96)
+                                    new Pose(45,93)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(144), Math.toRadians(230))
@@ -126,15 +126,15 @@ public class AutonNEWB_1GateNearTotal extends OpMode {
             goTakeSecond1 = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(45,96),
-                                    new Pose(45, 65)
+                                    new Pose(45,93),
+                                    new Pose(45, 62)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(230), Math.toRadians(180))
                     .addPath(
                             new BezierLine(
-                                    new Pose(45, 65),
-                                    new Pose(10, 65)
+                                    new Pose(45, 62),
+                                    new Pose(10, 62)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
@@ -143,8 +143,8 @@ public class AutonNEWB_1GateNearTotal extends OpMode {
             goOpen1 = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(10, 65),
-                                    new Pose(20, 65)
+                                    new Pose(10, 62),
+                                    new Pose(25, 62)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
@@ -152,8 +152,8 @@ public class AutonNEWB_1GateNearTotal extends OpMode {
             goOpen2 = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(20, 65),
-                                    new Pose(13, 73)
+                                    new Pose(25, 62),
+                                    new Pose(13, 74)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
@@ -162,9 +162,9 @@ public class AutonNEWB_1GateNearTotal extends OpMode {
             goShotSecond = follower.pathBuilder()
                     .addPath(
                             new BezierCurve(
-                                    new Pose(13.000, 73.000),
-                                    new Pose(39.988, 71.223),
-                                    new Pose(45,96)
+                                    new Pose(13.000, 74),
+                                    new Pose(39.988, 68),
+                                    new Pose(45,93)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
@@ -173,15 +173,15 @@ public class AutonNEWB_1GateNearTotal extends OpMode {
             goTakeFirst = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(45, 96),
-                                    new Pose(45,90)
+                                    new Pose(45, 93),
+                                    new Pose(45,87)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
                     .addPath(
                             new BezierLine(
-                                    new Pose(45, 90),
-                                    new Pose(13,90)
+                                    new Pose(45, 87),
+                                    new Pose(13,87)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
@@ -190,8 +190,8 @@ public class AutonNEWB_1GateNearTotal extends OpMode {
             goShotFirst = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(13, 90),
-                                    new Pose(45,96)
+                                    new Pose(13, 87),
+                                    new Pose(45,93)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(230))
@@ -200,15 +200,15 @@ public class AutonNEWB_1GateNearTotal extends OpMode {
             goTakeThird1 = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(45,96),
-                                    new Pose(45, 43.000)
+                                    new Pose(45,93),
+                                    new Pose(45, 40)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(230), Math.toRadians(180))
                     .addPath(
                             new BezierLine(
-                                    new Pose(45, 43.000),
-                                    new Pose(9,43)
+                                    new Pose(45, 40),
+                                    new Pose(9,40)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
@@ -217,8 +217,8 @@ public class AutonNEWB_1GateNearTotal extends OpMode {
             goShotThird = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(9, 43.000),
-                                    new Pose(45,96)
+                                    new Pose(9, 40),
+                                    new Pose(45,93)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(230))
@@ -226,8 +226,8 @@ public class AutonNEWB_1GateNearTotal extends OpMode {
             finalPath = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(45,96),
-                                    new Pose(24, 70)
+                                    new Pose(45,93),
+                                    new Pose(24, 67)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(230), Math.toRadians(180))

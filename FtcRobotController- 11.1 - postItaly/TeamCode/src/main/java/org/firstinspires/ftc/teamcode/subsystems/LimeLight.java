@@ -6,7 +6,9 @@ import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.teamcode.util.Constants;
 
 public class LimeLight {
@@ -54,31 +56,35 @@ public class LimeLight {
         }
         return null;
     }
+    // Añade estas constantes (las calibras tú midiendo)
+    private static final double LL_ORIGIN_OFFSET_X = -0.3856325149536133; // en pulgadas
+    private static final double LL_ORIGIN_OFFSET_Y = -0.03463870659470558; // en pulgadas
 
-    public Pose getCorrectedVisionPos(Constants.Alliance alliance, double turretAngle){ //Robot pose according to camera (corrected)
+    public Pose getCorrectedVisionPos(Constants.Alliance alliance, double turretAngle) {
         LLResult llResult = limelight.getLatestResult();
-        if (llResult == null || !llResult.isValid())
-            return null;
+        if (llResult == null || !llResult.isValid()) return null;
 
-        Pose3D pose = llResult.getBotpose();
-        Pose corrPose;
+        Pose3D pose;
+        pose = llResult.getBotpose();
+        if (pose == null) return null;
 
-        double x = pose.getPosition().x;
-        double y = pose.getPosition().y;
-        double dirX = Math.cos(turretAngle);
-        double dirY = Math.sin(turretAngle);
+        // Limelight da metros → convertir a pulgadas
+        double x = pose.getPosition().toUnit(DistanceUnit.INCH).x;
+        double y = pose.getPosition().toUnit(DistanceUnit.INCH).y;
 
+        // WPI pone el origen en el CENTRO del campo, Pedro Pathing en la ESQUINA
+        // El campo mide 144" x 144"
+        x += 72.0;
+        y = 72.0 - y;
 
+        // Corrección por offset de torreta
         double radius = 6.5;
+        x -= Math.cos(turretAngle) * radius;
+        y += Math.sin(turretAngle) * radius;
 
-        double dx = dirX * radius;
-        double dy = dirY * radius;
-        corrPose = new Pose(
-                x-dx,
-                y-dy,
-                pose.getOrientation().getYaw()
-        );
-        return corrPose;
+        double heading = pose.getOrientation().getYaw(); // ya en grados
+
+        return new Pose(x, y, Math.toRadians(heading));
     }
     public Pose getRawVisionPose(){
         LLResult llResult = limelight.getLatestResult();
