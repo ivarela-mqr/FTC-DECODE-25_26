@@ -129,11 +129,6 @@ public class DriveTrain {
         double strafe = gamepad.left_stick_x * driveVelFactor;
         double rotate = gamepad.right_stick_x * rotVelFactor;
 
-
-        // Small P controller
-        double kP = 0.03; // todo tune this
-
-
         double headingRad = Math.toRadians(yawAngle);
 
         double rotX = drive * Math.cos(headingRad) - strafe * Math.sin(headingRad);
@@ -156,7 +151,6 @@ public class DriveTrain {
         telemetry.addData("X previous", lastPose.getX());
         telemetry.addData("Y previous", lastPose.getY());
         telemetry.addData("Heading previous",Math.toDegrees(lastPose.getHeading()));
-        //telemetry.addData("yaw",yawAngle);
         return yawAngle;
     }
 
