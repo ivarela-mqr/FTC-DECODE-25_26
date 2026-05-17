@@ -1,15 +1,8 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.bylazar.configurables.annotations.Configurable;
-import com.bylazar.panels.Panels;
 import com.bylazar.telemetry.PanelsTelemetry;
-import com.bylazar.telemetry.TelemetryManager;
-import com.pedropathing.telemetry.SelectScope;
-import com.pedropathing.telemetry.SelectableOpMode;
-import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -23,16 +16,10 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
-import org.firstinspires.ftc.teamcode.subsystems.ColorSensor;
 import org.firstinspires.ftc.teamcode.subsystems.DriveTrain;
 import org.firstinspires.ftc.teamcode.subsystems.LimeLight;
 import org.firstinspires.ftc.teamcode.util.Constants;
-
-import java.security.Provider;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 @TeleOp
 @Configurable
@@ -52,8 +39,6 @@ public class CalculateShooterCurvature extends OpMode {
     DcMotorEx  intake, transfer;
     double highVel = 1300;
     double currVel = highVel;
-    ColorSensor colorSensor;
-    ColorSensor.DetectedColors detectedColor;
     DriveTrain driveTrain;
 
     DcMotorEx encoder;
@@ -105,8 +90,6 @@ public class CalculateShooterCurvature extends OpMode {
 
         block = hardwareMap.get(Servo.class,"block");
         coverL.setDirection(Servo.Direction.REVERSE);
-        colorSensor = new ColorSensor();
-        colorSensor.init(hardwareMap);
         driveTrain = new DriveTrain(hardwareMap);
 
         distanceSensor1 = hardwareMap.get(DistanceSensor.class,"distanceSensor1");
@@ -148,8 +131,6 @@ public class CalculateShooterCurvature extends OpMode {
         if(gamepad1.xWasPressed())
             block.setPosition(0);
 
-        detectedColor = colorSensor.getDetectedColor();
-        telemetry.addData("ColorDetected",detectedColor);
         telemetry.addData("Sensor 1", distanceSensor1.getDistance(DistanceUnit.CM));
         telemetry.addData("Sensor 2", distanceSensor2.getDistance(DistanceUnit.CM));
         /*if(detectedColor != ColorSensor.DetectedColors.UNKNOWN)
