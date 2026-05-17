@@ -15,13 +15,13 @@ import com.qualcomm.robotcore.hardware.IMU;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.subsystems.DriveTrain;
+import org.firstinspires.ftc.teamcode.subsystems.IntakeStateMachine;
 
 
 @TeleOp
 public class BasicTeleOpMode extends OpMode {
     DriveTrain driveTrain;
-    DcMotor intake;
-    DcMotorEx transfer;
+    IntakeStateMachine intakeStateMachine;
     IMU imu;
     YawPitchRollAngles orientation;
     double yawOffset = 0;
@@ -35,12 +35,7 @@ public class BasicTeleOpMode extends OpMode {
         initTimer = new Timer();
         driveTrain = new DriveTrain(hardwareMap);
 
-        intake = hardwareMap.get(DcMotor.class, "intake");
-        transfer = hardwareMap.get(DcMotorEx.class, "transfer");
-
-        intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        transfer.setDirection(DcMotorSimple.Direction.REVERSE);
-        transfer.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        intakeStateMachine = new IntakeStateMachine(hardwareMap);
 
         imu = hardwareMap.get(IMU.class, "imu");
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
@@ -78,17 +73,11 @@ public class BasicTeleOpMode extends OpMode {
             gamepad1.rumble(2000);
             gamepad2.rumble(2000);
         }
-        if (gamepad1.left_trigger>0.1) {
-            intake.setPower(1);
-        }else {
-            intake.setPower(0);
-        }
-        if (gamepad1.right_trigger>0.1) {
-            transfer.setPower(1);
-        }else {
-            transfer.setPower(0);
-        }
-
+        intakeStateMachine.TeleOp(true,gamepad1,gamepad2);
+        telemetry.addData("Sensor1", intakeStateMachine.intake.lightSensor1.isDetecting());
+        telemetry.addData("Sensor2", intakeStateMachine.intake.lightSensor2.isPressed());
+        telemetry.addData("Sensor3", intakeStateMachine.intake.lightSensor3.isDetecting());
+        telemetry.addData("Intake state", intakeStateMachine.state);
 
         telemetry.update();
     }
