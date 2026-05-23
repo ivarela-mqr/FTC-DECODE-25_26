@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.util.Debouncer;
 
 
-@TeleOp(name = "Servo SPM Test", group = "Test")
+@TeleOp(name = "Turret Test", group = "Test")
 public class TurretTest extends OpMode {
     public Debouncer velDebouncer = new Debouncer(300);
 
@@ -14,8 +14,8 @@ public class TurretTest extends OpMode {
 
     @Override
     public void init() {
-        rotorR = hardwareMap.get(Servo.class, "testServo");
-        rotorL = hardwareMap.get(Servo.class, "testServo");
+        rotorR = hardwareMap.get(Servo.class, "testServo1");
+        rotorL = hardwareMap.get(Servo.class, "testServo2");
         telemetry.update();
     }
 
