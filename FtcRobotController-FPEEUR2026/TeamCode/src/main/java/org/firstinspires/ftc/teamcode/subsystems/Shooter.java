@@ -46,7 +46,6 @@ public class Shooter {
     //public PoseCorrector poseCorrector;
     public boolean hold = true, reset = false;
 
-    //constructor
     public Shooter (HardwareMap hardwareMap, Constants.Alliance alliance, double targetVel){
         shooter0 = hardwareMap.get(DcMotorEx.class,"shooter0");
         shooter1 = hardwareMap.get(DcMotorEx.class,"shooter1");
@@ -68,8 +67,6 @@ public class Shooter {
         else
             goalPose = new Pose(141,137);
         curTargetVelocity = targetVel;
-
-        //poseCorrector = new PoseCorrector(limeLight, alliance);
 
         timer.reset();
     }

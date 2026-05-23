@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import static org.firstinspires.ftc.teamcode.pedroPathing.Constants.createFollower;
 
 
+import com.pedropathing.geometry.Pose;
 import com.pedropathing.util.Timer;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -15,15 +16,22 @@ import com.qualcomm.robotcore.hardware.IMU;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.subsystems.DriveTrain;
+import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.IntakeStateMachine;
-
+import org.firstinspires.ftc.teamcode.subsystems.Shooter;
+import org.firstinspires.ftc.teamcode.subsystems.Tilt;
+import org.firstinspires.ftc.teamcode.subsystems.Zone;
+import org.firstinspires.ftc.teamcode.util.Constants;
+import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
 @TeleOp
 public class BasicTeleOpMode extends OpMode {
     DriveTrain driveTrain;
-    IntakeStateMachine intakeStateMachine;
+    DcMotor intake;
+    DcMotorEx transfer;
     IMU imu;
     YawPitchRollAngles orientation;
+    double headingReset;
     double yawOffset = 0;
     Timer actualTimer,initTimer;
     boolean rumble = false;
@@ -35,7 +43,12 @@ public class BasicTeleOpMode extends OpMode {
         initTimer = new Timer();
         driveTrain = new DriveTrain(hardwareMap);
 
-        intakeStateMachine = new IntakeStateMachine(hardwareMap);
+        intake = hardwareMap.get(DcMotor.class, "intake");
+        transfer = hardwareMap.get(DcMotorEx.class, "transfer");
+
+        intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        transfer.setDirection(DcMotorSimple.Direction.REVERSE);
+        transfer.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         imu = hardwareMap.get(IMU.class, "imu");
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
@@ -65,7 +78,8 @@ public class BasicTeleOpMode extends OpMode {
             yawOffset = rawYaw;
         }
 
-        driveTrain.TeleOp(gamepad1,telemetry,yawAngle);
+        driveTrain.TeleOp(gamepad1,telemetry,1,new Pose());
+        //tilt.Teleop(gamepad1);
 
         actualTimer.resetTimer();
         if(!rumble && timeElapsed() > 105){
@@ -73,11 +87,13 @@ public class BasicTeleOpMode extends OpMode {
             gamepad1.rumble(2000);
             gamepad2.rumble(2000);
         }
-        intakeStateMachine.TeleOp(true,gamepad1,gamepad2);
-        telemetry.addData("Sensor1", intakeStateMachine.intake.lightSensor1.isDetecting());
-        telemetry.addData("Sensor2", intakeStateMachine.intake.lightSensor2.isPressed());
-        telemetry.addData("Sensor3", intakeStateMachine.intake.lightSensor3.isDetecting());
-        telemetry.addData("Intake state", intakeStateMachine.state);
+        if (gamepad1.left_trigger>0.1) {
+            intake.setPower(1);
+            transfer.setPower(1);
+        }else {
+            intake.setPower(0);
+            transfer.setPower(0);
+        }
 
         telemetry.update();
     }

@@ -25,7 +25,7 @@ public class PoseCorrector {
         Pose encoderPose = follower.getPose();
         return limelightPose.distanceFrom(encoderPose) > margin;
     }
-    public void correctPose(Follower follower, double turretAngle, Pose goalPose){
+    public Pose correctPose(Follower follower, double turretAngle, Pose goalPose){
         Pose limelightPose = limeLight.getCorrectedVisionPos(alliance,turretAngle);
         Pose encoderPose = follower.getPose();
 
@@ -40,12 +40,13 @@ public class PoseCorrector {
         else
             r = 0;
 
-        follower.setPose( new Pose(
+        Pose pose = new Pose(
                 encoderPose.getX() + r * (limelightPose.getX() - encoderPose.getX()),
                 encoderPose.getY() + r * (limelightPose.getY() - encoderPose.getY()),
                 follower.getHeading()
-        ));
+        );
 
-        lastCorrection = follower.getPose();
+        lastCorrection = pose;
+        return pose;
     }
 }
