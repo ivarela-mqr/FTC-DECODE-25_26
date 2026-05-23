@@ -23,7 +23,7 @@ public class LimeLight {
 
     public void switchAlliance(Constants.Alliance newAlliance){
         if (newAlliance == Constants.Alliance.BLUE)
-            limelight.pipelineSwitch(8); // Blue alliance aprilTag
+            limelight.pipelineSwitch(0); // Blue alliance aprilTag
         else if (newAlliance == Constants.Alliance.RED)
             limelight.pipelineSwitch(9); // Red alliance aprilTag
     }
@@ -39,7 +39,7 @@ public class LimeLight {
             //telemetry.addData("distance in cm",getDistanceFromTargeta(llResult.getTa()));
             data[0] = llResult.getTx();
             data[1] = getDistanceFromTargeta(llResult.getTa());
-            return  data;
+            return data;
         }
         data[0] = 10000;
         data[1] = 0;

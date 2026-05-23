@@ -4,7 +4,6 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.math.Vector;
 import com.pedropathing.util.Timer;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Gamepad;
@@ -26,7 +25,6 @@ public class Shooter {
     int RIGHT_LIMIT = 20000;
     final double VELOCITY_FACTOR = 0.1;
     public double offset = 0, correctOffset = 0;
-    public double turretOffset;
     double curTargetVelocity;
     public Timer init = new Timer();
     public boolean autoAim = true, teleOp = false;
@@ -74,29 +72,7 @@ public class Shooter {
         init.resetTimer();
     }
 
-
-
-
-
-
-    //aiming functions
-    /*public void aimWithLimelight(double yaw){   //todo
-        double[] var = limeLight.getGoalAprilTagData(yaw);
-        offset = var[0];
-        if(var[1] > 300 && Constants.Alliance.BLUE == alliance)
-            correctOffset = -5;
-        else if(var[1] > 300 && Constants.Alliance.RED == alliance)
-            correctOffset = 5;
-        else
-            correctOffset = 0;
-        boolean offsetCentered = (offset == 0 && Math.abs(lastValidOffset) < 5);
-        moveServos(offset, !offsetCentered);
-    }
-
-     */
-
     public void aimWithOdometry(Follower follower){
-        double shooterAngle = translateRotorToAngle(encoder.getCurrentPosition()); //shooter relative to robot
         double allianceAngle = getTargetAngle(follower);//goal relative to field
         double targetAngle = 0; //target shooter relative to bot
         double relativeGoal = allianceAngle - Math.toDegrees(follower.getHeading()); //goal relative to bot
@@ -119,34 +95,15 @@ public class Shooter {
     }
     public void aim(double yawLimelight, Follower pose, boolean isInShootingPos){
         if(isInShootingPos) {
-            //if (turretOffset<10 &&isStable(pose)){
-                //aimWithLimelight(yawLimelight);
-                //if(poseCorrector.shouldReset(pose, getTargetAngle(pose))){
-                //    poseCorrector.correctPose(pose, getTurretAngle(), goalPose);
-                //}
-            //}else{
-        aimWithOdometry(pose);
-            //}
 
-//            if (var[0] < 10)
-//                aimWithLimelight(yawLimelight);
-//            else {
-//                aimWithOdometry(yawOdometry);
-//                //offset = 100;
-//            }
+        aimWithOdometry(pose);
+
         }else if(autoAim){
-            setPowerRotor(0);
-            //resetTurret();
         }
     }
 
     //Trig utilities
-    public int translateRotorToAngle(double posRotor){
-        return Math.toIntExact((long)(330*rotorR.getPosition() - 165));
-    }
-    public int getTurretAngle(){
-        return translateRotorToAngle(encoder.getCurrentPosition());
-    }
+
     public int getTargetAngle(Follower follower){
         double allianceAngle = 0;
         if(alliance == Constants.Alliance.BLUE){
@@ -156,43 +113,15 @@ public class Shooter {
         }
         return Math.toIntExact((long)allianceAngle);
     }
-
-
-    public double pid(double offset){
-        double currentTime = timer.seconds();
-        double dt = currentTime - lastTime;
-        lastTime = currentTime;
-        offset += correctOffset;
-        double derivative = 0;
-        if (dt > 0) {
-            derivative = (offset - lastError) / dt;
-        }
-        double output = (kP * offset)
-                + (kD * derivative);
-        lastError = offset;
-        if (!hold && Math.abs(offset) < 3){
-            output = 0;
-            hold = true;
-        }else if(hold && Math.abs(offset) > 5){
-            hold = false;
-        }
-        output = Math.max(-0.3, Math.min(0.3, output * VELOCITY_FACTOR));
-        return -output;
-    }
-
-
-
 //BOOL states
     public boolean isReady(){
-        return velocityOffset() < 50
-                && offset < 2;
+        return velocityOffset() < 50 && offset < 2;
     }
     public boolean isReady2(){
         return offset < 7.5 && offset > - 7.5;
     }
     public boolean canShoot(Gamepad gamepad){
-        return (velocityOffset() < 50
-                && block.getPosition() < 0.1) || gamepad.left_trigger > 0.1;
+        return (velocityOffset() < 50 && block.getPosition() < 0.1) || gamepad.left_trigger > 0.1;
     }
 
 
@@ -207,81 +136,20 @@ public class Shooter {
             shooter1.setVelocity(curTargetVelocity);
         }
     }
-    public void calm(){
-        if(velocityOffset() > 100){
-            shooter0.setPower(1);
-            shooter1.setPower(1);
-        }else {
-            shooter0.setVelocity(curTargetVelocity);
-            shooter1.setVelocity(curTargetVelocity);
-        }
-    }
     public void stop() {
         shooter0.setPower(0);
         shooter1.setPower(0);
     }
 
-
-
-
-
-//TURRET usage
-    public void resetTurret(){
-        int posR = encoder.getCurrentPosition();
-        if (posR > 3000) {
-            setPowerRotor(5);
-        } else if (posR < -3000) {
-            setPowerRotor(-5);
-        }else if(posR > 500)
-            setPowerRotor(0.2);
-        else if(posR < -500)
-            setPowerRotor(-0.2);
-        else
-            setPowerRotor(0);
-    }
-    public void moveServos(double offsetX, boolean objectDetected) {
-        int posR = encoder.getCurrentPosition();
-        if (!objectDetected) {
-            if (posR > 500) {
-                setPowerRotor(0.1);
-                return;
-            } else if (posR < -500) {
-                setPowerRotor(-0.1);
-                return;
-            }
-        }
-        if (objectDetected)
-            lastValidOffset = offsetX;
-        else
-            offsetX = lastValidOffset;
-        double power = pid(offsetX);
-        if (autoAim) {
-            setPowerRotor(power);
-        }
-        if (!reset && (posR <= LEFT_LIMIT && power > 0) ||
-                (posR >= RIGHT_LIMIT && power < 0)) {
-            rotorL.setPosition(0);
-            rotorR.setPosition(0);
-        }
-    }
     public void setPowerRotor(double power){
         int posR = encoder.getCurrentPosition();
         if (!reset && (posR <= LEFT_LIMIT && power > 0) ||
                 (posR >= RIGHT_LIMIT && power < 0)) {
-            stopTurret();
         }else{
             rotorL.setPosition(power);
             rotorR.setPosition(power);
         }
     }
-
-    public void stopTurret(){
-        //rotorL.setPower(0);
-        //rotorR.setPower(0);
-    }
-
-
-
 //BLOCK usage
     public double getBlockPos() {
         return block.getPosition();
@@ -292,14 +160,6 @@ public class Shooter {
     public void openBlock(){
         block.setPosition(0);
     }
-    public void switchBlock(){
-        if (block.getPosition()>0.8){
-            block.setPosition(0);
-        }else{block.setPosition(1);}
-    }
-
-
-
 
 //COVER usage
     public void adjustCover(double dist){
@@ -318,10 +178,6 @@ public class Shooter {
             adjustCover(pos);
         }
     }
-
-
-
-
 
     public double velocityOffset(){
         return curTargetVelocity - Math.max(shooter1.getVelocity(), shooter0.getVelocity());
@@ -358,9 +214,7 @@ public class Shooter {
     }
     public void TeleOp(Gamepad gamepad1, Gamepad gamepad2, Telemetry telemetry,
                        double yawAngleLimeLight, Follower follower , boolean isFull, boolean isInshootPos){
-        if(gamepad1.left_bumper)
-            stopTurret();
-        else
+        if(!gamepad1.left_bumper)
             aim(yawAngleLimeLight,follower,isInshootPos);
         preload();
         adjustVelAndCover(follower);
