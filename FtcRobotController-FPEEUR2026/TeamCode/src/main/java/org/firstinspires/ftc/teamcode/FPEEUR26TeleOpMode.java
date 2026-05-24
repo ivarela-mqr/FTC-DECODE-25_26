@@ -62,12 +62,13 @@ public class FPEEUR26TeleOpMode extends OpMode {
         }
 
         if(isInShootZone){
-            gamepad1.rumble(10);
+            gamepad1.rumble(1000);
         }
 
         telemetry.addData("Shooter Vel",shooter.shooter0.getVelocity());
         telemetry.addData("Pos hood",shooter.coverR.getPosition());
-
+        telemetry.addData("Angle shooter",shooter.getTurretAngle());
+        telemetry.addData("Intake state",intakeStateMachine.state);
         telemetry.update();
 
     }

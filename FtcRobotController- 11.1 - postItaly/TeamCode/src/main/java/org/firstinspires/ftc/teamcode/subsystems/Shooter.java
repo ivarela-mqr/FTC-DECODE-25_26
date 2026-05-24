@@ -370,10 +370,10 @@ public class Shooter {
             reset = true;
         if (gamepad2.dpad_left){
             alliance = Constants.Alliance.BLUE;
-            goalPose = new Pose(7,137);
+            goalPose = new Pose(2, 142);
         }else if(gamepad2.dpad_right){
             alliance = Constants.Alliance.RED;
-            goalPose = new Pose(137,137);
+            goalPose = new Pose(141, 137);
         }
 
 

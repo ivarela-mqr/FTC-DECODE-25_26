@@ -108,7 +108,7 @@ public class ShootingStateMachine {
         switch (state){
             case INIT:
                 shooter.closeBlock();
-                shooter.calm();
+                shooter.preload();
                 if(isInShootingPos) {
                     shooter.preload();
                     switchState(States.LOADING);
@@ -132,7 +132,7 @@ public class ShootingStateMachine {
                 break;
             case INTAKING:
                 shooter.closeBlock();
-                shooter.calm();
+                shooter.preload();
                 if(!intakeAutoStateMachine.isBusy() )
                     switchState(States.INIT);
                 break;

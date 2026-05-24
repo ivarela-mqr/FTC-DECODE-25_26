@@ -6,6 +6,7 @@ import com.pedropathing.math.Vector;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
@@ -18,7 +19,7 @@ import org.firstinspires.ftc.teamcode.util.Debouncer;
 import org.opencv.core.Mat;
 
 public class Shooter {
-    public  DcMotorEx shooter0, shooter1, encoder;
+    public  DcMotorEx shooter0, shooter1;
     public Servo coverL, coverR, block, rotorL, rotorR;
     //public LimeLight limeLight;
     int LEFT_LIMIT = -20000;
@@ -40,30 +41,32 @@ public class Shooter {
     double lastError = 0;
     double lastTime = 0;
     Constants.Alliance alliance;
-    public Pose goalPose;
+    public Pose goalPose,distancePose;
     //public PoseCorrector poseCorrector;
     public boolean hold = true, reset = false;
 
     public Shooter (HardwareMap hardwareMap, Constants.Alliance alliance, double targetVel){
         shooter0 = hardwareMap.get(DcMotorEx.class,"shooter0");
         shooter1 = hardwareMap.get(DcMotorEx.class,"shooter1");
-        encoder = hardwareMap.get(DcMotorEx.class, "intake");
         rotorL = hardwareMap.get(Servo.class,"rotorL");
         rotorR = hardwareMap.get(Servo.class,"rotorR");
         coverL = hardwareMap.get(Servo.class,"coverL");
         coverR = hardwareMap.get(Servo.class,"coverR");
         block = hardwareMap.get(Servo.class, "block");
+        shooter0.setDirection(DcMotorSimple.Direction.REVERSE);
+        shooter1.setDirection(DcMotorSimple.Direction.REVERSE);
         shooter0.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, coefficients);
         shooter1.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, coefficients);
-        encoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        encoder.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         coverL.setDirection(Servo.Direction.REVERSE);
         this.alliance = alliance;
         //limeLight = new LimeLight(hardwareMap, alliance);
-        if(alliance == Constants.Alliance.BLUE)
-            goalPose = new Pose(3,130);
-        else
-            goalPose = new Pose(141,137);
+        if(alliance == Constants.Alliance.BLUE) {
+            goalPose = new Pose(2, 142);
+            distancePose = new Pose(0,144);
+        }else {
+            goalPose = new Pose(141, 137);
+            distancePose = new Pose(144,144);
+        }
         curTargetVelocity = targetVel;
 
         timer.reset();
@@ -89,8 +92,8 @@ public class Shooter {
             targetAngle = relativeGoal + 180;
         }
 
-        rotorR.setPosition(0.003030303*targetAngle + 0.5);
-        rotorL.setPosition(0.003030303*targetAngle + 0.5);
+        rotorR.setPosition(0.003333333*targetAngle + 0.5);
+        rotorL.setPosition(0.003333333*targetAngle + 0.5);
 
     }
     public void aim(double yawLimelight, Follower pose, boolean isInShootingPos){
@@ -105,7 +108,11 @@ public class Shooter {
     //Trig utilities
 
     public int getTargetAngle(Follower follower){
-        double allianceAngle = 0;
+        double allianceAngle;
+        /*if(follower.getPose().getY() > 80)
+            goalPose = goalPose.withY(135);
+        else
+            goalPose = goalPose.withY(142);*/
         if(alliance == Constants.Alliance.BLUE){
             allianceAngle = 180 - Math.toDegrees(Math.atan((goalPose.getY() - follower.getPose().getY())/(follower.getPose().getX() - goalPose.getX())));
         }else{
@@ -140,15 +147,12 @@ public class Shooter {
         shooter0.setPower(0);
         shooter1.setPower(0);
     }
+    public int getTurretAngle(){
+        return Math.toIntExact((long)(300*rotorR.getPosition() - 150));
+    }
 
     public void setPowerRotor(double power){
-        int posR = encoder.getCurrentPosition();
-        if (!reset && (posR <= LEFT_LIMIT && power > 0) ||
-                (posR >= RIGHT_LIMIT && power < 0)) {
-        }else{
-            rotorL.setPosition(power);
-            rotorR.setPosition(power);
-        }
+       return;
     }
 //BLOCK usage
     public double getBlockPos() {
@@ -175,7 +179,7 @@ public class Shooter {
         if(distance > 0 && teleOp && autoAim){
             double pos = 0.5042418 + 0.0003379807*distance - 0.00005000763*Math.pow(distance,2) + 1.815475e-7*Math.pow(distance,3);
             curTargetVelocity = 1967.261 - 25.41657*distance + 0.3601524*Math.pow(distance,2) - 0.001263507*Math.pow(distance,3);
-            adjustCover(pos);
+            adjustCover(1 - pos);
         }
     }
 
@@ -187,7 +191,7 @@ public class Shooter {
 
     //Follower utilities
     public double getDistanceInches (Follower follower){
-        return (follower.getPose().distanceFrom(goalPose));
+        return (follower.getPose().distanceFrom(distancePose));
     }
     public boolean isStable(Follower follower) {
 
@@ -226,8 +230,6 @@ public class Shooter {
         if (gamepad2.share){
             autoAim = true;
             reset = false;
-            encoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            encoder.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         }
         if(gamepad2.options)
             reset = true;
@@ -263,9 +265,7 @@ public class Shooter {
             correctCover(1);
 
 
-        telemetry.addData("velocity shooter",shooter0.getVelocity());
-        telemetry.addData("curTargetVelocity",curTargetVelocity);
-        telemetry.addData("cover pos", coverR.getPosition());
+
 
 
         //Pose posLimelight = limeLight.getRawVisionPose();

@@ -147,10 +147,6 @@ public class DriveTrain {
         telemetry.addData("X", follower.getPose().getX());
         telemetry.addData("Y", follower.getPose().getY());
         telemetry.addData("Heading",Math.toDegrees(follower.getPose().getHeading()));
-
-        telemetry.addData("X previous", lastPose.getX());
-        telemetry.addData("Y previous", lastPose.getY());
-        telemetry.addData("Heading previous",Math.toDegrees(lastPose.getHeading()));
         return yawAngle;
     }
 

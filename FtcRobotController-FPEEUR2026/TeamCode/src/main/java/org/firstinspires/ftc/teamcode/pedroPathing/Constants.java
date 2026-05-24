@@ -18,7 +18,7 @@ public class Constants {
 
     public static FollowerConstants followerConstants = new FollowerConstants()
             .mass(10)
-            .predictiveBrakingCoefficients(new PredictiveBrakingCoefficients(0.1, 0.056648593064809884, 0.0016755211791537532));
+            .predictiveBrakingCoefficients(new PredictiveBrakingCoefficients(0.1, 0.109150350418677, 0.0008027020017785));
 
     public static MecanumConstants driveConstants = new MecanumConstants()
             .maxPower(1)
@@ -30,8 +30,8 @@ public class Constants {
             .leftRearMotorDirection(DcMotorSimple.Direction.REVERSE)
             .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
             .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD)
-            .xVelocity(68.09)
-            .yVelocity(80.4267)
+            .xVelocity(56.91)
+            .yVelocity(57.16)
             .useBrakeModeInTeleOp(true);
 
     public static PathConstraints pathConstraints = new PathConstraints(0.7, 60, 1, 1);

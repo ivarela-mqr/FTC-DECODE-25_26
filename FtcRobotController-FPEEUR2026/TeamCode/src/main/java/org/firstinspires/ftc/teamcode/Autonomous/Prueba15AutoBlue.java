@@ -7,6 +7,7 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
+import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
@@ -21,6 +22,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.Zone;
+import org.firstinspires.ftc.teamcode.util.IntakeStateMachineStates;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
 @Autonomous(name = "Prueba15AutoBlue", group = "Autonomous")
@@ -33,14 +35,13 @@ public class Prueba15AutoBlue extends OpMode {
     private Paths paths; // Paths defined in the Paths class
     IMU imu;
     YawPitchRollAngles orientation;
-    //ShootingStateMachine shootingStateMachine = new ShootingStateMachine();
+    ShootingStateMachine shootingStateMachine = new ShootingStateMachine();
     boolean shootsTriggered = false;
     int ticks = 0;
     Timer stateTimer = new Timer();
     Timer actualTimer = new Timer();
     int numOpen = 0;
-    DcMotor intake;
-    DcMotorEx transfer;
+    IntakeAutoStateMachine intakeAutoStateMachine = new IntakeAutoStateMachine();
 
     Zone zone;
     @Override
@@ -51,14 +52,8 @@ public class Prueba15AutoBlue extends OpMode {
         follower.setStartingPose(new Pose(15.000, 116.188, Math.toRadians(180)));
 
         paths = new Paths(follower); // Build paths
-
-
-        intake = hardwareMap.get(DcMotor.class, "intake");
-        transfer = hardwareMap.get(DcMotorEx.class, "transfer");
-
-        intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        transfer.setDirection(DcMotorSimple.Direction.REVERSE);
-        transfer.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        shootingStateMachine.init(hardwareMap, org.firstinspires.ftc.teamcode.util.Constants.Alliance.BLUE,
+                1600,IntakeStateMachineStates.FINAL,new Pose(60, 84));
         pathState = PathState.DRIVE_STARTPOS_SHOOT_POS;
 
 
@@ -81,8 +76,9 @@ public class Prueba15AutoBlue extends OpMode {
         double yawAngle = orientation.getYaw(AngleUnit.DEGREES);
         follower.update(); // Update Pedro Pathing
         Pose pose = pathState == PathState.SHOOT_PRELOAD ? follower.getPose() : new Pose();
-
-        autonomousPathUpdate(); // Update autonomous state machine
+        shootingStateMachine.update(pose,telemetry,yawAngle,follower
+                ,pathState != PathState.SHOOT_PRELOAD,zone.isRobotInZone(follower.getPose()));
+        autonomousPathUpdate();
         // Log values to Panels and Driver Station
         //panelsTelemetry.debug("Last state",lastPathState);
         //panelsTelemetry.debug("Path State", pathState);
@@ -173,22 +169,46 @@ public class Prueba15AutoBlue extends OpMode {
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(155), Math.toRadians(230))
                     .build();
+            goTakeFirst = follower.pathBuilder()
+                    .addPath(
+                            new BezierLine(
+                                    new Pose(60, 84),
+                                    new Pose(45,87)
+                            )
+                    )
+                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
+                    .addPath(
+                            new BezierLine(
+                                    new Pose(45, 87),
+                                    new Pose(13,87)
+                            )
+                    )
+                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
+                    .build();
+
+            goShotFirst = follower.pathBuilder()
+                    .addPath(
+                            new BezierLine(
+                                    new Pose(13, 87),
+                                    new Pose(60,84)
+                            )
+                    )
+                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(230))
+                    .build();
 
         }
     }
 
 
     public void autonomousPathUpdate() {
-        intake.setPower(1);
-        transfer.setPower(1);
-        actualTimer.resetTimer();
         switch (pathState){
             case DRIVE_STARTPOS_SHOOT_POS:
                 follower.followPath(paths.goShotLoaded,1,true);
+                shootingStateMachine.shooter.adjustCover(0.7);
                 setPathState(PathState.SHOOT_PRELOAD);
                 break;
             case SHOOT_PRELOAD:
-                if(!follower.isBusy()) {
+                if(!follower.isBusy() && !shootingStateMachine.isBusy()) {
                      if (lastPathState == PathState.TAKE_SECOND) {
                         follower.followPath(paths.goTakeOpen,1,true);
                         setPathState(PathState.TAKE_OPEN);
@@ -196,12 +216,14 @@ public class Prueba15AutoBlue extends OpMode {
                         follower.followPath(paths.goTakeOpen,1,true);
                         setPathState(PathState.TAKE_OPEN);
                     } else if (lastPathState == PathState.TAKE_OPEN && numOpen == 3) {
-                        //follower.followPath(paths.goTakeFirst,1,true);
-                        setPathState(PathState.END);
+                        follower.followPath(paths.goTakeFirst,1,true);
+                        setPathState(PathState.TAKE_FIRST);
                     } else if(lastPathState == PathState.DRIVE_STARTPOS_SHOOT_POS){
                         follower.followPath(paths.goTakeSecond1,1,true);
                         setPathState(PathState.TAKE_SECOND);
-                    }
+                    }else if(lastPathState == PathState.TAKE_FIRST){
+                         setPathState(PathState.END);
+                     }
                 }
                 break;
 
