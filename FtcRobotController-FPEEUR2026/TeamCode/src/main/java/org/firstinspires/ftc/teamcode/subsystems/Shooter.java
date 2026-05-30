@@ -86,16 +86,14 @@ public class Shooter {
             targetAngle = relativeGoal + 180;
         }
 
-        rotorR.setPosition(0.003333333*targetAngle + 0.5);
-        rotorL.setPosition(0.003333333*targetAngle + 0.5);
+        setPosRotor(0.0030303030303*targetAngle + 0.5);
+
 
     }
     public void aim(double yawLimelight, Follower pose, boolean isInShootingPos){
         if(isInShootingPos) {
+            aimWithOdometry(pose);
 
-        aimWithOdometry(pose);
-
-        }else if(autoAim){
         }
     }
 
@@ -246,6 +244,10 @@ public class Shooter {
             correctCover(1);
 
 
+        telemetry.addData("isInshootPos",isInshootPos);
+        telemetry.addData("autoAim",autoAim);
+        telemetry.addData("targetAngle",getTargetAngle(follower));
+        telemetry.addData("angle",getTurretAngle());
 
 
 
