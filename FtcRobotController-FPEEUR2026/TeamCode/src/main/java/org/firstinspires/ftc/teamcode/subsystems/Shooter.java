@@ -2,9 +2,7 @@ package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
-import com.pedropathing.math.Vector;
 import com.pedropathing.util.Timer;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
@@ -16,7 +14,6 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.util.Constants;
 import org.firstinspires.ftc.teamcode.util.Debouncer;
-import org.opencv.core.Mat;
 
 public class Shooter {
     public  DcMotorEx shooter0, shooter1;
@@ -31,15 +28,11 @@ public class Shooter {
     public boolean autoAim = true, teleOp = false;
     public Debouncer debouncer = new Debouncer(200);
     public Debouncer velDebouncer = new Debouncer(200);
-    public Debouncer blockDebouncer = new Debouncer(500);
     PIDFCoefficients coefficients = new PIDFCoefficients(22, 0, 1.7, 15);
-    private double lastValidOffset = 0;
-    public boolean stop = false;
+
     private final ElapsedTime timer = new ElapsedTime();
-    public double kP = 0.35;
-    public double kD = 0.05;
-    double lastError = 0;
-    double lastTime = 0;
+
+
     Constants.Alliance alliance;
     public Pose goalPose,distancePose;
     //public PoseCorrector poseCorrector;
@@ -57,6 +50,7 @@ public class Shooter {
         shooter1.setDirection(DcMotorSimple.Direction.REVERSE);
         shooter0.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, coefficients);
         shooter1.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, coefficients);
+
         coverL.setDirection(Servo.Direction.REVERSE);
         this.alliance = alliance;
         //limeLight = new LimeLight(hardwareMap, alliance);
@@ -80,7 +74,7 @@ public class Shooter {
         double targetAngle = 0; //target shooter relative to bot
         double relativeGoal = allianceAngle - Math.toDegrees(follower.getHeading()); //goal relative to bot
         if((relativeGoal > 330 || relativeGoal < 30) && teleOp) {
-            setPowerRotor(0);
+            setPosRotor(0);
             return;
         }
         if(relativeGoal > 180){
@@ -108,11 +102,7 @@ public class Shooter {
     //Trig utilities
 
     public int getTargetAngle(Follower follower){
-        double allianceAngle;
-        /*if(follower.getPose().getY() > 80)
-            goalPose = goalPose.withY(135);
-        else
-            goalPose = goalPose.withY(142);*/
+        double allianceAngle = 0;
         if(alliance == Constants.Alliance.BLUE){
             allianceAngle = 180 - Math.toDegrees(Math.atan((goalPose.getY() - follower.getPose().getY())/(follower.getPose().getX() - goalPose.getX())));
         }else{
@@ -151,9 +141,16 @@ public class Shooter {
         return Math.toIntExact((long)(300*rotorR.getPosition() - 150));
     }
 
-    public void setPowerRotor(double power){
-       return;
+    public void setPosRotor(double pos){
+        rotorL.setPosition(pos);
+        rotorR.setPosition(pos);
     }
+    public void correctRotor(double x){
+        double newPose = rotorL.getPosition() + x;
+        rotorL.setPosition(newPose);
+        rotorR.setPosition(newPose);
+    }
+
 //BLOCK usage
     public double getBlockPos() {
         return block.getPosition();
@@ -193,22 +190,6 @@ public class Shooter {
     public double getDistanceInches (Follower follower){
         return (follower.getPose().distanceFrom(distancePose));
     }
-    public boolean isStable(Follower follower) {
-
-        Vector vel = follower.getVelocity();
-
-        double linearVel = Math.sqrt(Math.pow(vel.getXComponent(),2) + Math.pow(vel.getYComponent(),2));
-        double angularVel = follower.getAngularVelocity();
-
-        Vector accel = follower.getAcceleration();
-        double linearAccel = Math.sqrt(Math.pow(accel.getXComponent(),2) + Math.pow(accel.getYComponent(),2));
-
-        boolean lowLinear = linearVel < 3.0; // in/s
-        boolean lowAngular = Math.abs(angularVel) < Math.toRadians(10);
-        boolean lowAccel = linearAccel < 10.0; // in/s^2
-
-        return lowLinear && lowAngular && lowAccel;
-    }
 
 
     public void startTeleop(){
@@ -230,6 +211,7 @@ public class Shooter {
         if (gamepad2.share){
             autoAim = true;
             reset = false;
+
         }
         if(gamepad2.options)
             reset = true;
@@ -246,12 +228,11 @@ public class Shooter {
 
         if (gamepad2.left_trigger > 0.1){
             autoAim = false;
-            setPowerRotor(10);
+            correctRotor(0.05);
         }else if (gamepad2.right_trigger > 0.1) {
             autoAim = false;
-            setPowerRotor(-10);
+            correctRotor(-0.05);
         } else if (!autoAim){
-            setPowerRotor(0);
             autoAim = false;
         }
 
