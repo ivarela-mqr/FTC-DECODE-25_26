@@ -86,7 +86,7 @@ public class Shooter {
             targetAngle = relativeGoal + 180;
         }
 
-        setPosRotor(0.004*targetAngle + 0.5);
+        setPosRotor(0.004105*targetAngle + 0.5);
 
 
     }

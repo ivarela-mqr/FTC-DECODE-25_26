@@ -98,7 +98,7 @@ public class ShootingStateMachine {
         this.shootingPose = shootingPose;
     }
 
-    public void update(Pose pose, Telemetry telemetry, double yawAngleLimeLight, Follower follower, boolean isBussyFollower,
+    public void update(Pose pose, Telemetry telemetry, double yawAngleLimeLight, Follower follower, boolean isBusyFollower,
                        boolean insideTriangle){
         isInShootingPos = canShoot(pose);
         //shooter.aimWithLimelight(yawAngleLimeLight);
@@ -115,7 +115,7 @@ public class ShootingStateMachine {
                 }
                 break;
             case LOADING:
-                if(shooter.isReady() && !isBussyFollower
+                if(shooter.isReady() && !isBusyFollower
                     && Math.abs(timer.getElapsedTimeSeconds() - actualTime.getElapsedTimeSeconds())> 0.5) {
                     switchState(States.SHOOTING);
                 } else
@@ -123,7 +123,7 @@ public class ShootingStateMachine {
                 break;
             case SHOOTING:
                 shooter.openBlock();
-                if(shooter.getBlockPos() <= 0.5 && !isBussyFollower)
+                if(shooter.getBlockPos() <= 0.5 && !isBusyFollower)
                     canShoot = true;
                 if(Math.abs(timer.getElapsedTimeSeconds() - actualTime.getElapsedTimeSeconds())> 0.5){
                     canShoot = false;

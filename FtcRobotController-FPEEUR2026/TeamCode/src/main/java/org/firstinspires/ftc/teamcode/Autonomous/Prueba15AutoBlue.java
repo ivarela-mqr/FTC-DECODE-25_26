@@ -37,6 +37,7 @@ public class Prueba15AutoBlue extends OpMode {
     Timer stateTimer = new Timer();
     Timer actualTimer = new Timer();
     int numOpen = 0;
+    int objNumOpen = 3;
     IntakeAutoStateMachine intakeAutoStateMachine = new IntakeAutoStateMachine();
 
     Zone zone;
@@ -76,16 +77,7 @@ public class Prueba15AutoBlue extends OpMode {
                 ,pathState != PathState.SHOOT_PRELOAD,zone.isRobotInZone(follower.getPose()));
         autonomousPathUpdate();
         // Log values to Panels and Driver Station
-        //panelsTelemetry.debug("Last state",lastPathState);
-        //panelsTelemetry.debug("Path State", pathState);
-        //panelsTelemetry.debug("Shooter state",shootingStateMachine.state);
-        //panelsTelemetry.debug("Intake state",shootingStateMachine.intakeAutoStateMachine.state);
-        //panelsTelemetry.debug("Is aiming auto", shootingStateMachine.shooter.autoAim);
-        //panelsTelemetry.debug("Rotors power", shootingStateMachine.shooter.rotorL.getPower());
-        //panelsTelemetry.debug("Shooter velocity", shootingStateMachine.shooter.shooter0.getVelocity());
-        //panelsTelemetry.debug("Shooter velocity", shootingStateMachine.shooter.shooter1.getVelocity());
-        //panelsTelemetry.debug("Ticks", ticks);
-        //panelsTelemetry.debug("Is bussy", pathState != PathState.SHOOT_PRELOAD);
+
         PoseStorage.update(follower.getPose(), org.firstinspires.ftc.teamcode.util.Constants.Alliance.BLUE);
         //panelsTelemetry.debug("Can shoot",shootingStateMachine.canShoot(pose));
         panelsTelemetry.debug("X", follower.getPose().getX());
@@ -103,12 +95,7 @@ public class Prueba15AutoBlue extends OpMode {
         public PathChain goTakeSecond;
         public PathChain goTakeOpen;
         public PathChain goShootSecond;
-        public PathChain goTakeThird1;
-        public PathChain goTakeThird2;
-        public PathChain goShootThird;
         public PathChain finalPath;
-        public PathChain goOpen1;
-        public PathChain goOpen2;
         public PathChain goShootOpen;
 
         public Paths(Follower follower) {
@@ -127,17 +114,16 @@ public class Prueba15AutoBlue extends OpMode {
                             new BezierCurve(
                                     new Pose(60.000, 84.000),
                                     new Pose(48.855, 56.176),
-                                    new Pose(5.500, 62.000)
+                                    new Pose(0, 61.000)
                             )
                     )
-                    //.setLinearHeadingInterpolation(Math.toRadians(230), Math.toRadians(180))
                     .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
                     .build();
 
             goShootSecond = follower.pathBuilder()
                     .addPath(
                             new BezierCurve(
-                                    new Pose(5.500, 62.000),
+                                    new Pose(0, 61.000),
                                     new Pose(48.855, 56.176),
                                     new Pose(60.000, 84.000)
                             )
@@ -150,34 +136,34 @@ public class Prueba15AutoBlue extends OpMode {
                             new BezierCurve(
                                     new Pose(60.000, 84.000),
                                     new Pose(48.855, 56.176),
-                                    new Pose(9, 66.00)
+                                    new Pose(9, 71)
                             )
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(230), Math.toRadians(150))
+                    .setLinearHeadingInterpolation(Math.toRadians(230), Math.toRadians(160))
                     .build();
 
             goShootOpen = follower.pathBuilder()
                     .addPath(
                             new BezierCurve(
-                                    new Pose(10.500, 62.00),
+                                    new Pose(9, 71),
                                     new Pose(48.855, 56.176),
                                     new Pose(60.000, 84.000)
                             )
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(150), Math.toRadians(230))
+                    .setLinearHeadingInterpolation(Math.toRadians(160), Math.toRadians(230))
                     .build();
             goTakeFirst = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
                                     new Pose(60, 84),
-                                    new Pose(45,84)
+                                    new Pose(45,82)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
                     .addPath(
                             new BezierLine(
-                                    new Pose(45, 84),
-                                    new Pose(13,84)
+                                    new Pose(45, 82),
+                                    new Pose(13,82)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
@@ -186,13 +172,21 @@ public class Prueba15AutoBlue extends OpMode {
             goShootFirst = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(13, 84),
+                                    new Pose(13, 82),
                                     new Pose(60,84)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(230))
                     .build();
-
+            finalPath = follower.pathBuilder()
+                    .addPath(
+                            new BezierLine(
+                                    new Pose(60,84),
+                                    new Pose(16, 66)
+                            )
+                    )
+                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
+                    .build();
         }
     }
 
@@ -207,19 +201,20 @@ public class Prueba15AutoBlue extends OpMode {
                 break;
             case SHOOT_PRELOAD:
                 if(!follower.isBusy() && !shootingStateMachine.isBusy()) {
-                     if (lastPathState == PathState.TAKE_SECOND) {
-                        follower.followPath(paths.goTakeOpen,0.6,true);
-                        setPathState(PathState.TAKE_OPEN);
-                    } else if (lastPathState == PathState.TAKE_OPEN && numOpen < 3) {
-                        follower.followPath(paths.goTakeOpen,0.6,true);
-                        setPathState(PathState.TAKE_OPEN);
-                    } else if (lastPathState == PathState.TAKE_OPEN && numOpen == 3) {
-                        follower.followPath(paths.goTakeFirst,0.6,true);
-                        setPathState(PathState.TAKE_FIRST);
-                    } else if(lastPathState == PathState.DRIVE_STARTPOS_SHOOT_POS){
-                        follower.followPath(paths.goTakeSecond,0.6,true);
-                        setPathState(PathState.TAKE_SECOND);
+                     if (lastPathState == PathState.DRIVE_STARTPOS_SHOOT_POS){
+                         follower.followPath(paths.goTakeSecond,0.6,true);
+                         setPathState(PathState.TAKE_SECOND);
+                    } else if (lastPathState == PathState.TAKE_SECOND) {
+                             follower.followPath(paths.goTakeOpen,0.6,true);
+                             setPathState(PathState.TAKE_OPEN);
+                    } else if (lastPathState == PathState.TAKE_OPEN && numOpen < objNumOpen) {
+                             follower.followPath(paths.goTakeOpen,0.6,true);
+                             setPathState(PathState.TAKE_OPEN);
+                    } else if(lastPathState == PathState.TAKE_OPEN && numOpen == objNumOpen) {
+                             follower.followPath(paths.goTakeFirst,0.7,true);
+                             setPathState(PathState.TAKE_FIRST);
                     }else if(lastPathState == PathState.TAKE_FIRST){
+                         follower.followPath(paths.finalPath,0.7,true);
                          setPathState(PathState.END);
                      }
                 }
@@ -227,7 +222,7 @@ public class Prueba15AutoBlue extends OpMode {
 
             case TAKE_OPEN:
                 if(!follower.isBusy() &&
-                        Math.abs(actualTimer.getElapsedTimeSeconds() - stateTimer.getElapsedTimeSeconds()) > 3.5){
+                        Math.abs(actualTimer.getElapsedTimeSeconds() - stateTimer.getElapsedTimeSeconds()) > 3.6){
                     follower.followPath(paths.goShootOpen,1,true);
                     numOpen ++;
                     setPathState(PathState.SHOOT_PRELOAD);
@@ -247,27 +242,8 @@ public class Prueba15AutoBlue extends OpMode {
                     }
                 }
                 break;
-            case TAKE_THIRD:
-                if(!follower.isBusy()) {
-                    if (lastPathState == PathState.SHOOT_PRELOAD) {
-                        follower.followPath(paths.goShootThird,1,true);
-                        setPathState(PathState.SHOOT_PRELOAD);
-                    }
-                }
-                break;
-            case OPEN_BLOCK:
-                if(!follower.isBusy()){
-                    if(lastPathState == PathState.TAKE_SECOND) {
-                        follower.followPath(paths.goOpen2,0.5,true);
-                        setPathState(PathState.OPEN_BLOCK);
-                    }else if(lastPathState == PathState.OPEN_BLOCK &&
-                            Math.abs(actualTimer.getElapsedTimeSeconds() - stateTimer.getElapsedTimeSeconds()) > 1.5){
-                        follower.followPath(paths.goShootSecond,1, true);
-                        setPathState(PathState.SHOOT_PRELOAD);
-                    }
-                }
-                break;
             case END:
+
                 break;
             default:
                 break;
