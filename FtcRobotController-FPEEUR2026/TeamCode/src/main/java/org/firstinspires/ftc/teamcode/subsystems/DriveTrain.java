@@ -14,6 +14,7 @@ import com.qualcomm.robotcore.hardware.IMU;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.util.Constants;
+import org.firstinspires.ftc.teamcode.util.PoseCorrector;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
 
@@ -63,14 +64,7 @@ public class DriveTrain {
         poseCorrector = new PoseCorrector(new LimeLight(hardwareMap,alliance),alliance);
         follower = createFollower(hardwareMap);
         follower.startTeleOpDrive(true);
-        if (PoseStorage.currentPose != null) {
-            follower.setPose(PoseStorage.currentPose);
-            //follower.setStartingPose(PoseStorage.currentPose);
-            yawOffset = PoseStorage.currentPose.getHeading() > 0 ? 180 : -180;
-        }else{
-            follower.setPose(new Pose(8.5, 7.75, Math.toRadians(180)));
-            yawOffset = 180;
-        }
+
         if (alliance == Constants.Alliance.BLUE){
             headingReset = 180;
             resetPose = new Pose(
@@ -87,6 +81,16 @@ public class DriveTrain {
             );
             yawOffset = 0;
         }
+
+        if (PoseStorage.currentPose != null) {
+            follower.setPose(PoseStorage.currentPose);
+            //follower.setStartingPose(PoseStorage.currentPose);
+            yawOffset = PoseStorage.currentPose.getHeading() > 0 ? 180 : -180;
+        }else{
+            follower.setPose(resetPose);
+            yawOffset = 180;
+        }
+
         double radius = Math.hypot(15.5, 17.5) / 2;
         farZone = new Zone(new Zone.Point(72,24), new Zone.Point(96,0),new Zone.Point(48,0), radius);
         nearZone = new Zone(new Zone.Point(72,72), new Zone.Point(0,144),new Zone.Point(144,144), radius);

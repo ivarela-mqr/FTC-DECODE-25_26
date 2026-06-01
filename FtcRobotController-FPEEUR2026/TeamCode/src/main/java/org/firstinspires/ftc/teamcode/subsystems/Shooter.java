@@ -86,7 +86,7 @@ public class Shooter {
             targetAngle = relativeGoal + 180;
         }
 
-        setPosRotor(0.0030303030303*targetAngle + 0.5);
+        setPosRotor(0.004*targetAngle + 0.5);
 
 
     }
@@ -250,6 +250,7 @@ public class Shooter {
         telemetry.addData("angle",getTurretAngle());
 
 
+        telemetry.addData("currRotPos", rotorL.getPosition());
 
         //Pose posLimelight = limeLight.getRawVisionPose();
         /*if(posLimelight != null){
