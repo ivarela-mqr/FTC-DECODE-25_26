@@ -31,7 +31,7 @@ public class Shooter {
     PIDFCoefficients coefficients = new PIDFCoefficients(22, 0, 1.7, 15);
 
     private final ElapsedTime timer = new ElapsedTime();
-
+    double targetAngle = 0;
 
     Constants.Alliance alliance;
     public Pose goalPose,distancePose;
@@ -71,7 +71,7 @@ public class Shooter {
 
     public void aimWithOdometry(Follower follower){
         double allianceAngle = getTargetAngle(follower);//goal relative to field
-        double targetAngle = 0; //target shooter relative to bot
+        //double targetAngle = 0; //target shooter relative to bot
         double relativeGoal = allianceAngle - Math.toDegrees(follower.getHeading()); //goal relative to bot
         if((relativeGoal > 330 || relativeGoal < 30) && teleOp) {
             setPosRotor(0);
@@ -86,7 +86,7 @@ public class Shooter {
             targetAngle = relativeGoal + 180;
         }
 
-        setPosRotor(0.004105*targetAngle + 0.5);
+        setPosRotor(0.00405*targetAngle + 0.5);
 
 
     }
@@ -110,7 +110,7 @@ public class Shooter {
     }
 //BOOL states
     public boolean isReady(){
-        return velocityOffset() < 50 && offset < 2;
+        return velocityOffset() < 50 && offset < 5;
     }
     public boolean isReady2(){
         return offset < 7.5 && offset > - 7.5;
@@ -244,13 +244,13 @@ public class Shooter {
             correctCover(1);
 
 
-        telemetry.addData("isInshootPos",isInshootPos);
-        telemetry.addData("autoAim",autoAim);
-        telemetry.addData("targetAngle",getTargetAngle(follower));
-        telemetry.addData("angle",getTurretAngle());
+        //telemetry.addData("isInshootPos",isInshootPos);
+        //telemetry.addData("autoAim",autoAim);
+        //telemetry.addData("targetAngle",getTargetAngle(follower));
+        //telemetry.addData("angle",getTurretAngle());
 
 
-        telemetry.addData("currRotPos", rotorL.getPosition());
+        //telemetry.addData("currRotPos", rotorL.getPosition());
 
         //Pose posLimelight = limeLight.getRawVisionPose();
         /*if(posLimelight != null){

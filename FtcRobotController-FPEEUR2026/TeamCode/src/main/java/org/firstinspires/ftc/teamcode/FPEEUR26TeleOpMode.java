@@ -5,6 +5,7 @@ import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.subsystems.IntakeStateMachine;
 import org.firstinspires.ftc.teamcode.util.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.DriveTrain;
@@ -46,12 +47,12 @@ public class FPEEUR26TeleOpMode extends OpMode {
         double yawAngle = driveTrain.TeleOp(gamepad1,telemetry,Math.toRadians(shooter.getTurretAngle()),
                 shooter.goalPose);
 
-        boolean isInShootZone = driveTrain.isInShootZone();
+        //boolean isInShootZone = driveTrain.isInShootZone();
 
         intakeStateMachine.TeleOp((shooter.canShoot(gamepad1) && gamepad1.right_trigger > 0.1),
                                     gamepad1, gamepad2);
         shooter.TeleOp(gamepad1, gamepad2, telemetry, yawAngle, driveTrain.follower,
-                                    intakeStateMachine.isFull(),isInShootZone);
+                                    intakeStateMachine.isFull(),true);
         //tilt.Teleop(gamepad1);
 
         actualTimer.resetTimer();
@@ -61,14 +62,16 @@ public class FPEEUR26TeleOpMode extends OpMode {
             gamepad2.rumble(2000);
         }
 
-        if(isInShootZone){
+        /*if(isInShootZone){
             gamepad1.rumble(1000);
-        }
+        }*/
 
-        telemetry.addData("Shooter Vel",shooter.shooter0.getVelocity());
-        telemetry.addData("Pos hood",shooter.coverR.getPosition());
-        telemetry.addData("Angle shooter",shooter.getTurretAngle());
-        telemetry.addData("Intake state",intakeStateMachine.state);
+        //telemetry.addData("Shooter Vel",shooter.shooter0.getVelocity());
+        //telemetry.addData("Pos hood",shooter.coverR.getPosition());
+        //telemetry.addData("Angle shooter",shooter.getTurretAngle());
+        //telemetry.addData("Target angle",shooter.getTurretAngle());
+        //telemetry.addData("Angle robot",driveTrain.orientation.getYaw(AngleUnit.DEGREES));
+        //telemetry.addData("Intake state",intakeStateMachine.state);
         telemetry.update();
 
     }

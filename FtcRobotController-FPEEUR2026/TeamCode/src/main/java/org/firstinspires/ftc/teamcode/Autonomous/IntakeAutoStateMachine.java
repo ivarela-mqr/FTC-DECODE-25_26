@@ -30,15 +30,13 @@ public class IntakeAutoStateMachine {
         switch (state){
             case INIT:
                 intake.intakeFirstArtifact();
-                if(intake.firstArtifactIn()
-                        || Math.abs(currTime.getElapsedTimeSeconds() - timer.getElapsedTimeSeconds()) > 4){
+                if(intake.firstArtifactIn()){
                     switchState(IntakeStateMachineStates.FIRST_ARTIFACT);
                 }
                 break;
             case FIRST_ARTIFACT:
                 intake.intakeNextArtifacts();
-                if(intake.secondArtifactIn()
-                        || Math.abs(currTime.getElapsedTimeSeconds() - timer.getElapsedTimeSeconds()) > 1.5){
+                if(intake.secondArtifactIn()){
                     switchState(IntakeStateMachineStates.SECOND_ARTIFACT);
                     intake.transferPosition2ArtifactIn = intake.transfer.getCurrentPosition();
                 }
@@ -47,8 +45,7 @@ public class IntakeAutoStateMachine {
                 intake.intakeNextArtifacts();
                 intake.setTransferPosition(75);
 
-                if(intake.thirdArtifactIn()
-                        || Math.abs(currTime.getElapsedTimeSeconds() - timer.getElapsedTimeSeconds()) > 1){
+                if(intake.thirdArtifactIn()){
                     switchState(IntakeStateMachineStates.FINAL);
                 }
                 break;

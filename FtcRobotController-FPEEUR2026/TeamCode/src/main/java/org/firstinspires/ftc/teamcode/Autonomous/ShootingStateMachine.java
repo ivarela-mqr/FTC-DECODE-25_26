@@ -115,7 +115,7 @@ public class ShootingStateMachine {
                 }
                 break;
             case LOADING:
-                if(shooter.isReady() && !isBusyFollower
+                if(shooter.isReady2() && !isBusyFollower
                     && Math.abs(timer.getElapsedTimeSeconds() - actualTime.getElapsedTimeSeconds())> 0.5) {
                     switchState(States.SHOOTING);
                 } else
@@ -128,6 +128,7 @@ public class ShootingStateMachine {
                 if(Math.abs(timer.getElapsedTimeSeconds() - actualTime.getElapsedTimeSeconds())> 0.5){
                     canShoot = false;
                     switchState(States.INTAKING);
+                    intakeAutoStateMachine.switchState(IntakeStateMachineStates.INIT);
                 }
                 break;
             case INTAKING:
