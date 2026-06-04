@@ -115,17 +115,19 @@ public class ShootingStateMachine {
                 }
                 break;
             case LOADING:
-                if(shooter.isReady2() && !isBusyFollower
+                if(shooter.isReady() && !isBusyFollower
                     && Math.abs(timer.getElapsedTimeSeconds() - actualTime.getElapsedTimeSeconds())> 0.5) {
                     switchState(States.SHOOTING);
+                    intakeAutoStateMachine.switchState(IntakeStateMachineStates.FINAL);
                 } else
                     shooter.preload();
                 break;
             case SHOOTING:
                 shooter.openBlock();
-                if(shooter.getBlockPos() <= 0.5 && !isBusyFollower)
+                if(shooter.getBlockPos() <= 0.5 && !isBusyFollower){
                     canShoot = true;
-                if(Math.abs(timer.getElapsedTimeSeconds() - actualTime.getElapsedTimeSeconds())> 0.5){
+                }
+                if(Math.abs(timer.getElapsedTimeSeconds() - actualTime.getElapsedTimeSeconds())> 0.75){
                     canShoot = false;
                     switchState(States.INTAKING);
                     intakeAutoStateMachine.switchState(IntakeStateMachineStates.INIT);

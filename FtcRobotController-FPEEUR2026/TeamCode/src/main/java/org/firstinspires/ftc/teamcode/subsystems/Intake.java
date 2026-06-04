@@ -35,7 +35,7 @@ public class Intake {
         transfer.setPower(1);
         intake.setPower(1);
     }
-    public void intakeNextArtifacts() {
+    public void intakeNextArtifacts() {//todo por velocity
         transfer.setPower(0);
         intake.setPower(1);
     }
