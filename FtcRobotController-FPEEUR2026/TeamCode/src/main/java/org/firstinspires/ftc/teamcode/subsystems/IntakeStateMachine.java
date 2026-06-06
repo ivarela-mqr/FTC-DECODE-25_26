@@ -45,7 +45,7 @@ public class IntakeStateMachine {
                 intake.intakeFirstArtifact();
                 if(intake.firstArtifactIn()){
                     switchState(IntakeStateMachineStates.FIRST_ARTIFACT);
-                    intake.led.setPosition(0.26);
+                    intake.led.setPosition(0.3);
                 }
                 break;
             case FIRST_ARTIFACT:

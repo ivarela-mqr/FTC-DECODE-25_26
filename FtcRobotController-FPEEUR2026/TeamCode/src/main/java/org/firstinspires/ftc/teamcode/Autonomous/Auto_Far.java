@@ -36,8 +36,7 @@ public class Auto_Far extends OpMode {
     int ticks = 0;
     Timer stateTimer = new Timer();
     Timer actualTimer = new Timer();
-    int numOpen = 0;
-    int objNumOpen = 3;
+    boolean thirdTaken = false;
     IntakeAutoStateMachine intakeAutoStateMachine = new IntakeAutoStateMachine();
 
     Zone zone;
@@ -50,7 +49,7 @@ public class Auto_Far extends OpMode {
 
         paths = new Paths(follower); // Build paths
         shootingStateMachine.init(hardwareMap, org.firstinspires.ftc.teamcode.util.Constants.Alliance.BLUE,
-                1900,IntakeStateMachineStates.FINAL,new Pose(53, 15));
+                1850,IntakeStateMachineStates.FINAL,new Pose(53, 15));
         pathState = PathState.DRIVE_STARTPOS_SHOOT_POS;
 
 
@@ -90,14 +89,14 @@ public class Auto_Far extends OpMode {
 
     public static class Paths {
         public PathChain goShootLoaded;
-        public PathChain goTakeFirst;
-        public PathChain goShootFirst;
-        public PathChain goTakeSecond;
+        public PathChain goTakeGate;
+        public PathChain goShootGate;
+        public PathChain goTakeBase;
         public PathChain goTakeThird;
-        public PathChain goShootSecond;
+        public PathChain goShootBase;
         public PathChain finalPath;
         public PathChain goShootThird;
-        public PathChain goOpen1;
+
 
         public Paths(Follower follower) {
             goShootLoaded = follower.pathBuilder().addPath(
@@ -109,7 +108,7 @@ public class Auto_Far extends OpMode {
 
                     .build();
 
-            goTakeSecond = follower.pathBuilder().addPath(
+            goTakeBase = follower.pathBuilder().addPath(
                             new BezierLine(
                                     new Pose(53.000, 10),
                                     new Pose(9.000, 6)
@@ -118,7 +117,7 @@ public class Auto_Far extends OpMode {
 
                     .build();
 
-            goShootSecond = follower.pathBuilder().addPath(
+            goShootBase = follower.pathBuilder().addPath(
                             new BezierLine(
                                     new Pose(9, 6),
                                     new Pose(53.000, 10)
@@ -146,22 +145,21 @@ public class Auto_Far extends OpMode {
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
                     .build();
-            goTakeFirst = follower.pathBuilder().addPath(
-                            new BezierCurve(
+            goTakeGate = follower.pathBuilder().addPath(
+                            new BezierLine(
                                     new Pose(53.000, 10),
-                                    new Pose(8.000, 50.000),
-                                    new Pose(9.000, 8)
+                                    new Pose(6, 40)
                             )
-                    ).setTangentHeadingInterpolation()
+                    ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
 
                     .build();
 
-            goShootFirst = follower.pathBuilder().addPath(
+            goShootGate = follower.pathBuilder().addPath(
                             new BezierLine(
-                                    new Pose(9.000, 8),
+                                    new Pose(6, 40),
                                     new Pose(53.000, 10)
                             )
-                    ).setLinearHeadingInterpolation(Math.toRadians(270), Math.toRadians(180))
+                    ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
                     .build();
             finalPath = follower.pathBuilder()
                     .addPath(
@@ -186,38 +184,24 @@ public class Auto_Far extends OpMode {
                 break;
             case SHOOT_PRELOAD:
                 if(!follower.isBusy() && !shootingStateMachine.isBusy()) {
-                    if (lastPathState == PathState.DRIVE_STARTPOS_SHOOT_POS){
-                        follower.followPath(paths.goTakeSecond,0.7,true);
-                        setPathState(PathState.TAKE_SECOND);
-                    } else if (lastPathState == PathState.TAKE_SECOND) {
-                        follower.followPath(paths.goTakeThird,0.8,true);
+                    if (lastPathState == PathState.DRIVE_STARTPOS_SHOOT_POS ||
+                            lastPathState == PathState.TAKE_GATE || lastPathState == PathState.TAKE_THIRD){
+                        follower.followPath(paths.goTakeBase,0.9,true);
+                        setPathState(PathState.TAKE_BASE);
+                    } else if (lastPathState == PathState.TAKE_BASE && !thirdTaken) {
+                        follower.followPath(paths.goTakeThird,0.9,true);
                         setPathState(PathState.TAKE_THIRD);
-                    } else if (lastPathState == PathState.TAKE_OPEN && numOpen < objNumOpen) {
-                        follower.followPath(paths.goTakeThird,0.7,true);
-                        setPathState(PathState.TAKE_OPEN);
-                    } else if(lastPathState == PathState.TAKE_OPEN && numOpen == objNumOpen) {
-                        follower.followPath(paths.goTakeFirst,1,true);
-                        setPathState(PathState.TAKE_FIRST);
-                    }else if(lastPathState == PathState.TAKE_FIRST){
-                        follower.followPath(paths.goTakeFirst,1,true);
-                        setPathState(PathState.TAKE_FIRST);
-                    }else if(lastPathState == PathState.TAKE_THIRD){
-                        follower.followPath(paths.goTakeFirst,0.7,true);
-                        setPathState(PathState.TAKE_FIRST);
+                        thirdTaken = true;
+                    }else if(lastPathState == PathState.TAKE_BASE){
+                        follower.followPath(paths.goTakeGate,0.9,true);
+                        setPathState(PathState.TAKE_GATE);
                     }
                 }
                 break;
 
-            case TAKE_OPEN:
-                if(!follower.isBusy() && stateTimer.getElapsedTimeSeconds() > 3.5){
-                    follower.followPath(paths.goShootThird,1,true);
-                    numOpen ++;
-                    setPathState(PathState.SHOOT_PRELOAD);
-                }
-                break;
-            case TAKE_FIRST:
+            case TAKE_GATE:
                 if(!follower.isBusy()) {
-                    follower.followPath(paths.goShootFirst,1,true);
+                    follower.followPath(paths.goShootGate,1,true);
                     setPathState(PathState.SHOOT_PRELOAD);
                 }
 
@@ -227,10 +211,10 @@ public class Auto_Far extends OpMode {
                     setPathState(PathState.SHOOT_PRELOAD);
                 }
                 break;
-            case TAKE_SECOND:
+            case TAKE_BASE:
                 if(!follower.isBusy()) {
                     if (lastPathState == PathState.SHOOT_PRELOAD && stateTimer.getElapsedTimeSeconds() > 2){
-                        follower.followPath(paths.goShootSecond,1,true);
+                        follower.followPath(paths.goShootBase,1,true);
                         setPathState(PathState.SHOOT_PRELOAD);
                     }
                 }

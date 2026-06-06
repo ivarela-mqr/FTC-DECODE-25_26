@@ -55,10 +55,10 @@ public class Shooter {
         this.alliance = alliance;
         //limeLight = new LimeLight(hardwareMap, alliance);
         if(alliance == Constants.Alliance.BLUE) {
-            goalPose = new Pose(2, 142);
+            goalPose = new Pose(5, 139);
             distancePose = new Pose(0,144);
         }else {
-            goalPose = new Pose(141, 137);
+            goalPose = new Pose(139, 139);
             distancePose = new Pose(144,144);
         }
         curTargetVelocity = targetVel;
