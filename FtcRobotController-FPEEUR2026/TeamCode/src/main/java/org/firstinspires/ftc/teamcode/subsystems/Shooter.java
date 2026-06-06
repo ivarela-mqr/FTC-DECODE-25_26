@@ -21,6 +21,8 @@ public class Shooter {
     //public LimeLight limeLight;
     int LEFT_LIMIT = -20000;
     int RIGHT_LIMIT = 20000;
+    int NumTimer = 0;
+    double PowerShooter = 0;
     final double VELOCITY_FACTOR = 0.1;
     public double offset = 0, correctOffset = 0;
     double curTargetVelocity;
@@ -123,9 +125,22 @@ public class Shooter {
 
 //STATES
     public void preload() {
+        if (NumTimer < 1) {
+            resetTimer();
+            NumTimer++;
+        }
         if (velocityOffset() > 100) {
-            shooter0.setPower(1);
-            shooter1.setPower(1);
+            if (timer.milliseconds()<=2000){
+                PowerShooter = 0.0005*timer.milliseconds();
+            }
+            else if (PowerShooter == 0){
+                NumTimer--;
+            }
+            if (PowerShooter >= 1){
+                PowerShooter = 1;
+            }
+            shooter0.setPower(PowerShooter);
+            shooter1.setPower(PowerShooter);
         } else {
             shooter0.setVelocity(curTargetVelocity);
             shooter1.setVelocity(curTargetVelocity);
@@ -134,6 +149,7 @@ public class Shooter {
     public void stop() {
         shooter0.setPower(0);
         shooter1.setPower(0);
+        PowerShooter = 0;
     }
     public int getTurretAngle(){
         return Math.toIntExact((long)(300*rotorR.getPosition() - 150));
