@@ -21,9 +21,9 @@ import org.firstinspires.ftc.teamcode.subsystems.Zone;
 import org.firstinspires.ftc.teamcode.util.IntakeStateMachineStates;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
-@Autonomous(name = "Auto_Far", group = "Autonomous")
+@Autonomous(name = "BLUE_Auto_Far", group = "Autonomous")
 @Configurable
-public class Auto_Far extends OpMode {
+public class BLUE_far_total extends OpMode {
     private TelemetryManager panelsTelemetry; // Panels Telemetry instance
     public Follower follower; // Pedro Pathing follower instance
     private PathState pathState; // Current autonomous path state (state machine)
@@ -32,14 +32,10 @@ public class Auto_Far extends OpMode {
     IMU imu;
     YawPitchRollAngles orientation;
     ShootingStateMachine shootingStateMachine = new ShootingStateMachine();
-    boolean shootsTriggered = false;
-    int ticks = 0;
     Timer stateTimer = new Timer();
     Timer actualTimer = new Timer();
     boolean thirdTaken = false;
-    IntakeAutoStateMachine intakeAutoStateMachine = new IntakeAutoStateMachine();
 
-    Zone zone;
     @Override
     public void init() {
         panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
@@ -62,8 +58,6 @@ public class Auto_Far extends OpMode {
         imu.initialize(parameters);
         panelsTelemetry.debug("Status", "Initialized");
         panelsTelemetry.update(telemetry);
-        zone = new Zone(new Zone.Point(72,72), new Zone.Point(0,144),new Zone.Point(144,144),
-                Math.hypot(15.5,17.5)/2);
     }
 
     @Override
@@ -94,9 +88,7 @@ public class Auto_Far extends OpMode {
         public PathChain goTakeBase;
         public PathChain goTakeThird;
         public PathChain goShootBase;
-        public PathChain finalPath;
         public PathChain goShootThird;
-
 
         public Paths(Follower follower) {
             goShootLoaded = follower.pathBuilder().addPath(
@@ -160,15 +152,6 @@ public class Auto_Far extends OpMode {
                                     new Pose(53.000, 10)
                             )
                     ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
-                    .build();
-            finalPath = follower.pathBuilder()
-                    .addPath(
-                            new BezierLine(
-                                    new Pose(53,80),
-                                    new Pose(25, 66)
-                            )
-                    )
-                    .setLinearHeadingInterpolation(Math.toRadians(230), Math.toRadians(180))
                     .build();
         }
     }
