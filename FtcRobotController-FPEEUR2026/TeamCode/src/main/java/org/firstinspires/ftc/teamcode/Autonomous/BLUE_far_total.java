@@ -21,7 +21,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Zone;
 import org.firstinspires.ftc.teamcode.util.IntakeStateMachineStates;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
-@Autonomous(name = "BLUE_Auto_Far", group = "Autonomous")
+@Autonomous(name = "BLUE_far", group = "Autonomous")
 @Configurable
 public class BLUE_far_total extends OpMode {
     private TelemetryManager panelsTelemetry; // Panels Telemetry instance
@@ -119,19 +119,25 @@ public class BLUE_far_total extends OpMode {
                     .build();
 
             goTakeThird = follower.pathBuilder().addPath(
-                            new BezierCurve(
+                            new BezierLine(
                                     new Pose(53.000, 10),
-                                    new Pose(59.516, 38.369),
-                                    new Pose(10, 45)
+                                    new Pose(40, 35)
                             )
-                    ).setTangentHeadingInterpolation()
+                    )
+                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
+                    .addPath(
+                            new BezierLine(
+                                    new Pose(40, 35),
+                                    new Pose(13, 35)
+                            )
+                    ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
 
                     .build();
 
             goShootThird = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(10, 45),
+                                    new Pose(13, 35),
                                     new Pose(53.000, 10)
                             )
                     )

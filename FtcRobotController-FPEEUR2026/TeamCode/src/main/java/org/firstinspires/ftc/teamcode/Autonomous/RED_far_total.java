@@ -21,7 +21,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Zone;
 import org.firstinspires.ftc.teamcode.util.IntakeStateMachineStates;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
-@Autonomous(name = "RED_far_total", group = "Autonomous")
+@Autonomous(name = "RED_far", group = "Autonomous")
 @Configurable
 public class RED_far_total extends OpMode {
     private TelemetryManager panelsTelemetry; // Panels Telemetry instance
