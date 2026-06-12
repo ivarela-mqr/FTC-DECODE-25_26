@@ -25,7 +25,7 @@ public class Shooter {
     public double offset = 0, correctOffset = 0;
     public double curTargetVelocity;
     public Timer init = new Timer();
-    public boolean autoAim = true, teleOp = false;
+    public boolean autoAim = true, autoAdjust = true, teleOp = false;
     public Debouncer debouncer = new Debouncer(200);
     public Debouncer velDebouncer = new Debouncer(200);
     PIDFCoefficients coefficients = new PIDFCoefficients(22, 0, 1.7, 15);
@@ -77,18 +77,17 @@ public class Shooter {
         if(relativeGoal > 180){
             relativeGoal -= 360;
         }
-        if((relativeGoal > 165 || relativeGoal < -165) && teleOp) {
-            return;
-        }
+
         if(relativeGoal > 0){
             targetAngle = relativeGoal - 180;
         }else{
             targetAngle = relativeGoal + 180;
         }
+        double pos = 0.00405*targetAngle + 0.5;
 
-        setPosRotor(0.00405*targetAngle + 0.5);
-
-
+        if(pos >= 0 && pos <= 1){
+            setPosRotor(pos);
+        }
     }
     public void aim(double yawLimelight, Follower pose, boolean isInShootingPos){
         if(isInShootingPos) {
@@ -171,7 +170,7 @@ public class Shooter {
     }
     public void adjustVelAndCover(Follower follower){
         double distance = getDistanceInches(follower);
-        if(distance > 0 && teleOp && autoAim){
+        if(distance > 0 && teleOp && autoAdjust){
             double pos = 0.5042418 + 0.0003379807*distance - 0.00005000763*Math.pow(distance,2) + 1.815475e-7*Math.pow(distance,3);
             curTargetVelocity = 1917.261 - 25.41657*distance + 0.3601524*Math.pow(distance,2) - 0.001263507*Math.pow(distance,3);
             adjustCover(1 - pos);
@@ -197,7 +196,7 @@ public class Shooter {
     }
     public void TeleOp(Gamepad gamepad1, Gamepad gamepad2, Telemetry telemetry,
                        double yawAngleLimeLight, Follower follower , boolean isFull, boolean isInshootPos){
-        if(!gamepad1.left_bumper)
+        if(!gamepad1.left_bumper && autoAim)
             aim(yawAngleLimeLight,follower,isInshootPos);
 
         preload();
@@ -209,6 +208,7 @@ public class Shooter {
 
         if (gamepad2.share){
             autoAim = true;
+            autoAdjust = true;
             reset = false;
 
         }
@@ -231,18 +231,24 @@ public class Shooter {
         }else if (gamepad2.right_trigger > 0.1) {
             autoAim = false;
             correctRotor(-0.05);
-        } else if (!autoAim){
-            autoAim = false;
         }
 
-        if(gamepad2.dpad_up && velDebouncer.isReady())
+        if(gamepad2.dpad_up && velDebouncer.isReady()) {
+            autoAdjust = false;
             curTargetVelocity += 50;
-        if(gamepad2.dpad_down && velDebouncer.isReady())
+        }
+        if(gamepad2.dpad_down && velDebouncer.isReady()) {
+            autoAdjust = false;
             curTargetVelocity -= 50;
-        if(gamepad2.left_bumper && debouncer.isReady())
+        }
+        if(gamepad2.left_bumper && debouncer.isReady()) {
+            autoAdjust = false;
             correctCover(-1);
-        if(gamepad2.right_bumper && debouncer.isReady())
+        }
+        if(gamepad2.right_bumper && debouncer.isReady()) {
+            autoAdjust = false;
             correctCover(1);
+        }
 
 
         //telemetry.addData("isInshootPos",isInshootPos);

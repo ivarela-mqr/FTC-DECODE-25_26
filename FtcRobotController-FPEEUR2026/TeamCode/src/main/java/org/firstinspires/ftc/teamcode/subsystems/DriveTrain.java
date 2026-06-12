@@ -115,8 +115,6 @@ public class DriveTrain {
                 follower.setPose(pose);
         }
         follower.update();
-
-
         if (gamepad.left_stick_button){
             driveVelFactor = 0.25;
         }else{
