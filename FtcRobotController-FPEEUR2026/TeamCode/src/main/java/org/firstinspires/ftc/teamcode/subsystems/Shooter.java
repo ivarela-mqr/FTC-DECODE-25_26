@@ -25,7 +25,7 @@ public class Shooter {
     double PowerShooter = 0;
     final double VELOCITY_FACTOR = 0.1;
     public double offset = 0, correctOffset = 0;
-    double curTargetVelocity;
+    public double curTargetVelocity;
     public Timer init = new Timer();
     public boolean autoAim = true, teleOp = false;
     public Debouncer debouncer = new Debouncer(200);
@@ -57,10 +57,10 @@ public class Shooter {
         this.alliance = alliance;
         //limeLight = new LimeLight(hardwareMap, alliance);
         if(alliance == Constants.Alliance.BLUE) {
-            goalPose = new Pose(2, 142);
+            goalPose = new Pose(5, 139);
             distancePose = new Pose(0,144);
         }else {
-            goalPose = new Pose(141, 137);
+            goalPose = new Pose(139, 139);
             distancePose = new Pose(144,144);
         }
         curTargetVelocity = targetVel;
@@ -75,12 +75,12 @@ public class Shooter {
         double allianceAngle = getTargetAngle(follower);//goal relative to field
         //double targetAngle = 0; //target shooter relative to bot
         double relativeGoal = allianceAngle - Math.toDegrees(follower.getHeading()); //goal relative to bot
-        if((relativeGoal > 330 || relativeGoal < 30) && teleOp) {
-            setPosRotor(0);
-            return;
-        }
+
         if(relativeGoal > 180){
             relativeGoal -= 360;
+        }
+        if((relativeGoal > 165 || relativeGoal < -165) && teleOp) {
+            return;
         }
         if(relativeGoal > 0){
             targetAngle = relativeGoal - 180;
@@ -189,7 +189,7 @@ public class Shooter {
         double distance = getDistanceInches(follower);
         if(distance > 0 && teleOp && autoAim){
             double pos = 0.5042418 + 0.0003379807*distance - 0.00005000763*Math.pow(distance,2) + 1.815475e-7*Math.pow(distance,3);
-            curTargetVelocity = 1967.261 - 25.41657*distance + 0.3601524*Math.pow(distance,2) - 0.001263507*Math.pow(distance,3);
+            curTargetVelocity = 1917.261 - 25.41657*distance + 0.3601524*Math.pow(distance,2) - 0.001263507*Math.pow(distance,3);
             adjustCover(1 - pos);
         }
     }
@@ -262,11 +262,12 @@ public class Shooter {
 
         //telemetry.addData("isInshootPos",isInshootPos);
         //telemetry.addData("autoAim",autoAim);
-        //telemetry.addData("targetAngle",getTargetAngle(follower));
-        //telemetry.addData("angle",getTurretAngle());
+        telemetry.addData("targetAngle",getTargetAngle(follower));
+        telemetry.addData("angle",getTurretAngle());
 
 
-        //telemetry.addData("currRotPos", rotorL.getPosition());
+        telemetry.addData("currLRotPos", rotorL.getPosition());
+        telemetry.addData("currRRotPos", rotorR.getPosition());
 
         //Pose posLimelight = limeLight.getRawVisionPose();
         /*if(posLimelight != null){

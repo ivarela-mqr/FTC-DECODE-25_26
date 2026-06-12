@@ -49,7 +49,7 @@ public class Intake {
     }
     public void shootArtifacts() {
         intake.setPower(1);
-        transfer.setPower(1);
+        transfer.setVelocity(2500);
     }
     public void stopArtifacts() {
         intake.setPower(0);

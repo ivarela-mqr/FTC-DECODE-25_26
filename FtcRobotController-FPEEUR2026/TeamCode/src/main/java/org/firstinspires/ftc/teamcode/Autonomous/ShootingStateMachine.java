@@ -115,7 +115,7 @@ public class ShootingStateMachine {
                 }
                 break;
             case LOADING:
-                if(shooter.isReady() && !isBusyFollower
+                if(shooter.isReady()
                     && Math.abs(timer.getElapsedTimeSeconds() - actualTime.getElapsedTimeSeconds())> 0.5) {
                     switchState(States.SHOOTING);
                     intakeAutoStateMachine.switchState(IntakeStateMachineStates.FINAL);
@@ -124,7 +124,7 @@ public class ShootingStateMachine {
                 break;
             case SHOOTING:
                 shooter.openBlock();
-                if(shooter.getBlockPos() <= 0.5 && !isBusyFollower){
+                if(shooter.getBlockPos() <= 0.5){
                     canShoot = true;
                 }
                 if(Math.abs(timer.getElapsedTimeSeconds() - actualTime.getElapsedTimeSeconds())> 0.75){
