@@ -174,7 +174,7 @@ public class BLUE_near_partial extends OpMode {
                     .addPath(
                             new BezierLine(
                                     new Pose(54.5, 81.5),
-                                    new Pose(54.5, 105)
+                                    new Pose(54.5, 110)
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(230), Math.toRadians(270))

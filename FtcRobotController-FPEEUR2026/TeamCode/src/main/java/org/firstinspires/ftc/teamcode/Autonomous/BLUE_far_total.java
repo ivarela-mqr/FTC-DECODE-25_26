@@ -191,12 +191,14 @@ public class BLUE_far_total extends OpMode {
             case TAKE_GATE:
                 if(!follower.isBusy()) {
                     follower.followPath(paths.goShootGate,1,true);
+                    shootingStateMachine.intakeAutoStateMachine.switchState(IntakeStateMachineStates.FINAL);
                     setPathState(PathState.SHOOT_PRELOAD);
                 }
 
             case TAKE_THIRD:
                 if(!follower.isBusy()) {
                     follower.followPath(paths.goShootThird,1,true);
+                    shootingStateMachine.intakeAutoStateMachine.switchState(IntakeStateMachineStates.FINAL);
                     setPathState(PathState.SHOOT_PRELOAD);
                 }
                 break;
@@ -204,6 +206,7 @@ public class BLUE_far_total extends OpMode {
                 if(!follower.isBusy()) {
                     if (lastPathState == PathState.SHOOT_PRELOAD && stateTimer.getElapsedTimeSeconds() > 2){
                         follower.followPath(paths.goShootBase,1,true);
+                        shootingStateMachine.intakeAutoStateMachine.switchState(IntakeStateMachineStates.FINAL);
                         setPathState(PathState.SHOOT_PRELOAD);
                     }
                 }

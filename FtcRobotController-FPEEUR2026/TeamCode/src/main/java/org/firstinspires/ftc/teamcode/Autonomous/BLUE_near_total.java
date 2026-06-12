@@ -75,6 +75,7 @@ public class BLUE_near_total extends OpMode {
         panelsTelemetry.debug("X", follower.getPose().getX());
         panelsTelemetry.debug("Y", follower.getPose().getY());
         panelsTelemetry.debug("Heading", follower.getPose().getHeading());
+        panelsTelemetry.debug("detecting", shootingStateMachine.intakeAutoStateMachine.state);
 
         panelsTelemetry.update(telemetry);
     }
@@ -172,15 +173,6 @@ public class BLUE_near_total extends OpMode {
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(230))
                     .build();
-            finalPath = follower.pathBuilder()
-                    .addPath(
-                            new BezierLine(
-                                    new Pose(54.5, 81.5),
-                                    new Pose(54.5, 105)
-                            )
-                    )
-                    .setLinearHeadingInterpolation(Math.toRadians(230), Math.toRadians(270))
-                    .build();
             goTakeThird = follower.pathBuilder().addPath(
                                     new BezierLine(
                                             new Pose(54.500, 81.400),
@@ -203,6 +195,15 @@ public class BLUE_near_total extends OpMode {
                             )
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(230))
+                    .build();
+            finalPath = follower.pathBuilder()
+                    .addPath(
+                            new BezierLine(
+                                    new Pose(54.5, 81.5),
+                                    new Pose(54.5, 110)
+                            )
+                    )
+                    .setLinearHeadingInterpolation(Math.toRadians(230), Math.toRadians(270))
                     .build();
         }
     }

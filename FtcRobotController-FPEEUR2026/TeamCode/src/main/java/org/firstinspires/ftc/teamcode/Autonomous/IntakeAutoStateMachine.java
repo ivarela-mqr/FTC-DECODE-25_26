@@ -9,6 +9,7 @@ import org.firstinspires.ftc.teamcode.util.IntakeStateMachineStates;
 public class IntakeAutoStateMachine {
     public Intake intake;
     public IntakeStateMachineStates state;
+
     public Timer timer = new Timer();
     public Timer currTime = new Timer();
 

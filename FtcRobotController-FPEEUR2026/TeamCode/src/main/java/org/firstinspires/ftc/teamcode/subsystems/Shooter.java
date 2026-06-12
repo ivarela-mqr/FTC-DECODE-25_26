@@ -123,10 +123,10 @@ public class Shooter {
 
 //STATES
     public void preload() {
-        if (velocityOffset() > 100) {
+        if(velocityOffset() > 50) {
             shooter0.setPower(1);
             shooter1.setPower(1);
-        } else {
+        } else{
             shooter0.setVelocity(curTargetVelocity);
             shooter1.setVelocity(curTargetVelocity);
         }
@@ -199,6 +199,7 @@ public class Shooter {
                        double yawAngleLimeLight, Follower follower , boolean isFull, boolean isInshootPos){
         if(!gamepad1.left_bumper)
             aim(yawAngleLimeLight,follower,isInshootPos);
+
         preload();
         adjustVelAndCover(follower);
         if(((isFull && isReady()) || gamepad1.left_trigger > 0.1) && gamepad1.right_trigger > 0.1)
