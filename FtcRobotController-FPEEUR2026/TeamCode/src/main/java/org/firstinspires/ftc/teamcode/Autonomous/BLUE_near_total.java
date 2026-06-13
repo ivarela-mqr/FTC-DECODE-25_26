@@ -182,7 +182,7 @@ public class BLUE_near_total extends OpMode {
                             .addPath(
                                     new BezierLine(
                                             new Pose(41.000, 35.000),
-                                            new Pose(9.000, 35.000)
+                                            new Pose(6, 35.000)
                                     )
                             ).setTangentHeadingInterpolation()
                             .build();
@@ -194,7 +194,7 @@ public class BLUE_near_total extends OpMode {
                                     new Pose(54.5, 81.5)
                             )
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(230))
+                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(270))
                     .build();
             finalPath = follower.pathBuilder()
                     .addPath(
@@ -203,7 +203,7 @@ public class BLUE_near_total extends OpMode {
                                     new Pose(54.5, 110)
                             )
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(230), Math.toRadians(270))
+                    .setLinearHeadingInterpolation(Math.toRadians(270), Math.toRadians(270))
                     .build();
         }
     }

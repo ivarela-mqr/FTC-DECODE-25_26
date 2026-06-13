@@ -20,9 +20,9 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.util.IntakeStateMachineStates;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
-@Autonomous(name = "BLUE_near_partial", group = "Autonomous")
+@Autonomous(name = "RED_near_total", group = "Autonomous")
 @Configurable
-public class BLUE_near_partial extends OpMode {
+public class RED_near_total extends OpMode {
     private TelemetryManager panelsTelemetry; // Panels Telemetry instance
     public Follower follower; // Pedro Pathing follower instance
     private PathState pathState; // Current autonomous path state (state machine)
@@ -34,17 +34,17 @@ public class BLUE_near_partial extends OpMode {
     Timer stateTimer = new Timer();
     Timer actualTimer = new Timer();
     int numOpen = 0;
-    int objNumOpen = 3;
+    int objNumOpen = 2;
     @Override
     public void init() {
         panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
 
         follower = Constants.createFollower(hardwareMap);
-        follower.setStartingPose(new Pose(16, 114.5, Math.toRadians(180)));
+        follower.setStartingPose(new Pose(128, 114.5, Math.toRadians(0)));
 
         paths = new Paths(follower); // Build paths
         shootingStateMachine.init(hardwareMap, org.firstinspires.ftc.teamcode.util.Constants.Alliance.BLUE,
-                1500,IntakeStateMachineStates.FINAL,new Pose(54.5, 81.5));
+                1500,IntakeStateMachineStates.FINAL,new Pose(89.5, 81.5));
         pathState = PathState.DRIVE_STARTPOS_SHOOT_POS;
 
 
@@ -75,6 +75,7 @@ public class BLUE_near_partial extends OpMode {
         panelsTelemetry.debug("X", follower.getPose().getX());
         panelsTelemetry.debug("Y", follower.getPose().getY());
         panelsTelemetry.debug("Heading", follower.getPose().getHeading());
+        panelsTelemetry.debug("detecting", shootingStateMachine.intakeAutoStateMachine.state);
 
         panelsTelemetry.update(telemetry);
     }
@@ -89,95 +90,120 @@ public class BLUE_near_partial extends OpMode {
         public PathChain goShootSecond;
         public PathChain finalPath;
         public PathChain goShootOpen;
+        public PathChain goTakeThird;
+        public PathChain goShootThird;
 
         public Paths(Follower follower) {
             goShootLoaded = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(16, 114.5),
-                                    new Pose(54.5, 81.5)
+                                    new Pose(128, 114.5),
+                                    new Pose(89.5, 81.5)
                             )
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(230))
+                    .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(310))
                     .build();
 
             goTakeSecond = follower.pathBuilder()
                     .addPath(
                             new BezierCurve(
-                                    new Pose(54.5, 81.5),
-                                    new Pose(48.855, 56.176),
-                                    new Pose(6, 60)
+                                    new Pose(89.5, 81.5),
+                                    new Pose(95.145, 56.176),
+                                    new Pose(138, 60)
                             )
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
+                    .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                     .build();
 
             goShootSecond = follower.pathBuilder()
                     .addPath(
                             new BezierCurve(
-                                    new Pose(6, 60),
-                                    new Pose(48.855, 56.176),
-                                    new Pose(54.5, 81.5)
+                                    new Pose(138, 60),
+                                    new Pose(95.145, 56.176),
+                                    new Pose(89.5, 81.5)
                             )
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(230))
+                    .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(310))
                     .build();
 
             goTakeOpen = follower.pathBuilder()
                     .addPath(
                             new BezierCurve(
-                                    new Pose(54.5, 81.5),
-                                    new Pose(33, 54),
-                                    new Pose(10, 61)
+                                    new Pose(89.5, 81.5),
+                                    new Pose(111, 54),
+                                    new Pose(134, 61)
                             )
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(230), Math.toRadians(155))
+                    .setLinearHeadingInterpolation(Math.toRadians(310), Math.toRadians(25))
                     .build();
 
             goShootOpen = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(10, 61),
-                                    new Pose(54.5, 81.5)
+                                    new Pose(134, 61),
+                                    new Pose(89.5, 81.5)
                             )
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(155), Math.toRadians(230))
+                    .setLinearHeadingInterpolation(Math.toRadians(25), Math.toRadians(310))
                     .build();
             goTakeFirst = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(54.5, 81.5),
-                                    new Pose(18,85)
+                                    new Pose(89.5, 81.5),
+                                    new Pose(126,85)
                             )
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
+                    .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                     .addPath(
                             new BezierCurve(
-                                    new Pose(18, 85),
-                                    new Pose(35, 77),
-                                    new Pose(10, 71)
+                                    new Pose(126, 85),
+                                    new Pose(109, 77),
+                                    new Pose(134, 71)
                             )
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
+                    .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                     .build();
 
             goShootFirst = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(10, 71),
-                                    new Pose(54.5, 81.5)
+                                    new Pose(134, 71),
+                                    new Pose(89.5, 81.5)
                             )
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(230))
+                    .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(310))
+                    .build();
+            goTakeThird = follower.pathBuilder().addPath(
+                            new BezierLine(
+                                    new Pose(89.5, 81.400),
+                                    new Pose(103, 35.000)
+                            )
+                    ).setLinearHeadingInterpolation(Math.toRadians(310), Math.toRadians(180))
+                    .addPath(
+                            new BezierLine(
+                                    new Pose(103, 35.000),
+                                    new Pose(138, 35.000)
+                            )
+                    ).setTangentHeadingInterpolation()
+                    .build();
+
+            goShootThird = follower.pathBuilder()
+                    .addPath(
+                            new BezierLine(
+                                    new Pose(138, 35),
+                                    new Pose(89.5, 81.5)
+                            )
+                    )
+                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(270))
                     .build();
             finalPath = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(54.5, 81.5),
-                                    new Pose(54.5, 110)
+                                    new Pose(89.5, 81.5),
+                                    new Pose(89.5, 110)
                             )
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(230), Math.toRadians(270))
+                    .setLinearHeadingInterpolation(Math.toRadians(270), Math.toRadians(270))
                     .build();
         }
     }
@@ -192,24 +218,29 @@ public class BLUE_near_partial extends OpMode {
                 setPathState(PathState.SHOOT_PRELOAD);
                 break;
             case SHOOT_PRELOAD:
-                if(!follower.isBusy() && (!shootingStateMachine.isBusy() || numOpen == objNumOpen)) {
-                     if (lastPathState == PathState.DRIVE_STARTPOS_SHOOT_POS){
-                         follower.followPath(paths.goTakeSecond,1,true);
-                         setPathState(PathState.TAKE_SECOND);
+                if(!follower.isBusy() && (!shootingStateMachine.isBusy())) {
+                    if (lastPathState == PathState.DRIVE_STARTPOS_SHOOT_POS){
+                        follower.followPath(paths.goTakeSecond,1,true);
+                        setPathState(PathState.TAKE_SECOND);
                     } else if (lastPathState == PathState.TAKE_SECOND) {
-                         follower.followPath(paths.goTakeFirst,1,true);
-                         setPathState(PathState.TAKE_FIRST);
-                     } else if (lastPathState == PathState.TAKE_OPEN && numOpen < objNumOpen) {
-                         follower.followPath(paths.goTakeOpen,1,true);
-                         setPathState(PathState.TAKE_OPEN);
-                     }else if(lastPathState == PathState.TAKE_OPEN && numOpen == objNumOpen) {
-                         follower.followPath(paths.finalPath,1,true);
-                         shootingStateMachine.shooter.adjustCover(0.5);
-                         setPathState(PathState.END);
+                        follower.followPath(paths.goTakeFirst,1,true);
+                        setPathState(PathState.TAKE_FIRST);
+                    } else if (lastPathState == PathState.TAKE_OPEN && numOpen < objNumOpen) {
+                        follower.followPath(paths.goTakeOpen,1,true);
+                        setPathState(PathState.TAKE_OPEN);
+                    }else if(lastPathState == PathState.TAKE_OPEN && numOpen == objNumOpen) {
+                        follower.followPath(paths.goTakeThird,1,true);
+                        //shootingStateMachine.shooter.adjustCover(0.6);
+                        setPathState(PathState.TAKE_THIRD);
+                    }else if(lastPathState == PathState.TAKE_THIRD) {
+                        follower.followPath(paths.finalPath,1,true);
+                        //shootingStateMachine.shooter.adjustCover(0.5);
+                        //shootingStateMachine.shooter.curTargetVelocity = 1400;
+                        setPathState(PathState.END);
                     }else if(lastPathState == PathState.TAKE_FIRST){
-                         follower.followPath(paths.goTakeOpen,1,true);
-                         setPathState(PathState.TAKE_OPEN);
-                     }
+                        follower.followPath(paths.goTakeOpen,1,true);
+                        setPathState(PathState.TAKE_OPEN);
+                    }
                 }
                 break;
 
@@ -220,8 +251,6 @@ public class BLUE_near_partial extends OpMode {
                     follower.followPath(paths.goShootOpen,1,true);
                     numOpen ++;
                     setPathState(PathState.SHOOT_PRELOAD);
-                    if(numOpen == objNumOpen)
-                        shootingStateMachine.shooter.curTargetVelocity = 1400;
                 }
                 break;
             case TAKE_FIRST:
@@ -232,10 +261,16 @@ public class BLUE_near_partial extends OpMode {
                 break;
             case TAKE_SECOND:
                 if(!follower.isBusy()){
-                    if (lastPathState == PathState.SHOOT_PRELOAD){
-                        follower.followPath(paths.goShootSecond,1,true);
-                        setPathState(PathState.SHOOT_PRELOAD);
-                    }
+                    follower.followPath(paths.goShootSecond,1,true);
+                    setPathState(PathState.SHOOT_PRELOAD);
+                }
+                break;
+
+            case TAKE_THIRD:
+                if(!follower.isBusy()) {
+                    follower.followPath(paths.goShootThird,1,true);
+                    shootingStateMachine.intakeAutoStateMachine.state = IntakeStateMachineStates.FINAL;
+                    setPathState(PathState.SHOOT_PRELOAD);
                 }
                 break;
             default:
