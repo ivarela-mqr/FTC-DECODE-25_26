@@ -44,7 +44,7 @@ public class BLUE_near_partial extends OpMode {
 
         paths = new Paths(follower); // Build paths
         shootingStateMachine.init(hardwareMap, org.firstinspires.ftc.teamcode.util.Constants.Alliance.BLUE,
-                1500,IntakeStateMachineStates.FINAL,new Pose(54.5, 81.5));
+                1475,IntakeStateMachineStates.FINAL,new Pose(54.5, 81.5));
         pathState = PathState.DRIVE_STARTPOS_SHOOT_POS;
 
 
@@ -204,7 +204,7 @@ public class BLUE_near_partial extends OpMode {
                          setPathState(PathState.TAKE_OPEN);
                      }else if(lastPathState == PathState.TAKE_OPEN && numOpen == objNumOpen) {
                          follower.followPath(paths.finalPath,1,true);
-                         shootingStateMachine.shooter.adjustCover(0.5);
+                         shootingStateMachine.shooter.adjustCover(0.525);
                          setPathState(PathState.END);
                     }else if(lastPathState == PathState.TAKE_FIRST){
                          follower.followPath(paths.goTakeOpen,1,true);

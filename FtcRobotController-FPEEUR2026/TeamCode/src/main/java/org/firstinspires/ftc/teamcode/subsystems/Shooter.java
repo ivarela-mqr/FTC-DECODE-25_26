@@ -37,7 +37,7 @@ public class Shooter {
     public Pose goalPose,distancePose;
     //public PoseCorrector poseCorrector;
     public boolean hold = true, reset = false;
-
+    public double power = 0.4;
     public Shooter (HardwareMap hardwareMap, Constants.Alliance alliance, double targetVel){
         shooter0 = hardwareMap.get(DcMotorEx.class,"shooter0");
         shooter1 = hardwareMap.get(DcMotorEx.class,"shooter1");
@@ -122,9 +122,10 @@ public class Shooter {
 
 //STATES
     public void preload() {
+        power += 0.012;
         if(velocityOffset() > 50) {
-            shooter0.setPower(1);
-            shooter1.setPower(1);
+            shooter0.setPower(power);
+            shooter1.setPower(power);
         } else{
             shooter0.setVelocity(curTargetVelocity);
             shooter1.setVelocity(curTargetVelocity);
@@ -171,8 +172,8 @@ public class Shooter {
     public void adjustVelAndCover(Follower follower){
         double distance = getDistanceInches(follower);
         if(distance > 0 && teleOp && autoAdjust){
-            double pos = 0.5042418 + 0.0003379807*distance - 0.00005000763*Math.pow(distance,2) + 1.815475e-7*Math.pow(distance,3);
-            curTargetVelocity = 1917.261 - 25.41657*distance + 0.3601524*Math.pow(distance,2) - 0.001263507*Math.pow(distance,3);
+            double pos = 0.920859 - 0.008364647*distance + 0.00003398213*Math.pow(distance,2) - 4.670559e-8*Math.pow(distance,3);
+            curTargetVelocity = 1817.261 - 25.41657*distance + 0.3601524*Math.pow(distance,2) - 0.001263507*Math.pow(distance,3);
             adjustCover(1 - pos);
         }
     }

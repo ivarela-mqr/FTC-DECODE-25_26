@@ -44,7 +44,7 @@ public class RED_near_total extends OpMode {
 
         paths = new Paths(follower); // Build paths
         shootingStateMachine.init(hardwareMap, org.firstinspires.ftc.teamcode.util.Constants.Alliance.BLUE,
-                1500,IntakeStateMachineStates.FINAL,new Pose(89.5, 81.5));
+                1475,IntakeStateMachineStates.FINAL,new Pose(89.5, 81.5));
         pathState = PathState.DRIVE_STARTPOS_SHOOT_POS;
 
 
