@@ -40,7 +40,6 @@ public class IntakeStateMachine {
             switchState(IntakeStateMachineStates.FINAL);
 
         switch (state){
-
             case INIT:
                 intake.intakeFirstArtifact();
                 if(intake.firstArtifactIn()){
@@ -51,8 +50,7 @@ public class IntakeStateMachine {
             case FIRST_ARTIFACT:
                 intake.intakeNextArtifacts();
 
-                if(intake.secondArtifactIn()
-                        && Math.abs(timer.getElapsedTimeSeconds() - currTime.getElapsedTimeSeconds()) > 1){
+                if(intake.secondArtifactIn()){
                     intake.transferPosition2ArtifactIn = intake.transfer.getCurrentPosition();
                     switchState(IntakeStateMachineStates.SECOND_ARTIFACT);
                     intake.led.setPosition(0.35);
@@ -63,8 +61,7 @@ public class IntakeStateMachine {
                 break;
             case SECOND_ARTIFACT:
                 intake.intakeNextArtifacts();
-                if(intake.thirdArtifactIn()
-                        && Math.abs(timer.getElapsedTimeSeconds() - currTime.getElapsedTimeSeconds()) > 1){
+                if(intake.thirdArtifactIn()){
                     switchState(IntakeStateMachineStates.FINAL);
                     gamepad1.rumble(1000);
                     gamepad2.rumble(1000);

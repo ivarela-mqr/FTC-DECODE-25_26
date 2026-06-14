@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode;
 
-import static org.firstinspires.ftc.teamcode.pedroPathing.Constants.createFollower;
-
 
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.util.Timer;
@@ -16,13 +14,6 @@ import com.qualcomm.robotcore.hardware.IMU;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.subsystems.DriveTrain;
-import org.firstinspires.ftc.teamcode.subsystems.Intake;
-import org.firstinspires.ftc.teamcode.subsystems.IntakeStateMachine;
-import org.firstinspires.ftc.teamcode.subsystems.Shooter;
-import org.firstinspires.ftc.teamcode.subsystems.Tilt;
-import org.firstinspires.ftc.teamcode.subsystems.Zone;
-import org.firstinspires.ftc.teamcode.util.Constants;
-import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
 @TeleOp
 public class BasicTeleOpMode extends OpMode {

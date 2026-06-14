@@ -8,10 +8,8 @@ import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.teamcode.subsystems.DriveTrain;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
-import org.firstinspires.ftc.teamcode.subsystems.IntakeStateMachine;
 import org.firstinspires.ftc.teamcode.subsystems.LimeLight;
 import org.firstinspires.ftc.teamcode.subsystems.Shooter;
-import org.firstinspires.ftc.teamcode.subsystems.Tilt;
 import org.firstinspires.ftc.teamcode.util.Constants;
 
 @TeleOp
@@ -19,7 +17,6 @@ public class Presentation extends OpMode {
     DriveTrain driveTrain;
     Shooter shooter;
     Intake intake;
-    Tilt tilt;
     Timer timer,actualTimer;
     LimeLight limelight;
     IMU imu;
@@ -27,7 +24,6 @@ public class Presentation extends OpMode {
     public void init() {
         driveTrain = new DriveTrain(hardwareMap);
         shooter = new Shooter(hardwareMap, Constants.Alliance.BLUE, 1200);
-        tilt = new Tilt(hardwareMap);
         intake = new Intake(hardwareMap);
         limelight = new LimeLight(hardwareMap, Constants.Alliance.BLUE);
         timer = new Timer();
@@ -62,11 +58,13 @@ public class Presentation extends OpMode {
             intake.stopArtifacts();
         }
 
-        if(gamepad1.dpadDownWasPressed()){
-            timer.resetTimer();
-            tilt.up();
-        }else if(timeElapsed() > 1)
-            tilt.stop();
+        if(gamepad1.circle){
+            if(shooter.getBlockPos()>0.5){
+                shooter.openBlock();
+            }else{
+                shooter.closeBlock();
+            }
+        }
 
     }
     public int timeElapsed(){

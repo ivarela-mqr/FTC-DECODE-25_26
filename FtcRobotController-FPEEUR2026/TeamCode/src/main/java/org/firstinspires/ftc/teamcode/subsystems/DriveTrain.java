@@ -25,13 +25,14 @@ public class DriveTrain {
     IMU imu;
     double yawOffset = 0;
     public YawPitchRollAngles orientation;
-    double headingReset;
+    double headingResetClose, headingResetFar;
 
     public Follower follower;
     public Constants.Alliance alliance = Constants.Alliance.BLUE;
     private final Zone farZone;
     private final Zone nearZone;
-    private final Pose resetPose;
+    private final Pose resetPoseClose,resetPoseFar;
+    private boolean close = true;
     private Pose lastPose = new Pose(8,8);
     PoseCorrector poseCorrector;
 
@@ -66,18 +67,33 @@ public class DriveTrain {
         follower.startTeleOpDrive(true);
 
         if (alliance == Constants.Alliance.BLUE){
-            headingReset = 180;
-            resetPose = new Pose(
+            headingResetClose = 180;
+            headingResetFar = 0;
+            resetPoseClose = new Pose(
                     14.72,
                     78.30,
-                    Math.toRadians(headingReset)
+                    Math.toRadians(headingResetClose)
             );
+            resetPoseFar = new Pose(
+                    136.75,
+                    7.15,
+                    Math.toRadians(headingResetFar)
+            );
+
         }else{
-            headingReset = 0;
-            resetPose = new Pose(
+
+
+            headingResetClose = 0;
+            headingResetFar = 180;
+            resetPoseClose = new Pose(
                     129.28,
                     78.30,
-                    Math.toRadians(headingReset)
+                    Math.toRadians(headingResetClose)
+            );
+            resetPoseFar = new Pose(
+                    7.25,
+                    7.15,
+                    Math.toRadians(headingResetFar)
             );
             yawOffset = 0;
         }
@@ -87,8 +103,8 @@ public class DriveTrain {
             //follower.setStartingPose(PoseStorage.currentPose);
             yawOffset = PoseStorage.currentPose.getHeading() > 0 ? 180 : -180;
         }else{
-            follower.setPose(resetPose);
-            yawOffset = 180;
+            follower.setPose(resetPoseFar);
+            yawOffset = 0;
         }
 
         double radius = Math.hypot(15.5, 17.5) / 2;
@@ -106,7 +122,13 @@ public class DriveTrain {
         if (gamepad.options) {
             yawOffset = rawYaw;
 
-            follower.setPose(resetPose);
+            if((follower.getPose().getX()<72)&&(alliance == Constants.Alliance.BLUE) ||
+                    (follower.getPose().getX()>72)&&(alliance == Constants.Alliance.RED)){
+                follower.setPose(resetPoseClose);
+            }else{
+                follower.setPose(resetPoseFar);
+            }
+
         }
         if(gamepad.share){
             lastPose = follower.getPose();
@@ -149,6 +171,7 @@ public class DriveTrain {
         telemetry.addData("X", follower.getPose().getX());
         telemetry.addData("Y", follower.getPose().getY());
         telemetry.addData("Heading",Math.toDegrees(follower.getPose().getHeading()));
+        telemetry.addData("Distance",follower.getPose().distanceFrom(new Pose(0,144)));
         return yawAngle;
     }
 

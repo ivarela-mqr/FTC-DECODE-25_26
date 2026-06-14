@@ -92,7 +92,6 @@ public class Shooter {
     public void aim(double yawLimelight, Follower pose, boolean isInShootingPos){
         if(isInShootingPos) {
             aimWithOdometry(pose);
-
         }
     }
 
@@ -172,9 +171,12 @@ public class Shooter {
     public void adjustVelAndCover(Follower follower){
         double distance = getDistanceInches(follower);
         if(distance > 0 && teleOp && autoAdjust){
-            double pos = 0.920859 - 0.008364647*distance + 0.00003398213*Math.pow(distance,2) - 4.670559e-8*Math.pow(distance,3);
-            curTargetVelocity = 1817.261 - 25.41657*distance + 0.3601524*Math.pow(distance,2) - 0.001263507*Math.pow(distance,3);
-            adjustCover(1 - pos);
+            double pos = distance < 120 ?
+                    0.32 + 0.005*distance + 1.7162589999999998e-19*Math.pow(distance,2) :
+                    0.003333333*distance + 0.41;
+            curTargetVelocity = -13309.54 + 548.6167*distance - 7.449673*Math.pow(distance,2)
+                    + 0.04410503*Math.pow(distance,3) - 0.00009530434*Math.pow(distance,4);
+            adjustCover(pos);
         }
     }
 
@@ -192,8 +194,6 @@ public class Shooter {
 
     public void startTeleop(){
         teleOp = true;
-        RIGHT_LIMIT = Constants.RIGHT_TELEOP_LIMIT;
-        LEFT_LIMIT = Constants.LEFT_TELEOP_LIMIT;
     }
     public void TeleOp(Gamepad gamepad1, Gamepad gamepad2, Telemetry telemetry,
                        double yawAngleLimeLight, Follower follower , boolean isFull, boolean isInshootPos){
@@ -211,8 +211,8 @@ public class Shooter {
             autoAim = true;
             autoAdjust = true;
             reset = false;
-
         }
+
         if(gamepad2.options)
             reset = true;
         if (gamepad2.dpad_left){
@@ -254,13 +254,13 @@ public class Shooter {
 
         //telemetry.addData("isInshootPos",isInshootPos);
         //telemetry.addData("autoAim",autoAim);
-        telemetry.addData("targetAngle",getTargetAngle(follower));
-        telemetry.addData("angle",getTurretAngle());
+        //telemetry.addData("targetAngle",getTargetAngle(follower));
+        //telemetry.addData("angle",getTurretAngle());
 
 
-        telemetry.addData("currLRotPos", rotorL.getPosition());
-        telemetry.addData("currRRotPos", rotorR.getPosition());
-
+        //telemetry.addData("currLRotPos", rotorL.getPosition());
+        telemetry.addData("PosHood",coverR.getPosition());
+        telemetry.addData("Velocity",curTargetVelocity);
         //Pose posLimelight = limeLight.getRawVisionPose();
         /*if(posLimelight != null){
             telemetry.addData("vision pos x", posLimelight.getX());
