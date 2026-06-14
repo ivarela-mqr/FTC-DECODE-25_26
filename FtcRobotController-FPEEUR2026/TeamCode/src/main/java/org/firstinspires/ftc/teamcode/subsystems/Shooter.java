@@ -18,11 +18,7 @@ import org.firstinspires.ftc.teamcode.util.Debouncer;
 public class Shooter {
     public  DcMotorEx shooter0, shooter1;
     public Servo coverL, coverR, block, rotorL, rotorR;
-    //public LimeLight limeLight;
-    int LEFT_LIMIT = -20000;
-    int RIGHT_LIMIT = 20000;
-    final double VELOCITY_FACTOR = 0.1;
-    public double offset = 0, correctOffset = 0;
+    public double offset = 0;
     public double curTargetVelocity;
     public Timer init = new Timer();
     public boolean autoAim = true, autoAdjust = true, teleOp = false;
@@ -35,8 +31,7 @@ public class Shooter {
 
     Constants.Alliance alliance;
     public Pose goalPose,distancePose;
-    //public PoseCorrector poseCorrector;
-    public boolean hold = true, reset = false;
+    public boolean reset = false;
     public double power = 0.4;
     public Shooter (HardwareMap hardwareMap, Constants.Alliance alliance, double targetVel){
         shooter0 = hardwareMap.get(DcMotorEx.class,"shooter0");
@@ -53,7 +48,6 @@ public class Shooter {
 
         coverL.setDirection(Servo.Direction.REVERSE);
         this.alliance = alliance;
-        //limeLight = new LimeLight(hardwareMap, alliance);
         if(alliance == Constants.Alliance.BLUE) {
             goalPose = new Pose(5, 139);
             distancePose = new Pose(0,144);
@@ -71,7 +65,6 @@ public class Shooter {
 
     public void aimWithOdometry(Follower follower){
         double allianceAngle = getTargetAngle(follower);//goal relative to field
-        //double targetAngle = 0; //target shooter relative to bot
         double relativeGoal = allianceAngle - Math.toDegrees(follower.getHeading()); //goal relative to bot
 
         if(relativeGoal > 180){
@@ -110,14 +103,9 @@ public class Shooter {
     public boolean isReady(){
         return velocityOffset() < 50 && offset < 5;
     }
-    public boolean isReady2(){
-        return offset < 7.5 && offset > - 7.5;
-    }
     public boolean canShoot(Gamepad gamepad){
         return (velocityOffset() < 50 && block.getPosition() < 0.1) || gamepad.left_trigger > 0.1;
     }
-
-
 
 //STATES
     public void preload() {
@@ -174,7 +162,7 @@ public class Shooter {
             double pos = distance < 120 ?
                     0.32 + 0.005*distance + 1.7162589999999998e-19*Math.pow(distance,2) :
                     0.003333333*distance + 0.41;
-            curTargetVelocity = -13309.54 + 548.6167*distance - 7.449673*Math.pow(distance,2)
+            curTargetVelocity = -12809.54 + 548.6167*distance - 7.449673*Math.pow(distance,2)
                     + 0.04410503*Math.pow(distance,3) - 0.00009530434*Math.pow(distance,4);
             adjustCover(pos);
         }
@@ -217,11 +205,9 @@ public class Shooter {
             reset = true;
         if (gamepad2.dpad_left){
             alliance = Constants.Alliance.BLUE;
-            //limeLight.switchAlliance(alliance);
             goalPose = new Pose(7,137);
         }else if(gamepad2.dpad_right){
             alliance = Constants.Alliance.RED;
-            //limeLight.switchAlliance(alliance);
             goalPose = new Pose(137,137);
         }
 

@@ -22,9 +22,6 @@ public class IntakeAutoStateMachine {
                 && state != IntakeStateMachineStates.FIRST_ARTIFACT
                 && state != IntakeStateMachineStates.SECOND_ARTIFACT;
     }
-    public boolean isShooting() {
-        return intake.numArtifactsIn() > 0;
-    }
 
     public void updateIntakeStateMachine(boolean canShoot){
         currTime.resetTimer();

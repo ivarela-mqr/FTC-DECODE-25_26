@@ -24,70 +24,8 @@ public class ShootingStateMachine {
     public boolean isInShootingPos = false;
     boolean canShoot = false;
     public Timer timer, actualTime;
-
-    static final double g = 9.81;
-
-    public static class ShotResult {
-        public double velocity;   // m/s
-        public double angleDeg;   // grados
-        public double rpm;        // RPM rueda
-        public double servoPos;
-    }
-    static double shooterHeightInches = 10;
-    static double basketHeightInches = 25;
-    static double wheelDiameterInches = 3.75;
     public Timer init;
 
-    // Convierte ángulo a servo (posición 0 = 24°, posición 1 = 50°)
-    public static double angleToServo(double angleDeg) {
-        double minAngle = 24.0; // servo 0
-        double maxAngle = 50.0; // servo 1
-        double servoPos = (angleDeg - minAngle) / (maxAngle - minAngle);
-        return Math.max(0.0, Math.min(1.0, servoPos));
-    }
-
-    // Calcula tiro parabólico exacto
-    public static ShotResult calculateShot(
-            Pose shooterPose, Pose basketPose
-    ) {
-        ShotResult result = new ShotResult();
-
-        // Convertir pulgadas a metros
-        double shooterHeight = shooterHeightInches * 0.0254;
-        double basketHeight = basketHeightInches * 0.0254;
-        double wheelRadius = (wheelDiameterInches / 2.0) * 0.0254;
-
-        // Distancia horizontal entre robot y canasta (metros)
-        double dx = Math.hypot(
-                (basketPose.getX() - shooterPose.getX()) * 0.0254,
-                (basketPose.getY() - shooterPose.getY()) * 0.0254
-        );
-
-        // Diferencia de altura
-        double dy = basketHeight - shooterHeight;
-
-        // Ángulo intermedio: 40° (punto medio entre bombeado y plano)
-        double angleDeg = 45;
-        double theta = Math.toRadians(angleDeg);
-
-        double cosTheta = Math.cos(theta);
-
-        // Velocidad inicial requerida
-        double v = Math.sqrt(g * dx * dx / (2 * cosTheta * cosTheta * (dx * Math.tan(theta) - dy)));
-
-        // RPM de la rueda
-        double rpm = v / wheelRadius * 60.0 / (2.0 * Math.PI);
-
-        // Posición del servo
-        double servoPos = angleToServo(angleDeg);
-
-        result.velocity = v;
-        result.rpm = rpm;
-        result.servoPos = servoPos;
-        result.angleDeg = angleDeg;
-
-        return result;
-    }
     public void init(HardwareMap hardwareMap, Constants.Alliance alliance,
                      double currVel, IntakeStateMachineStates state, Pose shootingPose){
         shooter = new Shooter(hardwareMap, alliance,currVel);
@@ -101,7 +39,6 @@ public class ShootingStateMachine {
     public void update(Pose pose, Telemetry telemetry, double yawAngleLimeLight, Follower follower, boolean isBusyFollower,
                        boolean insideTriangle){
         isInShootingPos = canShoot(pose);
-        //shooter.aimWithLimelight(yawAngleLimeLight);
         shooter.aim(yawAngleLimeLight,follower,insideTriangle);
         intakeAutoStateMachine.updateIntakeStateMachine(canShoot);
         actualTime.resetTimer();
@@ -149,9 +86,6 @@ public class ShootingStateMachine {
         double dy = pose.getY() - shootingPose.getY();
         double distance = Math.sqrt(dx * dx + dy * dy);
         return distance <= posTolerance;
-    }
-    public boolean canShoot(){
-        return canShoot;
     }
     public boolean isBusy(){
         return (state != States.INTAKING);

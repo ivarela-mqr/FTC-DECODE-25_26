@@ -3,12 +3,10 @@ package org.firstinspires.ftc.teamcode.subsystems;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class Intake {
     public DcMotorEx transfer;
@@ -35,7 +33,7 @@ public class Intake {
         transfer.setPower(1);
         intake.setPower(1);
     }
-    public void intakeNextArtifacts() {//todo por velocity
+    public void intakeNextArtifacts() {
         transfer.setPower(0);
         intake.setPower(1);
     }
@@ -54,16 +52,6 @@ public class Intake {
     public void stopArtifacts() {
         intake.setPower(0);
         transfer.setPower(0);
-    }
-    public int numArtifactsIn() {
-        int num = 0;
-        if (firstArtifactIn())
-            num += 1;
-        if (secondArtifactIn())
-            num += 1;
-        if (thirdArtifactIn())
-            num += 1;
-        return num;
     }
     public void setTransferPosition(double targetRelativePosition) {
         if (Math.abs(transfer.getCurrentPosition() - transferPosition2ArtifactIn) < targetRelativePosition) {

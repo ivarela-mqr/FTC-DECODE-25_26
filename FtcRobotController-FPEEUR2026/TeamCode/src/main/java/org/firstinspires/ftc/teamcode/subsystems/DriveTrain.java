@@ -81,8 +81,6 @@ public class DriveTrain {
             );
 
         }else{
-
-
             headingResetClose = 0;
             headingResetFar = 180;
             resetPoseClose = new Pose(
@@ -100,7 +98,6 @@ public class DriveTrain {
 
         if (PoseStorage.currentPose != null) {
             follower.setPose(PoseStorage.currentPose);
-            //follower.setStartingPose(PoseStorage.currentPose);
             yawOffset = PoseStorage.currentPose.getHeading() > 0 ? 180 : -180;
         }else{
             follower.setPose(resetPoseFar);
