@@ -216,7 +216,8 @@ public class BLUE_near_partial extends OpMode {
             case TAKE_OPEN:
                 if(!follower.isBusy() &&
                         (stateTimer.getElapsedTimeSeconds() > 3.5 ||
-                                shootingStateMachine.intakeAutoStateMachine.state == IntakeStateMachineStates.FINAL)){
+                                shootingStateMachine.intakeAutoStateMachine.state == IntakeStateMachineStates.FINAL
+                                || isBlocked(3.5))){
                     follower.followPath(paths.goShootOpen,1,true);
                     numOpen ++;
                     setPathState(PathState.SHOOT_PRELOAD);
@@ -225,7 +226,7 @@ public class BLUE_near_partial extends OpMode {
                 }
                 break;
             case TAKE_FIRST:
-                if(!follower.isBusy() && stateTimer.getElapsedTimeSeconds() > 2.75) {
+                if(!follower.isBusy() && (stateTimer.getElapsedTimeSeconds() > 2.75 || isBlocked(2.75))) {
                     follower.followPath(paths.goShootFirst,1,true);
                     setPathState(PathState.SHOOT_PRELOAD);
                 }
@@ -247,7 +248,7 @@ public class BLUE_near_partial extends OpMode {
         lastPathState = pathState;
         pathState = state;
     }
-    public boolean isBlocked(int limitTime){
+    public boolean isBlocked(double limitTime){
         return (stateTimer.getElapsedTimeSeconds() > limitTime)
                 && (follower.getPreviousClosestPose().getPose().distanceFrom(follower.getPose()) < 0.05);
     }
