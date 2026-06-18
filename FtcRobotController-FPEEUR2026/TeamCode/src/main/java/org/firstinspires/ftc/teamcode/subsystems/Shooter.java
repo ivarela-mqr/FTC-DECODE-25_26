@@ -30,7 +30,7 @@ public class Shooter {
     double targetAngle = 0;
 
     Constants.Alliance alliance;
-    public Pose goalPose,distancePose;
+    public Pose goalPose, goalPoseFar,distancePose;
     public boolean reset = false;
     public double power = 0.4;
     public Shooter (HardwareMap hardwareMap, Constants.Alliance alliance, double targetVel){
@@ -50,9 +50,11 @@ public class Shooter {
         this.alliance = alliance;
         if(alliance == Constants.Alliance.BLUE) {
             goalPose = new Pose(5, 139);
+            goalPoseFar = new Pose(7,139);
             distancePose = new Pose(0,144);
         }else {
             goalPose = new Pose(139, 139);
+            goalPoseFar = new Pose(137, 139);
             distancePose = new Pose(144,144);
         }
         curTargetVelocity = targetVel;
@@ -92,10 +94,12 @@ public class Shooter {
 
     public int getTargetAngle(Follower follower){
         double allianceAngle = 0;
+        double distance = getDistanceInches(follower);
+        Pose pose = distance < 120 ?goalPose:goalPoseFar;
         if(alliance == Constants.Alliance.BLUE){
-            allianceAngle = 180 - Math.toDegrees(Math.atan((goalPose.getY() - follower.getPose().getY())/(follower.getPose().getX() - goalPose.getX())));
+            allianceAngle = 180 - Math.toDegrees(Math.atan((pose.getY() - follower.getPose().getY())/(follower.getPose().getX() - pose.getX())));
         }else{
-            allianceAngle = Math.toDegrees(Math.atan((goalPose.getY() - follower.getPose().getY())/( goalPose.getX() -follower.getPose().getX())));
+            allianceAngle = Math.toDegrees(Math.atan((pose.getY() - follower.getPose().getY())/( pose.getX() -follower.getPose().getX())));
         }
         return Math.toIntExact((long)allianceAngle);
     }
@@ -210,11 +214,15 @@ public class Shooter {
         if (gamepad2.dpad_left){
             alliance = Constants.Alliance.BLUE;
             //limeLight.switchAlliance(alliance);
-            goalPose = new Pose(5,139);
+            goalPose = new Pose(5, 139);
+            goalPoseFar = new Pose(7,139);
+            distancePose = new Pose(0,144);
         }else if(gamepad2.dpad_right){
             alliance = Constants.Alliance.RED;
             //limeLight.switchAlliance(alliance);
-            goalPose = new Pose(139,139);
+            goalPose = new Pose(139, 139);
+            goalPoseFar = new Pose(137, 139);
+            distancePose = new Pose(144,144);
         }
 
 

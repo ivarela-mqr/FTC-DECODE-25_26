@@ -25,7 +25,6 @@ public class IntakeStateMachine {
                 || state == IntakeStateMachineStates.INIT;
     }
     public void TeleOp(boolean canShoot, Gamepad gamepad1, Gamepad gamepad2){
-        currTime.resetTimer();
 
         if(gamepad2.circle)
             switchState(IntakeStateMachineStates.FINAL);
@@ -44,7 +43,6 @@ public class IntakeStateMachine {
                 intake.intakeFirstArtifact();
                 if(intake.firstArtifactIn()){
                     switchState(IntakeStateMachineStates.FIRST_ARTIFACT);
-                    intake.led.setPosition(0.3);
                 }
                 break;
             case FIRST_ARTIFACT:
@@ -69,7 +67,8 @@ public class IntakeStateMachine {
                 }
                 break;
             case FINAL:
-                intake.stopArtifacts();
+                if(timer.getElapsedTimeSeconds()>0.5)
+                    intake.stopArtifacts();
                 if(canShoot){
                     intake.led.setPosition(0);
                     switchState(IntakeStateMachineStates.SHOOTING);

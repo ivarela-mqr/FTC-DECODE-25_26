@@ -34,7 +34,7 @@ public class BLUE_near_total extends OpMode {
     Timer stateTimer = new Timer();
     Timer actualTimer = new Timer();
     int numOpen = 0;
-    int objNumOpen = 2;
+    int objNumOpen = 1;
     @Override
     public void init() {
         panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
@@ -44,7 +44,7 @@ public class BLUE_near_total extends OpMode {
 
         paths = new Paths(follower); // Build paths
         shootingStateMachine.init(hardwareMap, org.firstinspires.ftc.teamcode.util.Constants.Alliance.BLUE,
-                1475,IntakeStateMachineStates.FINAL,new Pose(54.5, 81.5));
+                1450,IntakeStateMachineStates.FINAL,new Pose(54.5, 81.5));
         pathState = PathState.DRIVE_STARTPOS_SHOOT_POS;
 
 

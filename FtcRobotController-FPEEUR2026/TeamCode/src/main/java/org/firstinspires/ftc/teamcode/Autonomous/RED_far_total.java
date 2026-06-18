@@ -35,6 +35,7 @@ public class RED_far_total extends OpMode {
     Timer stateTimer = new Timer();
     Timer actualTimer = new Timer();
     boolean thirdTaken = false;
+    int timesTake = 0;
 
     @Override
     public void init() {
@@ -120,18 +121,24 @@ public class RED_far_total extends OpMode {
                     .build();
 
             goTakeThird = follower.pathBuilder().addPath(
-                            new BezierCurve(
+                            new BezierLine(
                                     new Pose(91, 10),
-                                    new Pose(84.484, 38.369),
-                                    new Pose(135, 45)
+                                    new Pose(104, 35)
                             )
-                    ).setTangentHeadingInterpolation()
+                    )
+                    .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
+                    .addPath(
+                            new BezierLine(
+                                    new Pose(104, 35),
+                                    new Pose(131, 35)
+                            )
+                    ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                     .build();
 
             goShootThird = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(135, 45),
+                                    new Pose(131, 35),
                                     new Pose(91, 10)
                             )
                     )
@@ -184,6 +191,7 @@ public class RED_far_total extends OpMode {
 
             case TAKE_GATE:
                 if(!follower.isBusy()) {
+                    timesTake++;
                     follower.followPath(paths.goShootGate,1,true);
                     setPathState(PathState.SHOOT_PRELOAD);
                 }
@@ -196,7 +204,7 @@ public class RED_far_total extends OpMode {
                 break;
             case TAKE_BASE:
                 if(!follower.isBusy()) {
-                    if (lastPathState == PathState.SHOOT_PRELOAD && stateTimer.getElapsedTimeSeconds() > 2){
+                    if (lastPathState == PathState.SHOOT_PRELOAD && timesTake<2){
                         follower.followPath(paths.goShootBase,1,true);
                         setPathState(PathState.SHOOT_PRELOAD);
                     }

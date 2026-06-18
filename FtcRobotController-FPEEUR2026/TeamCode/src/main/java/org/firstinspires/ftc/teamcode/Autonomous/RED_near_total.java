@@ -34,7 +34,7 @@ public class RED_near_total extends OpMode {
     Timer stateTimer = new Timer();
     Timer actualTimer = new Timer();
     int numOpen = 0;
-    int objNumOpen = 2;
+    int objNumOpen = 1;
     @Override
     public void init() {
         panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();

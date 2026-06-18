@@ -64,7 +64,7 @@ public class ShootingStateMachine {
                 if(shooter.getBlockPos() <= 0.5){
                     canShoot = true;
                 }
-                if(Math.abs(timer.getElapsedTimeSeconds() - actualTime.getElapsedTimeSeconds())> 0.75){
+                if(Math.abs(timer.getElapsedTimeSeconds() - actualTime.getElapsedTimeSeconds())> 1){
                     canShoot = false;
                     switchState(States.INTAKING);
                     intakeAutoStateMachine.switchState(IntakeStateMachineStates.INIT);

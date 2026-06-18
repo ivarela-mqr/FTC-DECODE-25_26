@@ -16,7 +16,6 @@ public class FPEEUR26TeleOpMode extends OpMode {
     DriveTrain driveTrain;
     Shooter shooter;
     IntakeStateMachine intakeStateMachine;
-    //Tilt tilt;
     Timer actualTimer,initTimer;
     boolean rumble = false;
 
@@ -26,7 +25,6 @@ public class FPEEUR26TeleOpMode extends OpMode {
         initTimer = new Timer();
         driveTrain = new DriveTrain(hardwareMap);
         shooter = new Shooter(hardwareMap, driveTrain.alliance, 1200);
-        //tilt = new Tilt(hardwareMap);
         intakeStateMachine = new IntakeStateMachine(hardwareMap);
     }
 
@@ -34,7 +32,6 @@ public class FPEEUR26TeleOpMode extends OpMode {
     public void start(){
         gamepad1.rumble(20);
         gamepad2.rumble(20);
-        //tilt.resetTimer();
         initTimer.resetTimer();
         actualTimer.resetTimer();
         shooter.startTeleop();
@@ -43,7 +40,7 @@ public class FPEEUR26TeleOpMode extends OpMode {
 
     @Override
     public void loop() {
-        double yawAngle = driveTrain.TeleOp(gamepad1,telemetry,Math.toRadians(shooter.getTurretAngle()),
+        double yawAngle = driveTrain.TeleOp(gamepad1,gamepad2,telemetry,Math.toRadians(shooter.getTurretAngle()),
                 shooter.goalPose);
 
         //boolean isInShootZone = driveTrain.isInShootZone();
@@ -52,7 +49,6 @@ public class FPEEUR26TeleOpMode extends OpMode {
                                     gamepad1, gamepad2);
         shooter.TeleOp(gamepad1, gamepad2, telemetry, yawAngle, driveTrain.follower,
                                     intakeStateMachine.isFull(),true);
-        //tilt.Teleop(gamepad1);
 
         actualTimer.resetTimer();
         if(!rumble && timeElapsed() > 105){

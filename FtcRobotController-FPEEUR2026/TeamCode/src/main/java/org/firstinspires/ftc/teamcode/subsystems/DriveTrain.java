@@ -31,9 +31,9 @@ public class DriveTrain {
     public Constants.Alliance alliance = Constants.Alliance.BLUE;
     private final Zone farZone;
     private final Zone nearZone;
-    private final Pose resetPoseClose,resetPoseFar;
-    private boolean close = true;
+    private  Pose resetPoseClose,resetPoseFar;
     private Pose lastPose = new Pose(8,8);
+
     PoseCorrector poseCorrector;
 
     public DriveTrain(HardwareMap hardwareMap){
@@ -66,38 +66,16 @@ public class DriveTrain {
         follower = createFollower(hardwareMap);
         follower.startTeleOpDrive(true);
 
-        if (alliance == Constants.Alliance.BLUE){
-            headingResetClose = 180;
-            headingResetFar = 0;
-            resetPoseClose = new Pose(
-                    14.72,
-                    78.30,
-                    Math.toRadians(headingResetClose)
-            );
-            resetPoseFar = new Pose(
-                    136.75,
-                    7.15,
-                    Math.toRadians(headingResetFar)
-            );
-        }else{
-            headingResetClose = 0;
-            headingResetFar = 180;
-            resetPoseClose = new Pose(
-                    129.28,
-                    78.30,
-                    Math.toRadians(headingResetClose)
-            );
-            resetPoseFar = new Pose(
-                    7.25,
-                    7.15,
-                    Math.toRadians(headingResetFar)
-            );
-            yawOffset = 0;
-        }
+        //RESET POSES
+        changeAlliance(alliance);
 
+        //POSE
         if (PoseStorage.currentPose != null) {
             follower.setPose(PoseStorage.currentPose);
-            yawOffset = PoseStorage.currentPose.getHeading() > 0 ? 180 : -180;
+            if (alliance == Constants.Alliance.BLUE)
+                yawOffset = PoseStorage.currentPose.getHeading() > 0 ? 180 : -180;
+            else
+                yawOffset = 0;
         }else{
             follower.setPose(resetPoseFar);
             yawOffset = 0;
@@ -108,46 +86,57 @@ public class DriveTrain {
         nearZone = new Zone(new Zone.Point(72,72), new Zone.Point(0,144),new Zone.Point(144,144), radius);
     }
 
-    public double TeleOp(Gamepad gamepad, Telemetry telemetry, double turretAngle, Pose goalPose){
+    public double TeleOp(Gamepad gamepad1, Gamepad gamepad2, Telemetry telemetry, double turretAngle, Pose goalPose){
         orientation = imu.getRobotYawPitchRollAngles();
 
         double rawYaw = Math.toDegrees(follower.getHeading());
         double yawAngle = calcYawAngle(rawYaw);
 
 
-        if (gamepad.options) {
+        //resetPose
+        if (gamepad1.options) {
             yawOffset = rawYaw;
-
-            if((follower.getPose().getX()<72)&&(alliance == Constants.Alliance.BLUE) ||
-                    (follower.getPose().getX()>72)&&(alliance == Constants.Alliance.RED)){
-                follower.setPose(resetPoseClose);
-            }else{
-                follower.setPose(resetPoseFar);
-            }
-
+            follower.setPose(resetPoseClose);
+        }else if (gamepad1.share){
+            if(yawOffset>0)
+                yawOffset = rawYaw-180;
+            else
+                yawOffset = rawYaw+180;
+            follower.setPose(resetPoseFar);
         }
-        if(gamepad.share){
+
+        //resetAlliance
+        if (gamepad2.dpad_left){
+            changeAlliance(Constants.Alliance.BLUE);
+        }else if(gamepad2.dpad_right){
+            changeAlliance(Constants.Alliance.RED);
+        }
+
+
+        if(gamepad2.share){
             lastPose = follower.getPose();
             Pose pose = poseCorrector.correctPose(follower,turretAngle,goalPose);
             if(pose != null)
                 follower.setPose(pose);
         }
+
+
         follower.update();
-        if (gamepad.left_stick_button){
+        if (gamepad1.left_stick_button){
             driveVelFactor = 0.25;
         }else{
             driveVelFactor = 1;
         }
 
-        if (gamepad.right_stick_button){
+        if (gamepad1.right_stick_button){
             rotVelFactor = 0.25;
         }else{
             rotVelFactor = 1;
         }
 
-        double drive = -gamepad.left_stick_y * driveVelFactor;
-        double strafe = gamepad.left_stick_x * driveVelFactor;
-        double rotate = gamepad.right_stick_x * rotVelFactor;
+        double drive = -gamepad1.left_stick_y * driveVelFactor;
+        double strafe = gamepad1.left_stick_x * driveVelFactor;
+        double rotate = gamepad1.right_stick_x * rotVelFactor;
 
         double headingRad = Math.toRadians(yawAngle);
 
@@ -184,6 +173,36 @@ public class DriveTrain {
             return(rawYaw - yawOffset);
         else
             return(rawYaw + yawOffset);
+    }
+
+    public void changeAlliance(Constants.Alliance alliance){
+        if (alliance == Constants.Alliance.BLUE){
+            headingResetClose = 180;
+            headingResetFar = 0;
+            resetPoseClose = new Pose(
+                    14.72,
+                    78.30,
+                    Math.toRadians(headingResetClose)
+            );
+            resetPoseFar = new Pose(
+                    136.75,
+                    7.15,
+                    Math.toRadians(headingResetFar)
+            );
+        }else{
+            headingResetClose = 0;
+            headingResetFar = 180;
+            resetPoseClose = new Pose(
+                    129.28,
+                    78.30,
+                    Math.toRadians(headingResetClose)
+            );
+            resetPoseFar = new Pose(
+                    7.25,
+                    7.15,
+                    Math.toRadians(headingResetFar)
+            );
+        }
     }
 
 }

@@ -34,7 +34,7 @@ public class BLUE_near_partial extends OpMode {
     Timer stateTimer = new Timer();
     Timer actualTimer = new Timer();
     int numOpen = 0;
-    int objNumOpen = 3;
+    int objNumOpen = 2;
     @Override
     public void init() {
         panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
@@ -44,7 +44,7 @@ public class BLUE_near_partial extends OpMode {
 
         paths = new Paths(follower); // Build paths
         shootingStateMachine.init(hardwareMap, org.firstinspires.ftc.teamcode.util.Constants.Alliance.BLUE,
-                1475,IntakeStateMachineStates.FINAL,new Pose(54.5, 81.5));
+                1450,IntakeStateMachineStates.FINAL,new Pose(54.5, 81.5));
         pathState = PathState.DRIVE_STARTPOS_SHOOT_POS;
 
 
@@ -192,7 +192,7 @@ public class BLUE_near_partial extends OpMode {
                 setPathState(PathState.SHOOT_PRELOAD);
                 break;
             case SHOOT_PRELOAD:
-                if(!follower.isBusy() && (!shootingStateMachine.isBusy() || numOpen == objNumOpen)) {
+                if(!follower.isBusy() && (!shootingStateMachine.isBusy())) {
                      if (lastPathState == PathState.DRIVE_STARTPOS_SHOOT_POS){
                          follower.followPath(paths.goTakeSecond,1,true);
                          setPathState(PathState.TAKE_SECOND);
@@ -204,7 +204,6 @@ public class BLUE_near_partial extends OpMode {
                          setPathState(PathState.TAKE_OPEN);
                      }else if(lastPathState == PathState.TAKE_OPEN && numOpen == objNumOpen) {
                          follower.followPath(paths.finalPath,1,true);
-                         shootingStateMachine.shooter.adjustCover(0.525);
                          setPathState(PathState.END);
                     }else if(lastPathState == PathState.TAKE_FIRST){
                          follower.followPath(paths.goTakeOpen,1,true);

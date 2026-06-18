@@ -35,6 +35,7 @@ public class BLUE_far_total extends OpMode {
     Timer stateTimer = new Timer();
     Timer actualTimer = new Timer();
     boolean thirdTaken = false;
+    int timesTake = 0;
 
     @Override
     public void init() {
@@ -190,6 +191,7 @@ public class BLUE_far_total extends OpMode {
 
             case TAKE_GATE:
                 if(!follower.isBusy()) {
+                    timesTake ++;
                     follower.followPath(paths.goShootGate,1,true);
                     shootingStateMachine.intakeAutoStateMachine.switchState(IntakeStateMachineStates.FINAL);
                     setPathState(PathState.SHOOT_PRELOAD);
@@ -204,10 +206,12 @@ public class BLUE_far_total extends OpMode {
                 break;
             case TAKE_BASE:
                 if(!follower.isBusy()) {
-                    if (lastPathState == PathState.SHOOT_PRELOAD && stateTimer.getElapsedTimeSeconds() > 2){
+                    if (lastPathState == PathState.SHOOT_PRELOAD && timesTake<2){
                         follower.followPath(paths.goShootBase,1,true);
                         shootingStateMachine.intakeAutoStateMachine.switchState(IntakeStateMachineStates.FINAL);
                         setPathState(PathState.SHOOT_PRELOAD);
+                    }else {
+                        setPathState(PathState.END);
                     }
                 }
                 break;
