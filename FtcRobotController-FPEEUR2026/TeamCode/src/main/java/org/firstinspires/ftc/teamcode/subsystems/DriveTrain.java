@@ -79,7 +79,6 @@ public class DriveTrain {
                     7.15,
                     Math.toRadians(headingResetFar)
             );
-
         }else{
             headingResetClose = 0;
             headingResetFar = 180;

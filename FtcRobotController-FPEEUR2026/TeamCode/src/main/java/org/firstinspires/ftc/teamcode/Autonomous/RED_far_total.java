@@ -44,7 +44,7 @@ public class RED_far_total extends OpMode {
         follower.setStartingPose(new Pose(87.694, 7.389, Math.toRadians(270)));
 
         paths = new Paths(follower); // Build paths
-        shootingStateMachine.init(hardwareMap, org.firstinspires.ftc.teamcode.util.Constants.Alliance.BLUE,
+        shootingStateMachine.init(hardwareMap, org.firstinspires.ftc.teamcode.util.Constants.Alliance.RED,
                 1850,IntakeStateMachineStates.FINAL,new Pose(91, 15));
         pathState = PathState.DRIVE_STARTPOS_SHOOT_POS;
 
@@ -71,7 +71,7 @@ public class RED_far_total extends OpMode {
         autonomousPathUpdate();
         // Log values to Panels and Driver Station
 
-        PoseStorage.update(follower.getPose(), org.firstinspires.ftc.teamcode.util.Constants.Alliance.BLUE);
+        PoseStorage.update(follower.getPose(), org.firstinspires.ftc.teamcode.util.Constants.Alliance.RED);
         panelsTelemetry.debug("Vel",shootingStateMachine.shooter.shooter0.getVelocity());
         panelsTelemetry.debug("X", follower.getPose().getX());
         panelsTelemetry.debug("Y", follower.getPose().getY());

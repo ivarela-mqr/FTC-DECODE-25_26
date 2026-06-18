@@ -43,8 +43,8 @@ public class RED_near_total extends OpMode {
         follower.setStartingPose(new Pose(128, 114.5, Math.toRadians(0)));
 
         paths = new Paths(follower); // Build paths
-        shootingStateMachine.init(hardwareMap, org.firstinspires.ftc.teamcode.util.Constants.Alliance.BLUE,
-                1475,IntakeStateMachineStates.FINAL,new Pose(89.5, 81.5));
+        shootingStateMachine.init(hardwareMap, org.firstinspires.ftc.teamcode.util.Constants.Alliance.RED,
+                1450,IntakeStateMachineStates.FINAL,new Pose(89.5, 81.5));
         pathState = PathState.DRIVE_STARTPOS_SHOOT_POS;
 
 
@@ -70,7 +70,7 @@ public class RED_near_total extends OpMode {
         autonomousPathUpdate();
         // Log values to Panels and Driver Station
 
-        PoseStorage.update(follower.getPose(), org.firstinspires.ftc.teamcode.util.Constants.Alliance.BLUE);
+        PoseStorage.update(follower.getPose(), org.firstinspires.ftc.teamcode.util.Constants.Alliance.RED);
         panelsTelemetry.debug("Vel",shootingStateMachine.shooter.shooter0.getVelocity());
         panelsTelemetry.debug("X", follower.getPose().getX());
         panelsTelemetry.debug("Y", follower.getPose().getY());
@@ -131,20 +131,20 @@ public class RED_near_total extends OpMode {
                             new BezierCurve(
                                     new Pose(89.5, 81.5),
                                     new Pose(111, 54),
-                                    new Pose(134, 61)
+                                    new Pose(134.5, 61.5)
                             )
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(310), Math.toRadians(25))
+                    .setLinearHeadingInterpolation(Math.toRadians(310), Math.toRadians(30))
                     .build();
 
             goShootOpen = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(134, 61),
+                                    new Pose(134.5, 61.5),
                                     new Pose(89.5, 81.5)
                             )
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(25), Math.toRadians(310))
+                    .setLinearHeadingInterpolation(Math.toRadians(30), Math.toRadians(310))
                     .build();
             goTakeFirst = follower.pathBuilder()
                     .addPath(
@@ -178,13 +178,13 @@ public class RED_near_total extends OpMode {
                                     new Pose(89.5, 81.400),
                                     new Pose(103, 35.000)
                             )
-                    ).setLinearHeadingInterpolation(Math.toRadians(310), Math.toRadians(180))
+                    ).setLinearHeadingInterpolation(Math.toRadians(310), Math.toRadians(0))
                     .addPath(
                             new BezierLine(
                                     new Pose(103, 35.000),
                                     new Pose(138, 35.000)
                             )
-                    ).setTangentHeadingInterpolation()
+                    ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                     .build();
 
             goShootThird = follower.pathBuilder()
@@ -194,7 +194,7 @@ public class RED_near_total extends OpMode {
                                     new Pose(89.5, 81.5)
                             )
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(270))
+                    .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(270))
                     .build();
             finalPath = follower.pathBuilder()
                     .addPath(

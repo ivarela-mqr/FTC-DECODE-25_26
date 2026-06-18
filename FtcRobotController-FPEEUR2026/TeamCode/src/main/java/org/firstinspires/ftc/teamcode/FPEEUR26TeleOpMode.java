@@ -19,14 +19,13 @@ public class FPEEUR26TeleOpMode extends OpMode {
     //Tilt tilt;
     Timer actualTimer,initTimer;
     boolean rumble = false;
-    Constants.Alliance alliance = Constants.Alliance.BLUE;
 
     @Override
     public void init() {
         actualTimer = new Timer();
         initTimer = new Timer();
         driveTrain = new DriveTrain(hardwareMap);
-        shooter = new Shooter(hardwareMap, alliance, 1200);
+        shooter = new Shooter(hardwareMap, driveTrain.alliance, 1200);
         //tilt = new Tilt(hardwareMap);
         intakeStateMachine = new IntakeStateMachine(hardwareMap);
     }

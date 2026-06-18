@@ -162,8 +162,12 @@ public class Shooter {
             double pos = distance < 120 ?
                     0.32 + 0.005*distance + 1.7162589999999998e-19*Math.pow(distance,2) :
                     0.003333333*distance + 0.41;
-            curTargetVelocity = -12809.54 + 548.6167*distance - 7.449673*Math.pow(distance,2)
-                    + 0.04410503*Math.pow(distance,3) - 0.00009530434*Math.pow(distance,4);
+
+            curTargetVelocity = distance < 155 ?
+                    -13507.86 + 557.2081*distance - 7.585888*Math.pow(distance,2)
+                            + 0.04503782*Math.pow(distance,3) - 0.00009761896*Math.pow(distance,4) :
+
+                    curTargetVelocity;
             adjustCover(pos);
         }
     }
@@ -205,10 +209,12 @@ public class Shooter {
             reset = true;
         if (gamepad2.dpad_left){
             alliance = Constants.Alliance.BLUE;
-            goalPose = new Pose(7,137);
+            //limeLight.switchAlliance(alliance);
+            goalPose = new Pose(5,139);
         }else if(gamepad2.dpad_right){
             alliance = Constants.Alliance.RED;
-            goalPose = new Pose(137,137);
+            //limeLight.switchAlliance(alliance);
+            goalPose = new Pose(139,139);
         }
 
 
