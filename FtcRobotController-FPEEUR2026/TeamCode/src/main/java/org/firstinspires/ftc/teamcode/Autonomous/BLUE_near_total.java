@@ -131,20 +131,20 @@ public class BLUE_near_total extends OpMode {
                             new BezierCurve(
                                     new Pose(54.5, 81.5),
                                     new Pose(33, 54),
-                                    new Pose(9.5, 61)
+                                    new Pose(10, 61)
                             )
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(230), Math.toRadians(150))
+                    .setLinearHeadingInterpolation(Math.toRadians(230), Math.toRadians(155))
                     .build();
 
             goShootOpen = follower.pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(9.5, 61),
+                                    new Pose(10, 61),
                                     new Pose(54.5, 81.5)
                             )
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(150), Math.toRadians(230))
+                    .setLinearHeadingInterpolation(Math.toRadians(155), Math.toRadians(230))
                     .build();
             goTakeFirst = follower.pathBuilder()
                     .addPath(
