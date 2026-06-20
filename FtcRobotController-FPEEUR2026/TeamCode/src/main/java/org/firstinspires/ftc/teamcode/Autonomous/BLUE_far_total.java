@@ -104,7 +104,7 @@ public class BLUE_far_total extends OpMode {
             goTakeBase = follower.pathBuilder().addPath(
                             new BezierLine(
                                     new Pose(53.000, 10),
-                                    new Pose(9.000, 6)
+                                    new Pose(9, 6)
                             )
                     ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
 
@@ -198,7 +198,7 @@ public class BLUE_far_total extends OpMode {
                 }
 
             case TAKE_THIRD:
-                if(!follower.isBusy()) {
+                if(!follower.isBusy() ) {
                     follower.followPath(paths.goShootThird,1,true);
                     shootingStateMachine.intakeAutoStateMachine.switchState(IntakeStateMachineStates.FINAL);
                     setPathState(PathState.SHOOT_PRELOAD);
@@ -206,12 +206,10 @@ public class BLUE_far_total extends OpMode {
                 break;
             case TAKE_BASE:
                 if(!follower.isBusy()) {
-                    if (lastPathState == PathState.SHOOT_PRELOAD && timesTake<2){
+                    if (lastPathState == PathState.SHOOT_PRELOAD && timesTake<2 && stateTimer.getElapsedTimeSeconds()>2){
                         follower.followPath(paths.goShootBase,1,true);
                         shootingStateMachine.intakeAutoStateMachine.switchState(IntakeStateMachineStates.FINAL);
                         setPathState(PathState.SHOOT_PRELOAD);
-                    }else {
-                        setPathState(PathState.END);
                     }
                 }
                 break;
@@ -223,5 +221,10 @@ public class BLUE_far_total extends OpMode {
         stateTimer.resetTimer();
         lastPathState = pathState;
         pathState = state;
+    }
+
+    public boolean isBlocked(double limitTime){
+        return (stateTimer.getElapsedTimeSeconds() > limitTime)
+                && (follower.getPreviousClosestPose().getPose().distanceFrom(follower.getPose()) < 0.05);
     }
 }

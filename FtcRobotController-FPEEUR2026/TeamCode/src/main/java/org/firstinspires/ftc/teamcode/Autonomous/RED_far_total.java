@@ -190,7 +190,7 @@ public class RED_far_total extends OpMode {
                 break;
 
             case TAKE_GATE:
-                if(!follower.isBusy()) {
+                if(!follower.isBusy() ) {
                     timesTake++;
                     follower.followPath(paths.goShootGate,1,true);
                     setPathState(PathState.SHOOT_PRELOAD);
@@ -203,8 +203,8 @@ public class RED_far_total extends OpMode {
                 }
                 break;
             case TAKE_BASE:
-                if(!follower.isBusy()) {
-                    if (lastPathState == PathState.SHOOT_PRELOAD && timesTake<2){
+                if(!follower.isBusy() ) {
+                    if (lastPathState == PathState.SHOOT_PRELOAD && timesTake<2 && stateTimer.getElapsedTimeSeconds()>2){
                         follower.followPath(paths.goShootBase,1,true);
                         setPathState(PathState.SHOOT_PRELOAD);
                     }
@@ -218,5 +218,9 @@ public class RED_far_total extends OpMode {
         stateTimer.resetTimer();
         lastPathState = pathState;
         pathState = state;
+    }
+    public boolean isBlocked(double limitTime){
+        return (stateTimer.getElapsedTimeSeconds() > limitTime);
+               // && (follower.getPreviousClosestPose().getPose().distanceFrom(follower.getPose()) < 0.05);
     }
 }
