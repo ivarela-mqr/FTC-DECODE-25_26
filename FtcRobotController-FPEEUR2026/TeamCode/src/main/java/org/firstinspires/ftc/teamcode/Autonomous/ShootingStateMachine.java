@@ -39,7 +39,7 @@ public class ShootingStateMachine {
     public void update(Pose pose, Telemetry telemetry, double yawAngleLimeLight, Follower follower, boolean isBusyFollower,
                        boolean insideTriangle){
         isInShootingPos = canShoot(pose);
-        shooter.aim(yawAngleLimeLight,follower,insideTriangle);
+        //shooter.aim(yawAngleLimeLight,follower,insideTriangle);
         intakeAutoStateMachine.updateIntakeStateMachine(canShoot);
         actualTime.resetTimer();
         switch (state){

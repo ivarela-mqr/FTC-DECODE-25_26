@@ -15,17 +15,19 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.util.Constants;
 import org.firstinspires.ftc.teamcode.util.Debouncer;
 
+import java.io.Console;
+import java.util.logging.ConsoleHandler;
+
 public class Shooter {
     public  DcMotorEx shooter0, shooter1;
     public Servo coverL, coverR, block, rotorL, rotorR;
     public double offset = 0;
     public double curTargetVelocity;
     public Timer init = new Timer();
-    public boolean autoAim = true, autoAdjust = true, teleOp = false;
+    public boolean autoAim = false, autoAdjust = true, teleOp = false;
     public Debouncer debouncer = new Debouncer(200);
     public Debouncer velDebouncer = new Debouncer(200);
     PIDFCoefficients coefficients = new PIDFCoefficients(22, 0, 1.7, 15);
-
     private final ElapsedTime timer = new ElapsedTime();
     double targetAngle = 0;
 
@@ -49,15 +51,17 @@ public class Shooter {
         coverL.setDirection(Servo.Direction.REVERSE);
         this.alliance = alliance;
         if(alliance == Constants.Alliance.BLUE) {
-            goalPose = new Pose(5, 139);
-            goalPoseFar = new Pose(7,139);
+            goalPose = new Pose(5, 7.15);
+            goalPoseFar = new Pose(7,7.15);
             distancePose = new Pose(0,144);
         }else {
-            goalPose = new Pose(139, 139);
-            goalPoseFar = new Pose(137, 139);
+            goalPose = new Pose(139, 7.15);
+            goalPoseFar = new Pose(137, 7.15);
             distancePose = new Pose(144,144);
         }
-        curTargetVelocity = targetVel;
+        curTargetVelocity = 1200;
+        adjustCover(0.5);
+        setPosRotor(0.5);
 
         timer.reset();
     }
@@ -84,10 +88,13 @@ public class Shooter {
             setPosRotor(pos);
         }
     }
-    public void aim(double yawLimelight, Follower pose, boolean isInShootingPos){
+    public void aim(double yawLimelight, Follower pose, boolean isInShootingPos,Telemetry telemetry){
         if(isInShootingPos) {
             aimWithOdometry(pose);
         }
+        /*double[] data = limelight.getGoalAprilTagData(yawLimelight);
+        boolean offsetCentered = (data[0] == 0 && Math.abs(lastValidOffset) < 5);
+        aimLimelight(data[0],telemetry,!offsetCentered);*/
     }
 
     //Trig utilities
@@ -172,7 +179,7 @@ public class Shooter {
                             + 0.04503782*Math.pow(distance,3) - 0.00009761896*Math.pow(distance,4) :
 
                     curTargetVelocity;
-            adjustCover(pos);
+
         }
     }
 
@@ -193,17 +200,18 @@ public class Shooter {
     }
     public void TeleOp(Gamepad gamepad1, Gamepad gamepad2, Telemetry telemetry,
                        double yawAngleLimeLight, Follower follower , boolean isFull, boolean isInshootPos){
-        if(!gamepad1.left_bumper && autoAim)
-            aim(yawAngleLimeLight,follower,isInshootPos);
+        if(gamepad1.right_trigger < 0.9 && autoAim)
+            aim(yawAngleLimeLight,follower,isInshootPos,telemetry);
 
         preload();
-        adjustVelAndCover(follower);
+        //adjustVelAndCover(follower);
+
         if(((isFull && isReady()) || gamepad1.left_trigger > 0.1) && gamepad1.right_trigger > 0.1)
             openBlock();
         else if(gamepad1.right_trigger < 0.5 && gamepad1.left_trigger < 0.5)
             closeBlock();
 
-        if (gamepad2.share){
+        if (gamepad1.share){
             autoAim = true;
             autoAdjust = true;
             reset = false;
@@ -226,27 +234,27 @@ public class Shooter {
         }
 
 
-        if (gamepad2.left_trigger > 0.1){
+        if (gamepad1.left_bumper && velDebouncer.isReady()){
             autoAim = false;
             correctRotor(0.05);
-        }else if (gamepad2.right_trigger > 0.1) {
+        }else if (gamepad1.right_bumper && velDebouncer.isReady()) {
             autoAim = false;
             correctRotor(-0.05);
         }
 
-        if(gamepad2.dpad_up && velDebouncer.isReady()) {
+        if(gamepad1.dpad_up && velDebouncer.isReady()) {
             autoAdjust = false;
             curTargetVelocity += 50;
         }
-        if(gamepad2.dpad_down && velDebouncer.isReady()) {
+        if(gamepad1.dpad_down && velDebouncer.isReady()) {
             autoAdjust = false;
             curTargetVelocity -= 50;
         }
-        if(gamepad2.left_bumper && debouncer.isReady()) {
+        if(gamepad1.dpad_left && debouncer.isReady()) {
             autoAdjust = false;
             correctCover(-1);
         }
-        if(gamepad2.right_bumper && debouncer.isReady()) {
+        if(gamepad1.dpad_right && debouncer.isReady()) {
             autoAdjust = false;
             correctCover(1);
         }
@@ -258,8 +266,9 @@ public class Shooter {
         //telemetry.addData("angle",getTurretAngle());
 
 
-        //telemetry.addData("currLRotPos", rotorL.getPosition());
         telemetry.addData("PosHood",coverR.getPosition());
+        telemetry.addData("PosRotor",rotorL.getPosition());
+        telemetry.addData("PosRotor",rotorR.getPosition());
         telemetry.addData("Velocity",curTargetVelocity);
         //Pose posLimelight = limeLight.getRawVisionPose();
         /*if(posLimelight != null){

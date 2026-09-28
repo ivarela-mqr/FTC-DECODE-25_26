@@ -82,7 +82,7 @@ public class Shooter {
         else
             correctOffset = 0;
         adjustVelAndCover(var[1]);
-        boolean offsetCentered = (offset == 0 && Math.abs(lastValidOffset) < 5);
+            boolean offsetCentered = (offset == 0 && Math.abs(lastValidOffset) < 5);
         moveServos(offset, !offsetCentered);
     }
     public double pid(double offset){
